@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{52FF10B6-9247-436B-992F-BF5F60AB48C5}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>SMSC_Simulator</RootNamespace>
+    <AssemblyName>SMSC_Simulator</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EES.Framework.XMLMapping, Version=1.0.1.1, Culture=neutral, PublicKeyToken=21ba9c16b185fec9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\EES.Framework.XMLMapping.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.19.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.19.5.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Design" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Connected Services\R2RReplyService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Connected Services\R2RService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="DBOperation.cs" />
+    <Compile Include="SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForm.Designer.cs">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Simulator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Simulator.Designer.cs">
+      <DependentUpon>Simulator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebService\ArrayProperty.cs" />
+    <Compile Include="WebService\ClassProperty.cs" />
+    <Compile Include="WebService\Configuration.cs" />
+    <Compile Include="WebService\CustomHandler.cs" />
+    <Compile Include="WebService\DataSetEditor.cs" />
+    <Compile Include="WebService\DynamicConverter.cs" />
+    <Compile Include="WebService\DynamicEditor.cs" />
+    <Compile Include="WebService\IAdditionalProperties.cs" />
+    <Compile Include="WebService\InvokeProperties.cs" />
+    <Compile Include="WebService\Language.cs" />
+    <Compile Include="WebService\ListStandardValues.cs" />
+    <Compile Include="WebService\MessageTracer.cs" />
+    <Compile Include="WebService\MessageType.cs" />
+    <Compile Include="WebService\MethodProperty.cs" />
+    <Compile Include="WebService\NoCloseMemoryStream.cs" />
+    <Compile Include="WebService\NullableGenericProperty.cs" />
+    <Compile Include="WebService\NullablePrimitiveProperty.cs" />
+    <Compile Include="WebService\PrimitiveProperty.cs" />
+    <Compile Include="WebService\Protocol.cs" />
+    <Compile Include="WebService\ProxyProperties.cs" />
+    <Compile Include="WebService\ProxyProperty.cs" />
+    <Compile Include="WebService\RequestProperties.cs" />
+    <Compile Include="WebService\Script.cs" />
+    <Compile Include="WebService\TreeNodeProperty.cs" />
+    <Compile Include="WebService\UiProperties.cs" />
+    <Compile Include="WebService\Wsdl.cs" />
+    <Compile Include="WebService\WsdlProperties.cs" />
+    <Compile Include="WebService\WSSWebRequest.cs" />
+    <Compile Include="WebService\WSSWebRequestCreate.cs" />
+    <Compile Include="WebService\WSSWebResponse.cs" />
+    <Compile Include="WebService\XmlAttributeProperty.cs" />
+    <Compile Include="WebService\XmlElementProperty.cs" />
+    <Compile Include="WebService\XmlTreeNode.cs" />
+    <Compile Include="WebService\XmlTreeWriter.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="SearchForm.resx">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Simulator.resx">
+      <DependentUpon>Simulator.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Connected Services\R2RReplyService\SMSC_R2R_ControllerService_Reply.wsdl" />
+    <None Include="Connected Services\R2RService\SMSC_R2R_ControllerService1.wsdl" />
+    <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\R2RReplyService\" />
+    <WCFMetadataStorage Include="Connected Services\R2RService\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RService\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RService\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RService\SMSC_R2R_ControllerService1.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RReplyService\SMSC_R2R_ControllerService_Reply.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RReplyService\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RReplyService\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\R2RReplyService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

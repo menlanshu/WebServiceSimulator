@@ -1,0 +1,12 @@
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\bin\Release\SMSC_Simulator.exe.config
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\bin\Release\SMSC_Simulator.exe
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\bin\Release\SMSC_Simulator.pdb
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\bin\Release\EES.Framework.XMLMapping.dll
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.csprojAssemblyReference.cache
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.Properties.Resources.resources
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.Simulator.resources
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.csproj.GenerateResource.cache
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.csproj.CoreCompileInputs.cache
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.csproj.CopyComplete
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.exe
+C:\Users\LWu110168\Documents\Code\SMSC_Simulator\SMSC_Simulator\obj\Release\SMSC_Simulator.pdb
