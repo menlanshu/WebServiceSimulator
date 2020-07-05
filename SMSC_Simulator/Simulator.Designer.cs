@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("");
             this.treeMethods = new System.Windows.Forms.TreeView();
             this.treeInput = new System.Windows.Forms.TreeView();
             this.mainMenu = new System.Windows.Forms.MenuStrip();
@@ -65,6 +65,11 @@
             this.SetStartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SetEndStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnStop = new System.Windows.Forms.Button();
+            this.cbAutoChangeContext = new System.Windows.Forms.CheckBox();
+            this.cbPerfTest = new System.Windows.Forms.CheckBox();
+            this.tbMsgCount = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -153,10 +158,10 @@
             this.pathTree.Location = new System.Drawing.Point(0, 0);
             this.pathTree.Margin = new System.Windows.Forms.Padding(2);
             this.pathTree.Name = "pathTree";
-            treeNode4.Name = "RootNode";
-            treeNode4.Text = "";
+            treeNode1.Name = "RootNode";
+            treeNode1.Text = "";
             this.pathTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode4});
+            treeNode1});
             this.pathTree.Size = new System.Drawing.Size(259, 502);
             this.pathTree.TabIndex = 0;
             this.pathTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathTree_DragEnter);
@@ -432,11 +437,62 @@
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
             // 
+            // cbAutoChangeContext
+            // 
+            this.cbAutoChangeContext.AutoSize = true;
+            this.cbAutoChangeContext.Location = new System.Drawing.Point(628, 2);
+            this.cbAutoChangeContext.Name = "cbAutoChangeContext";
+            this.cbAutoChangeContext.Size = new System.Drawing.Size(121, 17);
+            this.cbAutoChangeContext.TabIndex = 7;
+            this.cbAutoChangeContext.Text = "AutoChangeContext";
+            this.cbAutoChangeContext.UseVisualStyleBackColor = true;
+            // 
+            // cbPerfTest
+            // 
+            this.cbPerfTest.AutoSize = true;
+            this.cbPerfTest.Location = new System.Drawing.Point(1240, 2);
+            this.cbPerfTest.Name = "cbPerfTest";
+            this.cbPerfTest.Size = new System.Drawing.Size(66, 17);
+            this.cbPerfTest.TabIndex = 8;
+            this.cbPerfTest.Text = "PerfTest";
+            this.cbPerfTest.UseVisualStyleBackColor = true;
+            // 
+            // tbMsgCount
+            // 
+            this.tbMsgCount.Location = new System.Drawing.Point(1043, 2);
+            this.tbMsgCount.Name = "tbMsgCount";
+            this.tbMsgCount.Size = new System.Drawing.Size(169, 20);
+            this.tbMsgCount.TabIndex = 9;
+            this.tbMsgCount.Text = "1";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(979, 6);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "LoopCount";
+            // 
+            // lbCurrentLoop
+            // 
+            this.lbCurrentLoop.AutoSize = true;
+            this.lbCurrentLoop.Location = new System.Drawing.Point(809, 6);
+            this.lbCurrentLoop.Name = "lbCurrentLoop";
+            this.lbCurrentLoop.Size = new System.Drawing.Size(68, 13);
+            this.lbCurrentLoop.TabIndex = 11;
+            this.lbCurrentLoop.Text = "CurrentLoop:";
+            // 
             // Simulator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1338, 526);
+            this.Controls.Add(this.lbCurrentLoop);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.tbMsgCount);
+            this.Controls.Add(this.cbPerfTest);
+            this.Controls.Add(this.cbAutoChangeContext);
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.lbCurrentCount);
             this.Controls.Add(this.lbHowManyNodesSend);
@@ -507,6 +563,11 @@
         private System.Windows.Forms.ToolStripMenuItem clearStartToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopToolStripMenuItem;
         private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.CheckBox cbAutoChangeContext;
+        private System.Windows.Forms.CheckBox cbPerfTest;
+        private System.Windows.Forms.TextBox tbMsgCount;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lbCurrentLoop;
     }
 }
 

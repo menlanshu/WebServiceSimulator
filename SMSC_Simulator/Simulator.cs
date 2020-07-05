@@ -71,6 +71,14 @@ namespace SMSC_Simulator
         System.Collections.Hashtable dispatcherConfig;
 
 
+        //auto generate context function
+        GenerateContext autoGenerateContext;
+        List<int> autoContextCountList;
+        TreeNode currentLoopDirectoryNode;
+        int currentPerfTestCount;
+        int perfMsgCount;
+
+
         public Simulator()
         {
             InitializeComponent();
@@ -202,6 +210,7 @@ namespace SMSC_Simulator
                 if (!InitAddressList()) this.Dispose();
                 if (!InitBatchMethoName()) this.Dispose();
                 if (!InitFileExtensionName()) this.Dispose();
+                if (!InitialGenerateContext()) this.Dispose();
 
                 SendTreeNodeList = false;
                 if (!InitSendMultiNodesFileExtensionName()) this.Dispose();
@@ -224,6 +233,38 @@ namespace SMSC_Simulator
             {
                 MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
             }
+        }
+
+        private bool InitialGenerateContext()
+        {
+            try
+            {
+                autoGenerateContext = ConfigurationManager.GetSection("AutoGenerateContext") as GenerateContext;
+                InitialGenerateContextCurrentCount();
+
+
+                return true;
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Excepetion happen when initial Generate Context Group : " + err.Message);
+                return false;
+            }
+        }
+
+        private void InitialGenerateContextCurrentCount()
+        {
+            currentPerfTestCount = 1;
+            autoContextCountList = new List<int>();
+            foreach (ContextGroup currentObject in autoGenerateContext.ContextGroupList)
+            {
+                currentObject.CurrentCount = 0;
+                if (!autoContextCountList.Contains(currentObject.Count))
+                {
+                    autoContextCountList.Add(currentObject.Count);
+                }
+            }
+            autoContextCountList.Sort();
         }
 
         private bool InitBatchMethoName()
@@ -827,6 +868,12 @@ namespace SMSC_Simulator
                     {
                         selectRichTextBox = this.rtbRequest;
                         toDispatchToolStripMenuItem_Click(false, null);
+                    }
+
+                    if (cbAutoChangeContext.Checked == true)
+                    {
+                        selectRichTextBox = this.rtbRequest;
+                        AutoChangeContextInfo(selectRichTextBox);
                     }
                 }
             }
@@ -2609,6 +2656,78 @@ namespace SMSC_Simulator
             this.rtbRequest.Text = sb.ToString();
         }
 
+        private void AutoChangeContextInfo(RichTextBox inRichTextBox)
+        {
+            string tempStr = inRichTextBox.Text;
+
+            try
+            {
+                foreach (ContextGroup singleContextGroup in autoGenerateContext.ContextGroupList)
+                {
+                    singleContextGroup.CurrentCount = CalculateCurrentCount(singleContextGroup.Count, singleContextGroup.Mode);
+                }
+
+                foreach (ContextGroup singleContextGroup in autoGenerateContext.ContextGroupList)
+                {
+                    tempStr = tempStr.Replace(singleContextGroup.Name, 
+                        (FormatCount(singleContextGroup.CurrentCount,singleContextGroup.Type)).ToString());
+                }
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
+            }
+            
+            inRichTextBox.Text = tempStr;
+        }
+
+        private string FormatCount(int count, string type)
+        {
+            string result = "";
+
+            result = string.Format(type, count);
+            return result;
+        }
+
+        private int CalculateCurrentCount(int contextCount, string contextMode)
+        {
+            int result = currentPerfTestCount;
+            bool assigned = false;
+
+            if (contextMode.ToUpper() == "INCREASE")
+            {
+                assigned = true;
+                result = currentPerfTestCount - 1;
+            }
+            else if (contextMode.ToUpper() == "LOOP")
+            {
+                assigned = true;
+                result = (currentPerfTestCount - 1) % (contextCount <= 0 ? 1 : contextCount);
+            }
+            else
+            {
+                for (int i = autoContextCountList.Count() - 1; i >= 0; i--)
+                {
+                    if (autoContextCountList[i] <= currentPerfTestCount && autoContextCountList[i] >= contextCount)
+                    {
+                        if (autoContextCountList[i] == contextCount)
+                        {
+                            result = contextCount == 0 ?
+                                (assigned ? result : result - 1) : result / contextCount;
+                            assigned = true;
+                        }
+                        else
+                        {
+                            result = result % autoContextCountList[i];
+                            assigned = true;
+                        }
+                    }
+                }
+            }
+            return assigned ? result : 0;
+        }
+
         private void ReplaceDispatcher(XmlNodeList nodeList, XmlDocument requestDoc)
         {
             string autoChangeMe = "";
@@ -2886,41 +3005,94 @@ namespace SMSC_Simulator
 
         private void runMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode directoryNode = this.pathTree.SelectedNode;
-
-            //initial wait send node related variable
-            currentSendNodeCount = 1;
-            currentActualSendNodeCount = 0;
-            waitSendTreeNode = new Dictionary<int, TreeNode>();
-            SendTreeNodeList = true;
-            durationSendFlag = "";
-
-            if (sendStartNode != null)
+            try
             {
-                durationCheckNeed = true;
-            }
-            else
-            {
-                durationCheckNeed = false;
-            }
-
-            if (directoryNode.Nodes.Count > 0)
-            {
-                int tempNodeCount = 0;
-                foreach (TreeNode tempNode in directoryNode.Nodes)
+                currentPerfTestCount = 1;
+                if (cbPerfTest.Checked == true)
                 {
-                    if (tempNode.Nodes.Count == 0)
+                    if (this.tbMsgCount.Text.Contains(";"))
                     {
-                        waitSendTreeNode.Add(++tempNodeCount, tempNode);
+                        if (this.tbMsgCount.Text.Split(ConfigDelimeter).Count() == 2)
+                        {
+                            perfMsgCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[0]);
+                            currentPerfTestCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[1]);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Only support PerfMsgCount and Start Test Count split by ; in PerfMsgCount TextBox");
+                        }
+                    }
+                    else
+                    {
+                        perfMsgCount = Convert.ToInt32(this.tbMsgCount.Text);
                     }
                 }
+                else
+                {
+                    perfMsgCount = 1;
+                }
 
-                if (!waitSendTreeNode.ContainsValue(sendStartNode))
+                this.lbCurrentLoop.Text = "CurrentLoop: " + currentPerfTestCount.ToString();
+                RunAllNodesInDirectory(true);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
+            }
+        }
+
+
+        private void RunAllNodesInDirectory(bool firstLoop)
+        {
+            TreeNode directoryNode;
+            if(firstLoop)
+            {
+                directoryNode = currentLoopDirectoryNode = this.pathTree.SelectedNode;
+            }else
+            {
+                directoryNode = currentLoopDirectoryNode;
+            }
+
+            try
+            {
+                //initial wait send node related variable
+                currentSendNodeCount = 1;
+                currentActualSendNodeCount = 0;
+                waitSendTreeNode = new Dictionary<int, TreeNode>();
+                SendTreeNodeList = true;
+                durationSendFlag = "";
+
+                if (sendStartNode != null)
+                {
+                    durationCheckNeed = true;
+                }
+                else
                 {
                     durationCheckNeed = false;
                 }
 
-                SendAllWaitNodes();
+                if (directoryNode.Nodes.Count > 0)
+                {
+                    int tempNodeCount = 0;
+                    foreach (TreeNode tempNode in directoryNode.Nodes)
+                    {
+                        if (tempNode.Nodes.Count == 0)
+                        {
+                            waitSendTreeNode.Add(++tempNodeCount, tempNode);
+                        }
+                    }
+
+                    if (!waitSendTreeNode.ContainsValue(sendStartNode))
+                    {
+                        durationCheckNeed = false;
+                    }
+
+                    SendAllWaitNodes();
+                }
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
             }
         }
 
@@ -3001,7 +3173,17 @@ namespace SMSC_Simulator
             }
             else
             {
-                waitSendTreeNode = new Dictionary<int, TreeNode>(); 
+                SendTreeNodeList = false;
+                waitSendTreeNode = new Dictionary<int, TreeNode>();
+                if (cbPerfTest.Checked == true)
+                {
+                    if (currentPerfTestCount < perfMsgCount)
+                    {
+                        currentPerfTestCount++;
+                        this.lbCurrentLoop.Text = "CurrentLoop: " + currentPerfTestCount.ToString();
+                        RunAllNodesInDirectory(false);
+                    }
+                }
             }
         }
 
@@ -3064,6 +3246,9 @@ namespace SMSC_Simulator
             this.btnSend.Enabled = true;
             waitSecond = 0;
             myTimer.Enabled = false;
+
+            durationSendFlag = durSendEnd;
+            SendTreeNodeList = false;
         }
     }
 }
