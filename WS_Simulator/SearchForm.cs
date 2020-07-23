@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SMSC_Simulator
+namespace WS_Simulator
 {
     public partial class SearchForm : Form
     {

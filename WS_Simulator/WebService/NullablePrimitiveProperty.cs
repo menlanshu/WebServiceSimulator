@@ -20,7 +20,7 @@
         {
             if (update)
             {
-                Value = SMSC_Simulator.Simulator.GetNodeValue(TreeNode.Text);
+                Value = WS_Simulator.Simulator.GetNodeValue(TreeNode.Text);
             }
             return Value;
         }

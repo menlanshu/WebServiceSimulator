@@ -5,7 +5,7 @@ using System.Web;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 
-namespace SMSC_Simulator
+namespace WS_Simulator
 {
     public class DBHelper
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace SMSC_Simulator
+namespace WS_Simulator
 {
     public class GenerateContext : ConfigurationSection
     {

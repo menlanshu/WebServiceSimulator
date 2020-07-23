@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
-  <contractRef ref="http://192.168.73.135:58251/Adapter/SMSC_R2R_ControllerService.asmx?wsdl" docRef="http://192.168.73.135:58251/Adapter/SMSC_R2R_ControllerService.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
-  <soap address="http://192.168.73.135:58251/Adapter/SMSC_R2R_ControllerService.asmx" xmlns:q1="http://Adapter/SMSC_R2R_ControllerService" binding="q1:SMSC_R2R_ControllerServiceSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
-  <soap address="http://192.168.73.135:58251/Adapter/SMSC_R2R_ControllerService.asmx" xmlns:q2="http://Adapter/SMSC_R2R_ControllerService" binding="q2:SMSC_R2R_ControllerServiceSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
-</discovery>

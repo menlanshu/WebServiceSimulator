@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SMSC_Simulator
+namespace WS_Simulator
 {
     static class Program
     {

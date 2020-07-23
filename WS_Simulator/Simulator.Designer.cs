@@ -1,4 +1,4 @@
-﻿namespace SMSC_Simulator
+﻿namespace WS_Simulator
 {
     partial class Simulator
     {
@@ -29,7 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("");
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Simulator));
             this.treeMethods = new System.Windows.Forms.TreeView();
             this.treeInput = new System.Windows.Forms.TreeView();
             this.mainMenu = new System.Windows.Forms.MenuStrip();
@@ -59,6 +60,7 @@
             this.runMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbHowManyNodesSend = new System.Windows.Forms.Label();
             this.lbCurrentCount = new System.Windows.Forms.Label();
             this.fileContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -70,7 +72,6 @@
             this.tbMsgCount = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
-            this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -114,8 +115,8 @@
             this.reloadFolderToolStripMenuItem});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
-            this.mainMenu.Padding = new System.Windows.Forms.Padding(4, 1, 0, 1);
-            this.mainMenu.Size = new System.Drawing.Size(1338, 24);
+            this.mainMenu.Padding = new System.Windows.Forms.Padding(5, 1, 0, 1);
+            this.mainMenu.Size = new System.Drawing.Size(1553, 24);
             this.mainMenu.TabIndex = 0;
             this.mainMenu.Text = "CurrentCount";
             // 
@@ -137,7 +138,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 24);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -147,8 +148,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1338, 502);
-            this.splitContainer1.SplitterDistance = 259;
+            this.splitContainer1.Size = new System.Drawing.Size(1553, 734);
+            this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -157,13 +158,13 @@
             this.pathTree.AllowDrop = true;
             this.pathTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pathTree.Location = new System.Drawing.Point(0, 0);
-            this.pathTree.Margin = new System.Windows.Forms.Padding(2);
+            this.pathTree.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.pathTree.Name = "pathTree";
-            treeNode2.Name = "RootNode";
-            treeNode2.Text = "";
+            treeNode1.Name = "RootNode";
+            treeNode1.Text = "";
             this.pathTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
-            this.pathTree.Size = new System.Drawing.Size(259, 502);
+            treeNode1});
+            this.pathTree.Size = new System.Drawing.Size(300, 734);
             this.pathTree.TabIndex = 0;
             this.pathTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathTree_DragEnter);
             this.pathTree.DragOver += new System.Windows.Forms.DragEventHandler(this.pathTree_DragOver);
@@ -173,7 +174,7 @@
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -184,9 +185,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.rtbReply);
-            this.splitContainer2.Size = new System.Drawing.Size(1076, 502);
-            this.splitContainer2.SplitterDistance = 274;
-            this.splitContainer2.SplitterWidth = 3;
+            this.splitContainer2.Size = new System.Drawing.Size(1250, 734);
+            this.splitContainer2.SplitterDistance = 400;
             this.splitContainer2.TabIndex = 0;
             // 
             // splitContainer3
@@ -194,7 +194,7 @@
             this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer3.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer3.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer3.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer3.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.splitContainer3.Name = "splitContainer3";
             this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -210,26 +210,24 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.rtbRequest);
-            this.splitContainer3.Size = new System.Drawing.Size(1076, 274);
-            this.splitContainer3.SplitterDistance = 44;
-            this.splitContainer3.SplitterWidth = 3;
+            this.splitContainer3.Size = new System.Drawing.Size(1250, 400);
             this.splitContainer3.TabIndex = 0;
             // 
             // lbAddress
             // 
             this.lbAddress.AutoSize = true;
-            this.lbAddress.Location = new System.Drawing.Point(7, 16);
+            this.lbAddress.Location = new System.Drawing.Point(8, 18);
             this.lbAddress.Name = "lbAddress";
-            this.lbAddress.Size = new System.Drawing.Size(45, 13);
+            this.lbAddress.Size = new System.Drawing.Size(56, 17);
             this.lbAddress.TabIndex = 4;
             this.lbAddress.Text = "Address";
             // 
             // lbMethod
             // 
             this.lbMethod.AutoSize = true;
-            this.lbMethod.Location = new System.Drawing.Point(556, 17);
+            this.lbMethod.Location = new System.Drawing.Point(646, 18);
             this.lbMethod.Name = "lbMethod";
-            this.lbMethod.Size = new System.Drawing.Size(74, 13);
+            this.lbMethod.Size = new System.Drawing.Size(93, 17);
             this.lbMethod.TabIndex = 3;
             this.lbMethod.Text = "Method Name";
             // 
@@ -237,20 +235,20 @@
             // 
             this.cmbAddress.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbAddress.FormattingEnabled = true;
-            this.cmbAddress.Location = new System.Drawing.Point(61, 13);
-            this.cmbAddress.Margin = new System.Windows.Forms.Padding(2);
+            this.cmbAddress.Location = new System.Drawing.Point(71, 15);
+            this.cmbAddress.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.cmbAddress.Name = "cmbAddress";
-            this.cmbAddress.Size = new System.Drawing.Size(478, 21);
+            this.cmbAddress.Size = new System.Drawing.Size(557, 25);
             this.cmbAddress.TabIndex = 2;
             this.cmbAddress.TextChanged += new System.EventHandler(this.cmbAddress_TextChanged);
             // 
             // btnSend
             // 
             this.btnSend.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSend.Location = new System.Drawing.Point(989, 9);
-            this.btnSend.Margin = new System.Windows.Forms.Padding(2);
+            this.btnSend.Location = new System.Drawing.Point(1153, 9);
+            this.btnSend.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(55, 27);
+            this.btnSend.Size = new System.Drawing.Size(64, 35);
             this.btnSend.TabIndex = 1;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
@@ -260,19 +258,19 @@
             // 
             this.cmbMethodName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMethodName.FormattingEnabled = true;
-            this.cmbMethodName.Location = new System.Drawing.Point(638, 13);
-            this.cmbMethodName.Margin = new System.Windows.Forms.Padding(2);
+            this.cmbMethodName.Location = new System.Drawing.Point(744, 15);
+            this.cmbMethodName.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.cmbMethodName.Name = "cmbMethodName";
-            this.cmbMethodName.Size = new System.Drawing.Size(336, 21);
+            this.cmbMethodName.Size = new System.Drawing.Size(391, 25);
             this.cmbMethodName.TabIndex = 0;
             // 
             // rtbRequest
             // 
             this.rtbRequest.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbRequest.Location = new System.Drawing.Point(0, 0);
-            this.rtbRequest.Margin = new System.Windows.Forms.Padding(2);
+            this.rtbRequest.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.rtbRequest.Name = "rtbRequest";
-            this.rtbRequest.Size = new System.Drawing.Size(1076, 227);
+            this.rtbRequest.Size = new System.Drawing.Size(1250, 346);
             this.rtbRequest.TabIndex = 0;
             this.rtbRequest.Text = "";
             this.rtbRequest.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rtbRequest_KeyDown);
@@ -282,9 +280,9 @@
             // 
             this.rtbReply.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbReply.Location = new System.Drawing.Point(0, 0);
-            this.rtbReply.Margin = new System.Windows.Forms.Padding(2);
+            this.rtbReply.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.rtbReply.Name = "rtbReply";
-            this.rtbReply.Size = new System.Drawing.Size(1076, 225);
+            this.rtbReply.Size = new System.Drawing.Size(1250, 330);
             this.rtbReply.TabIndex = 1;
             this.rtbReply.Text = "";
             this.rtbReply.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rtbReply_KeyDown);
@@ -351,9 +349,10 @@
             // cbToDispatcher
             // 
             this.cbToDispatcher.AutoSize = true;
-            this.cbToDispatcher.Location = new System.Drawing.Point(174, 2);
+            this.cbToDispatcher.Location = new System.Drawing.Point(203, 3);
+            this.cbToDispatcher.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbToDispatcher.Name = "cbToDispatcher";
-            this.cbToDispatcher.Size = new System.Drawing.Size(112, 17);
+            this.cbToDispatcher.Size = new System.Drawing.Size(130, 21);
             this.cbToDispatcher.TabIndex = 2;
             this.cbToDispatcher.Text = "AutoToDispatcher";
             this.cbToDispatcher.UseVisualStyleBackColor = true;
@@ -366,44 +365,51 @@
             this.clearStartToolStripMenuItem,
             this.openFileFolderToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(181, 114);
+            this.folderContextMenu.Size = new System.Drawing.Size(161, 92);
             // 
             // runMenuItem
             // 
             this.runMenuItem.Name = "runMenuItem";
-            this.runMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.runMenuItem.Size = new System.Drawing.Size(160, 22);
             this.runMenuItem.Text = "Run All";
             this.runMenuItem.Click += new System.EventHandler(this.runMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.stopToolStripMenuItem.Text = "Stop Run";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
             // clearStartToolStripMenuItem
             // 
             this.clearStartToolStripMenuItem.Name = "clearStartToolStripMenuItem";
-            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.clearStartToolStripMenuItem.Text = "Clear Duration";
             this.clearStartToolStripMenuItem.Click += new System.EventHandler(this.clearStartToolStripMenuItem_Click);
+            // 
+            // openFileFolderToolStripMenuItem
+            // 
+            this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
+            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
+            this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
             // 
             // lbHowManyNodesSend
             // 
             this.lbHowManyNodesSend.AutoSize = true;
-            this.lbHowManyNodesSend.Location = new System.Drawing.Point(342, 4);
+            this.lbHowManyNodesSend.Location = new System.Drawing.Point(391, 4);
             this.lbHowManyNodesSend.Name = "lbHowManyNodesSend";
-            this.lbHowManyNodesSend.Size = new System.Drawing.Size(94, 13);
+            this.lbHowManyNodesSend.Size = new System.Drawing.Size(116, 17);
             this.lbHowManyNodesSend.TabIndex = 4;
             this.lbHowManyNodesSend.Text = "Multi Nodes Send:";
             // 
             // lbCurrentCount
             // 
             this.lbCurrentCount.AutoSize = true;
-            this.lbCurrentCount.Location = new System.Drawing.Point(440, 4);
+            this.lbCurrentCount.Location = new System.Drawing.Point(513, 4);
             this.lbCurrentCount.Name = "lbCurrentCount";
-            this.lbCurrentCount.Size = new System.Drawing.Size(69, 13);
+            this.lbCurrentCount.Size = new System.Drawing.Size(85, 17);
             this.lbCurrentCount.TabIndex = 5;
             this.lbCurrentCount.Text = "CurrentCount";
             // 
@@ -431,9 +437,10 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(547, -1);
+            this.btnStop.Location = new System.Drawing.Point(638, -1);
+            this.btnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(48, 22);
+            this.btnStop.Size = new System.Drawing.Size(56, 27);
             this.btnStop.TabIndex = 6;
             this.btnStop.Text = "STOP";
             this.btnStop.UseVisualStyleBackColor = true;
@@ -442,9 +449,10 @@
             // cbAutoChangeContext
             // 
             this.cbAutoChangeContext.AutoSize = true;
-            this.cbAutoChangeContext.Location = new System.Drawing.Point(628, 2);
+            this.cbAutoChangeContext.Location = new System.Drawing.Point(733, 3);
+            this.cbAutoChangeContext.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbAutoChangeContext.Name = "cbAutoChangeContext";
-            this.cbAutoChangeContext.Size = new System.Drawing.Size(121, 17);
+            this.cbAutoChangeContext.Size = new System.Drawing.Size(142, 21);
             this.cbAutoChangeContext.TabIndex = 7;
             this.cbAutoChangeContext.Text = "AutoChangeContext";
             this.cbAutoChangeContext.UseVisualStyleBackColor = true;
@@ -452,52 +460,47 @@
             // cbPerfTest
             // 
             this.cbPerfTest.AutoSize = true;
-            this.cbPerfTest.Location = new System.Drawing.Point(1240, 2);
+            this.cbPerfTest.Location = new System.Drawing.Point(1447, 3);
+            this.cbPerfTest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbPerfTest.Name = "cbPerfTest";
-            this.cbPerfTest.Size = new System.Drawing.Size(66, 17);
+            this.cbPerfTest.Size = new System.Drawing.Size(73, 21);
             this.cbPerfTest.TabIndex = 8;
             this.cbPerfTest.Text = "PerfTest";
             this.cbPerfTest.UseVisualStyleBackColor = true;
             // 
             // tbMsgCount
             // 
-            this.tbMsgCount.Location = new System.Drawing.Point(1043, 2);
+            this.tbMsgCount.Location = new System.Drawing.Point(1217, 1);
+            this.tbMsgCount.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tbMsgCount.Name = "tbMsgCount";
-            this.tbMsgCount.Size = new System.Drawing.Size(169, 20);
+            this.tbMsgCount.Size = new System.Drawing.Size(196, 25);
             this.tbMsgCount.TabIndex = 9;
             this.tbMsgCount.Text = "1";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(979, 6);
+            this.label1.Location = new System.Drawing.Point(1139, 4);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.Size = new System.Drawing.Size(72, 17);
             this.label1.TabIndex = 10;
             this.label1.Text = "LoopCount";
             // 
             // lbCurrentLoop
             // 
             this.lbCurrentLoop.AutoSize = true;
-            this.lbCurrentLoop.Location = new System.Drawing.Point(809, 6);
+            this.lbCurrentLoop.Location = new System.Drawing.Point(939, 4);
             this.lbCurrentLoop.Name = "lbCurrentLoop";
-            this.lbCurrentLoop.Size = new System.Drawing.Size(68, 13);
+            this.lbCurrentLoop.Size = new System.Drawing.Size(84, 17);
             this.lbCurrentLoop.TabIndex = 11;
             this.lbCurrentLoop.Text = "CurrentLoop:";
             // 
-            // openFileFolderToolStripMenuItem
-            // 
-            this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
-            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
-            this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
-            // 
             // Simulator
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1338, 526);
+            this.ClientSize = new System.Drawing.Size(1553, 758);
             this.Controls.Add(this.lbCurrentLoop);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tbMsgCount);
@@ -509,8 +512,10 @@
             this.Controls.Add(this.cbToDispatcher);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.mainMenu);
+            this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenu;
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "Simulator";
             this.Text = "Simulator";
             this.Load += new System.EventHandler(this.Simulator_Load);
