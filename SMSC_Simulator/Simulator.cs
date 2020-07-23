@@ -15,6 +15,7 @@ using WebServiceStudio;
 using System.Reflection;
 using System.Web.Services.Protocols;
 using System.Net;
+using System.Diagnostics;
 
 namespace SMSC_Simulator
 {
@@ -171,6 +172,7 @@ namespace SMSC_Simulator
                 {
                     TreeNode tempDireNode = new TreeNode(tempSystemInfo.Name);
                     tempDireNode.ContextMenuStrip = this.folderContextMenu;
+                    tempDireNode.Tag = tempSystemInfo;
                     tempNode.Nodes.Add(tempDireNode);
                     foreach (FileSystemInfo tempInfo in ((DirectoryInfo)tempSystemInfo).EnumerateFileSystemInfos())
                     {
@@ -183,6 +185,7 @@ namespace SMSC_Simulator
                     {
                         TreeNode tempFileNode = new TreeNode(tempSystemInfo.Name);
                         tempFileNode.ContextMenuStrip = this.fileContextMenu;
+                        tempFileNode.Tag = tempSystemInfo;
                         //tempFileNode.ContextMenuStrip = this.pathContextMenu;
                         tempNode.Nodes.Add(tempFileNode);
                     }
@@ -3249,6 +3252,19 @@ namespace SMSC_Simulator
 
             durationSendFlag = durSendEnd;
             SendTreeNodeList = false;
+        }
+
+        private void openFileFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode directoryNode = this.pathTree.SelectedNode;
+
+            if(directoryNode != null)
+            {
+                if (directoryNode.FullPath != "")
+                {
+                    Process.Start($@"{((DirectoryInfo)directoryNode.Tag).FullName}");
+                }
+            }
         }
     }
 }

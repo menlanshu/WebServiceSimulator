@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("");
             this.treeMethods = new System.Windows.Forms.TreeView();
             this.treeInput = new System.Windows.Forms.TreeView();
             this.mainMenu = new System.Windows.Forms.MenuStrip();
@@ -70,6 +70,7 @@
             this.tbMsgCount = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
+            this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -121,14 +122,14 @@
             // loadFileToolStripMenuItem
             // 
             this.loadFileToolStripMenuItem.Name = "loadFileToolStripMenuItem";
-            this.loadFileToolStripMenuItem.Size = new System.Drawing.Size(72, 22);
+            this.loadFileToolStripMenuItem.Size = new System.Drawing.Size(78, 22);
             this.loadFileToolStripMenuItem.Text = "LoadFolder";
             this.loadFileToolStripMenuItem.Click += new System.EventHandler(this.loadFileToolStripMenuItem_Click);
             // 
             // reloadFolderToolStripMenuItem
             // 
             this.reloadFolderToolStripMenuItem.Name = "reloadFolderToolStripMenuItem";
-            this.reloadFolderToolStripMenuItem.Size = new System.Drawing.Size(82, 22);
+            this.reloadFolderToolStripMenuItem.Size = new System.Drawing.Size(88, 22);
             this.reloadFolderToolStripMenuItem.Text = "ReloadFolder";
             this.reloadFolderToolStripMenuItem.Click += new System.EventHandler(this.reloadFolderToolStripMenuItem_Click);
             // 
@@ -158,10 +159,10 @@
             this.pathTree.Location = new System.Drawing.Point(0, 0);
             this.pathTree.Margin = new System.Windows.Forms.Padding(2);
             this.pathTree.Name = "pathTree";
-            treeNode1.Name = "RootNode";
-            treeNode1.Text = "";
+            treeNode2.Name = "RootNode";
+            treeNode2.Text = "";
             this.pathTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.pathTree.Size = new System.Drawing.Size(259, 502);
             this.pathTree.TabIndex = 0;
             this.pathTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathTree_DragEnter);
@@ -295,12 +296,12 @@
             this.pathContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sendToolStrip});
             this.pathContextMenu.Name = "pathContextMenu";
-            this.pathContextMenu.Size = new System.Drawing.Size(99, 26);
+            this.pathContextMenu.Size = new System.Drawing.Size(101, 26);
             // 
             // sendToolStrip
             // 
             this.sendToolStrip.Name = "sendToolStrip";
-            this.sendToolStrip.Size = new System.Drawing.Size(98, 22);
+            this.sendToolStrip.Size = new System.Drawing.Size(100, 22);
             this.sendToolStrip.Text = "Send";
             this.sendToolStrip.Click += new System.EventHandler(this.sendToolStrip_Click);
             // 
@@ -317,33 +318,33 @@
             this.toolStripClear,
             this.saveToFileToolStripMenuItem});
             this.rtbContextMenu.Name = "pathContextMenu";
-            this.rtbContextMenu.Size = new System.Drawing.Size(128, 92);
+            this.rtbContextMenu.Size = new System.Drawing.Size(134, 92);
             // 
             // toolStripToXML
             // 
             this.toolStripToXML.Name = "toolStripToXML";
-            this.toolStripToXML.Size = new System.Drawing.Size(127, 22);
+            this.toolStripToXML.Size = new System.Drawing.Size(133, 22);
             this.toolStripToXML.Text = "ToXML";
             this.toolStripToXML.Click += new System.EventHandler(this.toolStripToXML_Click);
             // 
             // toDispatchToolStripMenuItem
             // 
             this.toDispatchToolStripMenuItem.Name = "toDispatchToolStripMenuItem";
-            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.toDispatchToolStripMenuItem.Text = "ToDispatch";
             this.toDispatchToolStripMenuItem.Click += new System.EventHandler(this.toDispatchToolStripMenuItem_Click);
             // 
             // toolStripClear
             // 
             this.toolStripClear.Name = "toolStripClear";
-            this.toolStripClear.Size = new System.Drawing.Size(127, 22);
+            this.toolStripClear.Size = new System.Drawing.Size(133, 22);
             this.toolStripClear.Text = "Clear";
             this.toolStripClear.Click += new System.EventHandler(this.toolStripClear_Click);
             // 
             // saveToFileToolStripMenuItem
             // 
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
-            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.saveToFileToolStripMenuItem.Text = "SaveToFile";
             this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
             // 
@@ -362,28 +363,29 @@
             this.folderContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.runMenuItem,
             this.stopToolStripMenuItem,
-            this.clearStartToolStripMenuItem});
+            this.clearStartToolStripMenuItem,
+            this.openFileFolderToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(144, 70);
+            this.folderContextMenu.Size = new System.Drawing.Size(181, 114);
             // 
             // runMenuItem
             // 
             this.runMenuItem.Name = "runMenuItem";
-            this.runMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.runMenuItem.Size = new System.Drawing.Size(150, 22);
             this.runMenuItem.Text = "Run All";
             this.runMenuItem.Click += new System.EventHandler(this.runMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.stopToolStripMenuItem.Text = "Stop Run";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
             // clearStartToolStripMenuItem
             // 
             this.clearStartToolStripMenuItem.Name = "clearStartToolStripMenuItem";
-            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
             this.clearStartToolStripMenuItem.Text = "Clear Duration";
             this.clearStartToolStripMenuItem.Click += new System.EventHandler(this.clearStartToolStripMenuItem_Click);
             // 
@@ -483,10 +485,18 @@
             this.lbCurrentLoop.TabIndex = 11;
             this.lbCurrentLoop.Text = "CurrentLoop:";
             // 
+            // openFileFolderToolStripMenuItem
+            // 
+            this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
+            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
+            this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
+            // 
             // Simulator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1338, 526);
             this.Controls.Add(this.lbCurrentLoop);
             this.Controls.Add(this.label1);
@@ -568,6 +578,7 @@
         private System.Windows.Forms.TextBox tbMsgCount;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbCurrentLoop;
+        private System.Windows.Forms.ToolStripMenuItem openFileFolderToolStripMenuItem;
     }
 }
 

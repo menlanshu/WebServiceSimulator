@@ -1,6 +1,0 @@
-
-#TODO When you click save to file in send/receive form, browse to the actual
-folder or current file
-#TODO When you right click on a folder in the tree list in left pane, add a
-function for open current folder
-#TODO Auto refresh folder structure and point to current add fild in file tree

@@ -1,0 +1,1 @@
+x 2020-07-06 2020-07-05 When you right click on a folder in the tree list in left pane, add a function for open current folder
