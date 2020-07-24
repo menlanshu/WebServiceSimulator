@@ -5,9 +5,12 @@
     using System.Drawing.Design;
     using System.Configuration;
     using System.Xml;
+    using System.Windows.Forms;
 
     internal class NullablePrimitiveProperty : ClassProperty
     {
+        public static Func<string, string> GetNodeValue;
+
         public NullablePrimitiveProperty(Type[] possibleTypes, string name, object val) : base(possibleTypes, name, val)
         {
         }
@@ -20,7 +23,7 @@
         {
             if (update)
             {
-                Value = WS_Simulator.Simulator.GetNodeValue(TreeNode.Text);
+                Value = GetNodeValue(TreeNode.Text);
             }
             return Value;
         }

@@ -17,49 +17,25 @@ using System.Web.Services.Protocols;
 using System.Net;
 using System.Diagnostics;
 using WS_Simulator.FormHandler;
+using WS_Simulator.Models;
+using WS_Simulator.DataAccess;
 
 namespace WS_Simulator
 {
     public partial class Simulator : Form
     {
+        private Action TimerStart;
+        private Action<string> UpdateReplyMessage;
+        private Action UpdateCurrLoopText;
+        private Action<TreeNode> SelectNodeAndSend;
+
         private string m_DirectoryPath;
-        private char[] Delimeter = (",").ToCharArray();
         public static char[] ConfigDelimeter = (";").ToCharArray();
-        public static string defaultValue = "NA";
-        public static string requestMessage = "";
-        private static string replyMessage = "";
         private int waitSecond = 0;
 
         private RichTextBox selectRichTextBox;
-        private List<string> batchMethodName;
-        private List<string> fileExtensionName;
-        private List<string> multiNodesExtensionName;
-        private List<string> needWaitMessageList;
-        private int sleepTime;
 
-        public delegate void UpdateReplyMessage();
-        public static UpdateReplyMessage myUpdateReplyMessage;
 
-        private Wsdl wsdl = null;
-        private TreeView treeMethods;
-        private TreeView treeInput;
-        private Dictionary<int, TreeNode> waitSendTreeNode = new Dictionary<int, TreeNode>();
-        private int currentSendNodeCount;
-        private int currentActualSendNodeCount;
-        private bool SendTreeNodeList;
-        private TreeNode sendStartNode;
-        private TreeNode sendEndNode;
-        private bool durationCheckNeed;
-        private string durationSendFlag;
-        private const string durSendStart = "Start";
-        private const string durSendEnd = "End";
-
-        DBHelper myDBHelper;
-        bool DBHelperNeed;
-
-        public static int sendIndex;
-        public static int totalCount;
-        public static bool isBatch;
 
         SearchForm testSearch;
         string requestSourceStr = "";
@@ -67,33 +43,67 @@ namespace WS_Simulator
         string replySourceStr = "";
         bool replyIsCaseSensitive = false;
 
-        System.Collections.Hashtable normalCollection;
-        System.Collections.Hashtable batchCollection;
-        System.Collections.Hashtable methodMapping;
-        System.Collections.Hashtable dispatcherConfig;
+        private WSConfig _wsConfig = new WSConfig();
+        private TestClient _testClient = new TestClient();
 
-
-        //auto generate context function
-        GenerateContext autoGenerateContext;
-        List<int> autoContextCountList;
-        TreeNode currentLoopDirectoryNode;
-        int currentPerfTestCount;
-        int perfMsgCount;
-
-
+        #region Initial region
         public Simulator()
         {
             InitializeComponent();
 
             // Initial control form of this form
-            InitilizeControlFormat();
+            InitilizeControl();
 
-            this.Resize += new System.EventHandler(this.frmSimulator_Resize);
-            wsdl = new Wsdl();
+            InitializeFormEventAndDelegate();
         }
 
+        private void WireUpForms()
+        {
+            this.cmbAddress.DataSource = null;
+            this.cmbAddress.DataSource = _wsConfig.WSAddressList;
+        }
+
+        private void WireUpWSMethodList()
+        {
+            this.cmbMethodName.DataSource = null;
+            this.cmbMethodName.DataSource = _wsConfig.WSMethodList;
+        }
+
+        private void Simulator_Load(object sender, EventArgs e)
+        {
+            string errDesc = "";
+            try
+            {
+
+                _wsConfig = new WSConfig();
+                if (_wsConfig.InitializeWSConfig(out errDesc) == false)
+                {
+                    ShowErrorMessage(errDesc);
+                    return;
+                }
+
+                if (_wsConfig.DBHelperNeed)
+                {
+                    if (!DBProcessor.InitDBHelper(out errDesc))
+                    {
+                        ShowErrorMessage(errDesc);
+                        return;
+                    }
+                }
+
+                _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
+
+                WireUpForms();
+
+                LoadFileTree();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
+            }
+        }
         // Initial Control size and font size
-        private void InitilizeControlFormat()
+        private void InitilizeControl()
         {
             // Initial name of current form
             this.Text = "Web Service Simulator";
@@ -102,10 +112,65 @@ namespace WS_Simulator
             this.StartPosition = FormStartPosition.CenterScreen;
 
             // initial font size of receive/reply text box
-            this.rtbRequest.Font = new Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rtbReply.Font = new Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
- 
+            this.rtbRequest.Font = new Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rtbReply.Font = new Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+
+            this.rtbRequest.ContextMenuStrip = this.rtbContextMenu;
+            this.rtbReply.ContextMenuStrip = this.rtbContextMenu;
+
+            // My timer defaul setting
+            myTimer.Interval = 1000;
+            myTimer.Enabled = false;
+
         }
+        // Initial Control event and delegate
+        private void InitializeFormEventAndDelegate()
+        {
+            NullablePrimitiveProperty.GetNodeValue += _testClient.GetNodeValue;
+
+            this.Resize += frmSimulator_Resize;
+
+            this.UpdateReplyMessage += UpdateRTBReplyMsg;
+            this.UpdateCurrLoopText += UpdateCurrentLoopTextMethod;
+            this.SelectNodeAndSend += SelectNodeAndSendMethod;
+            this.TimerStart += TimerStartSet;
+        }
+
+        private void SelectNodeAndSendMethod(TreeNode currNode)
+        {
+            this.BeginInvoke((Action<TreeNode>)((node) =>
+            {
+                this.pathTree.SelectedNode = node;
+
+                LoadTestFile();
+
+                SendButtonClick(_testClient.MethodName, node, this.rtbRequest.Text);
+            }), currNode
+            );
+        }
+
+        private void UpdateCurrentLoopTextMethod()
+        {
+            this.BeginInvoke((Action)(() => this.lbCurrentLoop.Text = "CurrentLoop: " + _testClient.CurrentPerfTestCount.ToString()));
+        }
+
+        private void TimerStartSet()
+        {
+            this.btnSend.Enabled = false;
+            waitSecond = 0;
+            
+            myTimer.Enabled = true;
+            myTimer.Start();
+        }
+
+        private void ShowErrorMessage(string errDesc)
+        {
+            MessageBox.Show(errDesc);
+            this.Dispose();
+        }
+
+        #endregion
+
         #region event handle region
         // When form resize, auto change the locaion of buttong and address text box
         private void frmSimulator_Resize(object sender, EventArgs e)
@@ -127,33 +192,93 @@ namespace WS_Simulator
             this.btnSend.Location = new System.Drawing.Point(this.cmbMethodName.Location.X + this.cmbMethodName.Width + 10, this.btnSend.Location.Y);
         }
 
-        private void cmbAddress_TextChanged(object sender, EventArgs e)
+        private async void cmbAddress_TextChanged(object sender, EventArgs e)
         {
-            wsdl.Reset();
-            wsdl.Paths.Add(this.cmbAddress.Text);
-            wsdl.Generate();
-            FillInvokeTab();
+            await WebServiceProcessor.Reset(this.cmbAddress.Text);
+
+            // Initial Node info of whole method in current web service
+            await Task.Run(() => WebServiceProcessor.FillInvokeTab());
+
             WebServiceStudio.Configuration.MasterConfig.InvokeSettings.AddUri(this.cmbAddress.Text);
-            SimulatorFormHandler.InitMethodNameOfWebService(this.cmbMethodName, this.treeMethods.Nodes);
+
+            // Get web service Method list of current webservice
+            await SimulatorFormHandler.InitMethodNameOfWebService(_wsConfig, WebServiceProcessor.TreeMethods.Nodes);
+
+            WireUpWSMethodList();
+        }
+
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            _testClient.SendTreeNodeList = false;
+
+            if (string.IsNullOrEmpty(this.cmbMethodName.Text))
+            {
+                MessageBox.Show("Method Name can not be empty!");
+                return;
+            }
+
+            SendButtonClick(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text);
+        }
+
+        private void pathTree_MouseDown(object sender, MouseEventArgs e)
+        {
+
+            // TODO - Check this part need optimize or not
+            if (_testClient.SendTreeNodeList)
+            {
+                return;
+            }
+
+            // Set old node to white
+            if (this.pathTree.SelectedNode != null)
+            {
+                this.pathTree.SelectedNode.BackColor = Color.White;
+            }
+
+            /// set color of current node
+            this.pathTree.SelectedNode = this.pathTree.GetNodeAt(e.X, e.Y);
+            if (this.pathTree.SelectedNode != null)
+            {
+                this.pathTree.SelectedNode.BackColor = Color.LightGreen;
+            }
+
+            LoadTestFile();
+        }
+
+        private async void SendButtonClick(string methodName, TreeNode sendNode, string requestMessage)
+        {
+            _testClient.SendIndex = 0;
+            _testClient.TotalCount = 1;
+            _testClient.IsBatch = _wsConfig.BatchMethodName.Contains(methodName);
+
+            await SendMessageToE3(methodName, sendNode, requestMessage);
+        }
+
+        private void myTimer_Tick(object sender, EventArgs e)
+        {
+            this.rtbReply.Text = "Please wait web service reply.........." + (++waitSecond).ToString();
         }
 
         #endregion
 
-
-
+        #region Control Utility region
         private void LoadFileTree(string directoryPath = ".")
         {
             if (Directory.Exists(directoryPath))
             {
                 m_DirectoryPath = directoryPath;
                 DirectoryInfo tempDirectory = new DirectoryInfo(directoryPath);
+
                 this.pathTree.Nodes[0].Nodes.Clear();
                 this.pathTree.Nodes[0].Text = "RootNode";
                 this.pathTree.Nodes[0].ContextMenuStrip = this.folderContextMenu;
+
                 foreach (FileSystemInfo tempInfo in tempDirectory.EnumerateFileSystemInfos())
                 {
                     LoadWholeTree(tempInfo, this.pathTree.Nodes[0]);
                 }
+
                 this.pathTree.Nodes[0].Expand();
             }
         }
@@ -166,9 +291,12 @@ namespace WS_Simulator
                 if (tempSystemInfo is DirectoryInfo)
                 {
                     TreeNode tempDireNode = new TreeNode(tempSystemInfo.Name);
+
                     tempDireNode.ContextMenuStrip = this.folderContextMenu;
                     tempDireNode.Tag = tempSystemInfo;
+
                     tempNode.Nodes.Add(tempDireNode);
+
                     foreach (FileSystemInfo tempInfo in ((DirectoryInfo)tempSystemInfo).EnumerateFileSystemInfos())
                     {
                         LoadWholeTree(tempInfo, tempDireNode);
@@ -176,731 +304,161 @@ namespace WS_Simulator
                 }
                 else if (tempSystemInfo is FileInfo)
                 {
-                    if (this.fileExtensionName.Contains(tempSystemInfo.Extension))
+                    if (_wsConfig.FileExtensionName.Contains(tempSystemInfo.Extension))
                     {
                         TreeNode tempFileNode = new TreeNode(tempSystemInfo.Name);
+
                         tempFileNode.ContextMenuStrip = this.fileContextMenu;
                         tempFileNode.Tag = tempSystemInfo;
-                        //tempFileNode.ContextMenuStrip = this.pathContextMenu;
+
                         tempNode.Nodes.Add(tempFileNode);
                     }
                 }
             }
             catch (Exception err)
             {
-                MessageBox.Show("Exception happen in LoadWholeTree : " + err.Message);
+                throw new Exception($"Exception happen in LoadWholeTree : { err.Message }");
             }
 
         }
 
-        private void Simulator_Load(object sender, EventArgs e)
+        #endregion
+
+        private void UpdateRTBReplyMsg(string replyMessage)
         {
-            string errDesc = "";
-            try
-            {
-                WSSWebRequestCreate.RegisterPrefixes();
-                if (SimulatorFormHandler.InitAddressList(this.cmbAddress, out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (SimulatorFormHandler.InitBatchMethoName(ref batchMethodName,out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (SimulatorFormHandler.InitFileExtensionName(ref fileExtensionName, out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (SimulatorFormHandler.InitSendMultiNodesFileExtensionName(ref multiNodesExtensionName, out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (SimulatorFormHandler.InitNeedWaitMessageList(ref needWaitMessageList, ref sleepTime, out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (SimulatorFormHandler.InitMyDBHelper(ref DBHelperNeed, myDBHelper, out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                if (!InitialGenerateContext()) this.Dispose();
-
-                SetupAssemblyResolver();
-
-
-                LoadFileTree();
-
-                SendTreeNodeList = false;
-                myUpdateReplyMessage = new UpdateReplyMessage(UpdateRTBReplyMsg);
-
-                myTimer.Interval = 1000;
-                myTimer.Enabled = false;
-
-                this.rtbRequest.ContextMenuStrip = this.rtbContextMenu;
-                this.rtbReply.ContextMenuStrip = this.rtbContextMenu;
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
-            }
-        }
-
-        private void ShowErrorMessage(string errDesc)
-        {
-            MessageBox.Show(errDesc);
-            this.Dispose();
-        }
-
-        private bool InitialGenerateContext()
-        {
-            try
-            {
-                autoGenerateContext = ConfigurationManager.GetSection("AutoGenerateContext") as GenerateContext;
-                InitialGenerateContextCurrentCount();
-
-
-                return true;
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Excepetion happen when initial Generate Context Group : " + err.Message);
-                return false;
-            }
-        }
-
-        private void InitialGenerateContextCurrentCount()
-        {
-            currentPerfTestCount = 1;
-            autoContextCountList = new List<int>();
-            foreach (ContextGroup currentObject in autoGenerateContext.ContextGroupList)
-            {
-                currentObject.CurrentCount = 0;
-                if (!autoContextCountList.Contains(currentObject.Count))
-                {
-                    autoContextCountList.Add(currentObject.Count);
-                }
-            }
-            autoContextCountList.Sort();
-        }
-
-
-        public Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            Assembly proxyAssembly = wsdl.ProxyAssembly;
-            if ((proxyAssembly != null) && (proxyAssembly.GetName().ToString() == args.Name))
-            {
-                return proxyAssembly;
-            }
-            return null;
-        }
-
-        private void SetupAssemblyResolver()
-        {
-            ResolveEventHandler handler = new ResolveEventHandler(OnAssemblyResolve);
-            AppDomain.CurrentDomain.AssemblyResolve += handler;
-        }
-
-        private void FillInvokeTab()
-        {
-            Assembly proxyAssembly = wsdl.ProxyAssembly;
-            if (proxyAssembly != null)
-            {
-                treeMethods.Nodes.Clear();
-                foreach (System.Type type in proxyAssembly.GetTypes())
-                {
-                    if (TreeNodeProperty.IsWebService(type))
-                    {
-                        TreeNode node = treeMethods.Nodes.Add(type.Name);
-                        HttpWebClientProtocol proxy = (HttpWebClientProtocol)Activator.CreateInstance(type);
-                        ProxyProperty property = new ProxyProperty(proxy);
-                        property.RecreateSubtree(null);
-                        node.Tag = property.TreeNode;
-                        proxy.Credentials = CredentialCache.DefaultCredentials;
-                        if (proxy is SoapHttpClientProtocol protocol2)
-                        {
-                            protocol2.CookieContainer = new CookieContainer();
-                            protocol2.AllowAutoRedirect = true;
-                        }
-                        foreach (MethodInfo info in type.GetMethods())
-                        {
-                            if (TreeNodeProperty.IsWebMethod(info))
-                            {
-                                node.Nodes.Add(info.Name).Tag = info;
-                            }
-                        }
-                    }
-                }
-                TreeNode currentNode = new TreeNode();
-
-                // TODO - Check need delete or not
-                currentNode = FindCurrentNode(this.treeMethods.Nodes, "SMSC_R2R_CMP_CalcRecipeSettings");
-                if (currentNode != null && (currentNode.Tag is MethodInfo))
-                {
-                    MethodInfo tag = currentNode.Tag as MethodInfo;
-                }
-                //treeMethods.ExpandAll();
-            }
-        }
-
-        private void HandleDBAction()
-        {
-            try
-            {
-                replyMessage = "";
-                DataTable tempDataTable = myDBHelper.GetTable(requestMessage);
-                if (tempDataTable == null)
-                {
-                    replyMessage = "DB Action Error";
-                }
-                else
-                {
-                    replyMessage = ConvertBetweenDataTableAndXML_AX(tempDataTable);
-                }
-
-            }
-            catch (Exception err)
-            {
-                replyMessage += "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
-            }
-            finally
-            {
-                this.BeginInvoke(myUpdateReplyMessage);
-            }
-        }
-
-        public string ConvertBetweenDataTableAndXML_AX(DataTable dtNeedCoveret)
-        {
-            System.IO.TextWriter tw = new System.IO.StringWriter();
-            //if TableName is empty, WriteXml() will throw Exception.             
-            dtNeedCoveret.TableName = dtNeedCoveret.TableName.Length == 0 ? "Table_AX" : dtNeedCoveret.TableName;
-            dtNeedCoveret.WriteXml(tw);
-            //dtNeedCoveret.WriteXmlSchema(tw);
-            return tw.ToString();
-        }
-
-
-        private void InvokeWebMethod()
-        {
-            string replyHeader = "";
-            try
-            {
-                MethodProperty currentMethodProperty = GetCurrentMethodProperty();
-                if (currentMethodProperty != null)
-                {
-                    HttpWebClientProtocol proxy = currentMethodProperty.GetProxyProperty().GetProxy();
-                    RequestProperties properties = new RequestProperties(proxy);
-                    replyMessage = "<Reply>";
-                    MethodInfo method = currentMethodProperty.GetMethod();
-                    System.Type declaringType = method.DeclaringType;
-                    for (int tempInfoCount = 0; tempInfoCount < totalCount; tempInfoCount++)
-                    {
-                        try
-                        {
-
-                            WSSWebRequest.RequestTrace = properties;
-                            object[] parameters = currentMethodProperty.ReadChildren() as object[];
-                            object result = method.Invoke(proxy, BindingFlags.Public, null, parameters, null);
-                            //MethodProperty property2 = new MethodProperty(currentMethodProperty.GetProxyProperty(), method, result, parameters);
-                        }
-                        catch (Exception err)
-                        {
-                            replyMessage += err.Message + Environment.NewLine;
-                        }
-                        finally
-                        {
-                            WSSWebRequest.RequestTrace = null;
-                            //richRequest.Text = properties.requestPayLoad;
-                            //replyMessage = properties.responsePayLoad;
-                            if (properties != null && !string.IsNullOrEmpty(properties.responsePayLoad))
-                            {
-                                replyHeader = GetReplyHeader(properties.responsePayLoad);
-                                if (replyHeader.Contains("ResponseCode: 200 (OK)"))
-                                {
-                                    replyMessage += GetReplyBody(properties.responsePayLoad) + Environment.NewLine;
-                                }
-                            }
-                            else
-                            {
-                                replyMessage += "For some reason, no reponse." + Environment.NewLine;
-                            }
-                        }
-                    }
-                    replyMessage += "</Reply>";
-                }
-                else
-                {
-                    replyMessage += "currentMethodProperty = null, can not get current Method Property";
-                }
-            }
-            catch (Exception err)
-            {
-                replyMessage += "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
-            }
-            finally
-            {
-                this.BeginInvoke(myUpdateReplyMessage);
-            }
-        }
-
-        private string GetReplyHeader(string inReply)
-        {
-            string outHeader;
-            List<string> striparr = inReply.Split(new string[] { "\n" }, StringSplitOptions.None).ToList();
-
-            foreach (string tempStr in striparr)
-            {
-                outHeader = tempStr;
-                return outHeader;
-            }
-
-            return "Get Header Fail!";
-        }
-
-        private string GetReplyBody(string inReply)
-        {
-            string outBody = "";
-            bool isBody = false;
-            List<string> striparr = inReply.Split(new string[] { "\n" }, StringSplitOptions.None).ToList();
-
-            foreach (string tempStr in striparr)
-            {
-                if (isBody)
-                {
-                    outBody += tempStr;
-                }
-                else
-                {
-                    if (tempStr == "")
-                    {
-                        isBody = true;
-                    }
-                }
-            }
-            if (outBody != "")
-            {
-                outBody = outBody.Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>","");
-                outBody = outBody.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
-                return outBody;
-            }
-
-            return "Get Body Fail!";
-        }
-
-        public static string GetNodeValue(string nodeName)
-        {
-            string nodeValue = "";
-            string path = "";
-            bool getInnerXml = false;
-
-            //path = ConfigurationManager.ConnectionStrings["E3TestRootName"] == null ? "" :
-            //        ConfigurationManager.ConnectionStrings["E3TestRootName"].ConnectionString;
-            if (requestMessage != "" && nodeName.Split(' ').Length >= 3)
-            {
-                //XmlDocument testXmlDoc = new XmlDocument();
-                //if (SMSC_Simulator.Simulator.requestMessage == "") return "";
-
-                //testXmlDoc.LoadXml(requestMessage);
-                //if (testXmlDoc == null)
-                //{
-                //    return "";
-                //}
-                //else if (path != "")
-                //{
-                //    if (testXmlDoc.SelectSingleNode(path) != null)
-                //    {
-                //        path = path + "/" + nodeName.Split(' ')[1];
-                //        getInnerXml = true;
-                //    }
-                //    else
-                //    {
-                        if (isBatch)
-                        {
-                            path = ConfigurationManager.ConnectionStrings[nodeName.Split(' ')[1]] == null ? "" :
-                            ConfigurationManager.ConnectionStrings[nodeName.Split(' ')[1]].ConnectionString;
-                        }
-                        else
-                        {
-                            path = ConfigurationManager.AppSettings[nodeName.Split(' ')[1]] == null ? "" :
-                                ConfigurationManager.AppSettings[nodeName.Split(' ')[1]];
-                        }
-                    }
-                //}
-
-                if (path != "")
-                {
-                    nodeValue = "";
-                    foreach (string tempPath in path.Split(ConfigDelimeter))
-                    {
-                        nodeValue += GetVlaueByPath(tempPath, getInnerXml);
-                    }
-                }
-            //}
-
-            return nodeValue;
-        }
-
-        private static string GetVlaueByPath(string path, bool getInnerXml = false)
-        {
-            XmlDocument testXmlDoc = new XmlDocument();
-            string pathValue = "";
-            if (WS_Simulator.Simulator.requestMessage == "") return "";
-
-            testXmlDoc.LoadXml(WS_Simulator.Simulator.requestMessage);
-
-            if (testXmlDoc.SelectSingleNode(path) == null)
-            {
-                pathValue = WS_Simulator.Simulator.defaultValue;
-            }
-            else
-            {
-                if (testXmlDoc.SelectSingleNode(path) == null)
-                {
-                    pathValue = $"<defaultValue>{defaultValue}</defaultValue>";
-                }
-                else
-                {
-                    if (testXmlDoc.SelectSingleNode(path).InnerText != testXmlDoc.SelectSingleNode(path).InnerXml)
-                    {
-                        XmlNodeList tempNodeList = testXmlDoc.SelectNodes(path);
-                        if (tempNodeList.Count > 1 && !isBatch && sendIndex == 0)
-                        {
-                            totalCount = tempNodeList.Count;
-                            pathValue = tempNodeList[sendIndex] == null?
-                                $"<defaultValue>{defaultValue}</defaultValue>": tempNodeList[sendIndex].OuterXml;
-                        }
-                        else if (tempNodeList.Count == 1)
-                        {
-                            pathValue = testXmlDoc.SelectSingleNode(path) == null ?
-                                $"<defaultValue>{defaultValue}</defaultValue>" : 
-                                (getInnerXml? testXmlDoc.SelectSingleNode(path).InnerXml :testXmlDoc.SelectSingleNode(path).OuterXml);
-                        }
-                        else if (sendIndex < totalCount)
-                        {
-                            pathValue = tempNodeList[sendIndex] == null ?
-                                $"<defaultValue>{defaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
-                        }
-                    }
-                    else
-                    {
-                        pathValue = testXmlDoc.SelectSingleNode(path) == null ?
-                            defaultValue : testXmlDoc.SelectSingleNode(path).InnerText;
-                    }
-                }
-            }
-
-            return pathValue;
-        }
-
-        private MethodProperty GetCurrentMethodProperty()
-        {
-            if ((treeInput.Nodes == null) || (treeInput.Nodes.Count == 0))
-            {
-                MessageBox.Show(this, "Select a web method to execute");
-                return null;
-            }
-            TreeNode node = treeInput.Nodes[0];
-            if (!(node.Tag is MethodProperty tag))
-            {
-                MessageBox.Show(this, "Select a method to execute");
-                return null;
-            }
-            return tag;
-        }
-
-        private void UpdateRTBReplyMsg()
-        {
+            this.BeginInvoke((Action<string>)((replyMsgText) => {
             if (!this.btnSend.Enabled)
             {
-                this.rtbReply.Clear();
-                this.rtbReply.Text = replyMessage;
-
-                this.btnSend.Enabled = true;
                 waitSecond = 0;
                 myTimer.Enabled = false;
+
+                this.rtbReply.Clear();
+                this.rtbReply.Text = replyMsgText;
+
+                this.btnSend.Enabled = true;
+            } else
+            {
+                this.rtbReply.Clear();
+                this.rtbReply.Text = replyMsgText;
             }
 
-            if (SendTreeNodeList)
+            if (_testClient.SendTreeNodeList)
             {
-                this.lbCurrentCount.Text = currentActualSendNodeCount + "/" + currentSendNodeCount + "/" + waitSendTreeNode.Count;
-                currentSendNodeCount++;
-                if (NeedWait(this.pathTree.SelectedNode.Text))
+                this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
+                _testClient.CurrentSendNodeCount++;
+                if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
                 {
-                    Thread.Sleep(sleepTime);
+                    Thread.Sleep(_wsConfig.SleepTime);
                 }
-                SendAllWaitNodes();
-            }
-        }
 
-        private bool NeedWait(string fileName)
-        {
-            if (fileName == "")
-            {
-                return false;
-            }
-            else {
-                foreach (string tempStr in needWaitMessageList)
-                {
-                    if (fileName.Contains(tempStr))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private void pathTree_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (SendTreeNodeList)
-            {
-                return;
-            }
-
-            if (this.pathTree.SelectedNode != null)
-            {
-                this.pathTree.SelectedNode.BackColor = Color.White;
-            }
-            this.pathTree.SelectedNode = this.pathTree.GetNodeAt(e.X, e.Y);
-            if (this.pathTree.SelectedNode != null)
-            {
-                this.pathTree.SelectedNode.BackColor = Color.LightGreen;
-            }
-
-            LoadTestFile();
+                _testClient.SendAllWaitNodes(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
+            } }), replyMessage
+            );
         }
 
         private void LoadTestFile()
         {
             string filePath = "";
+            string replyMessage = "";
+
             try
             {
                 if (this.pathTree.SelectedNode != null)
                 {
                     filePath = m_DirectoryPath + this.pathTree.SelectedNode.FullPath.Substring(8);
 
-                    ReadFileStream(filePath);
+                    FileProcessor.ReadFile(filePath, 
+                        (fileInfo) =>
+                            {
+                                this.rtbRequest.Clear();
+                                this.rtbRequest.Text = fileInfo;
+
+                                if (cbToDispatcher.Checked == true)
+                                {
+                                    selectRichTextBox = this.rtbRequest;
+                                    toDispatchToolStripMenuItem_Click(this, null);
+                                }
+
+                                if (cbAutoChangeContext.Checked == true)
+                                {
+                                    this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text, UpdateReplyMessage);
+                                }
+                            }
+                        );
                 }
             }
             catch (Exception err)
             {
-                MessageBox.Show("Exception happen in LoadTestFile : " + err.Message + Environment.NewLine
-                    + "File Path : " + filePath);
+                replyMessage = $"Exception happen in LoadTestFile : { err.Message} {Environment.NewLine} File Path: {filePath}";
+                UpdateReplyMessage?.Invoke(replyMessage);
             }
         }
 
-        private void ReadFileStream(string filePath)
+        private async Task SendMessageToE3(string methodName, TreeNode sendNode, string requestMessage)
         {
-            FileStream tempFileStream = null;
-            StreamReader tempReader = null;
-            string tempFileStr = "";
-
-            try
-            {
-
-                if (File.Exists(filePath))
-                {
-
-                    tempFileStream = new FileStream(filePath, FileMode.Open);
-                    tempReader = new StreamReader(tempFileStream);
-                    tempFileStr = tempReader.ReadToEnd();
-
-                    this.rtbRequest.Clear();
-                    this.rtbRequest.Text = tempFileStr;
-
-                    if (cbToDispatcher.Checked == true)
-                    {
-                        selectRichTextBox = this.rtbRequest;
-                        toDispatchToolStripMenuItem_Click(false, null);
-                    }
-
-                    if (cbAutoChangeContext.Checked == true)
-                    {
-                        selectRichTextBox = this.rtbRequest;
-                        AutoChangeContextInfo(selectRichTextBox);
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Exception happen in ReadFileStream : " + err.Message);
-            }
-            finally
-            {
-                if (tempFileStream != null) tempFileStream.Close();
-                if (tempReader != null) tempReader.Close();
-            }
-
-
-        }
-
-        private void btnSend_Click(object sender, EventArgs e)
-        {
-            SendTreeNodeList = false;
-            SendButtonClick();
-        }
-
-        private void SendButtonClick()
-        {
-            sendIndex = 0;
-            totalCount = 1;
-            isBatch = batchMethodName.Contains(this.cmbMethodName.Text);
-
-            SendMessageToE3();
-        }
-
-        private bool SetInputNode()
-        {
-            TreeNode currentNode = new TreeNode();
-            currentNode = FindCurrentNode(this.treeMethods.Nodes, this.cmbMethodName.Text);
-            if (currentNode != null && (currentNode.Tag is MethodInfo))
-            {
-                MethodInfo tag = currentNode.Tag as MethodInfo;
-                treeInput.Nodes.Clear();
-                MethodProperty property = new MethodProperty(GetProxyPropertyFromNode(currentNode), tag);
-                property.RecreateSubtree(null);
-                treeInput.Nodes.Add(property.TreeNode);
-                //currentNode.Tag = property.TreeNode;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private TreeNode FindCurrentNode(TreeNodeCollection inNodeCollection, string nodeName)
-        {
-            foreach (TreeNode node in inNodeCollection)
-            {
-                if (node.Text == nodeName)
-                {
-                    return node;
-                }
-                else if (node.Nodes.Count != 0)
-                {
-                    return FindCurrentNode(node.Nodes, nodeName);
-                }
-            }
-
-            return null;
-        }
-
-        private ProxyProperty GetProxyPropertyFromNode(TreeNode treeNode)
-        {
-            while (treeNode.Parent != null)
-            {
-                treeNode = treeNode.Parent;
-            }
-            if (treeNode.Tag is TreeNode tag)
-            {
-                return (tag.Tag as ProxyProperty);
-            }
-            return null;
-        }
-
-        private void SendMessageToE3()
-        {
-            Thread handleObj;
-            string tempName = this.pathTree.SelectedNode.Text;
+            string nodeName = sendNode.Text;
             bool isSqlFile = false;
+            string replyMessage;
 
             try
             {
-                requestMessage = RestoreXml(this.rtbRequest.Text);
-                this.rtbRequest.Text = requestMessage;
+                requestMessage = XMLProcessor.RestoreXml(requestMessage);
+                
+                // TODO - See any influence for this mark
+                //this.rtbRequest.Text = requestMessage;
 
                 if (string.IsNullOrEmpty(requestMessage))
                 {
-                    MessageBox.Show("Request message is empty, can't send message to R2R");
+                    replyMessage = "Request message is empty, can't send message to R2R";
+                    UpdateReplyMessage?.Invoke(replyMessage);
                     return;
                 }
 
-                tempName = tempName.Substring(tempName.LastIndexOf("."));
-                if (tempName.ToUpper() == ".SQL" && !DBHelperNeed)
+                string nodeNamePostFix = nodeName.Substring(nodeName.LastIndexOf("."));
+                if (nodeNamePostFix.ToUpper() == ".SQL" && !_wsConfig.DBHelperNeed)
                 {
-                    MessageBox.Show("Do not support SQL according to configuration!");
+                    replyMessage = "Do not support SQL according to configuration!";
+                    UpdateReplyMessage?.Invoke(replyMessage);
                     return;
                 }
-                else if (tempName.ToUpper() == ".SQL" && DBHelperNeed)
+                else if (nodeNamePostFix.ToUpper() == ".SQL" && _wsConfig.DBHelperNeed)
                 {
                     isSqlFile = true;
                 }
 
-                if (!isSqlFile && !cmbMethodName.Items.Contains(cmbMethodName.Text))
-                {
-                    MessageBox.Show("You key in a illegal method name for test, please check it");
-                    return;
-                }
+                // TODO - Check this mark has any influence
+                //if (!isSqlFile && !cmbMethodName.Items.Contains(methodName))
+                //{
+                //    MessageBox.Show("You key in a illegal method name for test, please check it");
+                //    return;
+                //}
 
-
-                SetInputNode();
-
-                myTimer.Enabled = true;
-                this.btnSend.Enabled = false;
-                waitSecond = 0;
-                myTimer.Start();
+                TimerStart();
 
                 if (isSqlFile)
                 {
-                    handleObj = new Thread(new ThreadStart(delegate
-                    { HandleDBAction(); }));
-                    handleObj.Start();
+                    await Task.Run(() => DBProcessor.HandleDBAction(requestMessage, UpdateReplyMessage));
                 }
                 else
                 {
-                    handleObj = new Thread(new ThreadStart(delegate
-                    { InvokeWebMethod(); }));
-                    handleObj.Start();
+                    // TODO - this is not a good practice
+                    _testClient.RequestMessage = requestMessage;
+                    await Task.Run(() => WebServiceProcessor.InvokeWebMethod(_testClient.TotalCount, UpdateReplyMessage));
                 }
 
             }
             catch (Exception err)
             {
-                this.rtbReply.Clear();
-                this.rtbReply.Text = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
-                this.btnSend.Enabled = true;
-                waitSecond = 0;
-                myTimer.Enabled = false;
+                replyMessage = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
+                UpdateReplyMessage?.Invoke(replyMessage);
 
-                if (SendTreeNodeList)
-                {
-                    this.lbCurrentCount.Text = currentActualSendNodeCount + "/" + currentSendNodeCount + "/" + waitSendTreeNode.Count;
-                    currentSendNodeCount++;
-                    SendAllWaitNodes();
-                }
+                //if (_wsConfig.SendTreeNodeList)
+                //{
+                //    this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + waitSendTreeNode.Count;
+                //    _testClient.CurrentSendNodeCount++;
+                //    SendAllWaitNodes();
+                //}
             }
-        }
-
-        private bool SaveFile(string fileName, string contents)
-        {
-            if (System.IO.File.Exists(fileName) && (MessageBox.Show(this, "File " + fileName + " already exists. Overwrite?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes))
-            {
-                return false;
-            }
-            FileStream stream = System.IO.File.OpenWrite(fileName);
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(contents);
-            writer.Flush();
-            stream.SetLength(stream.Position);
-            stream.Close();
-            return true;
-        }
-
-        private void myTimer_Tick(object sender, EventArgs e)
-        {
-            this.rtbReply.Text = "Please wait web service reply.........." + (++waitSecond).ToString();
         }
 
         private void RichBoxTextToXML(RichTextBox inRichTextBox)
@@ -913,7 +471,7 @@ namespace WS_Simulator
                     MessageBox.Show(inRichTextBox.Name + " is empty!");
                     return;
                 }
-                inRichTextBox.Text = FormatXml(RestoreXml(tempStr));
+                inRichTextBox.Text = XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr));
                 inRichTextBox.SelectionStart = 0;
             }
             catch (Exception ex)
@@ -929,45 +487,7 @@ namespace WS_Simulator
             }
         }
 
-        private string FormatXml(string sUnformattedXml)
-        {
-            XmlDocument xd = new XmlDocument();
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-            XmlTextWriter xtw = null;
-            try
-            {
-                xd.LoadXml(sUnformattedXml);
-                xtw = new XmlTextWriter(sw);
-                xtw.Formatting = Formatting.Indented;
-                xtw.Indentation = 8;
-                xtw.IndentChar = ' ';
-                xd.WriteTo(xtw);
-            }
-            finally
-            {
-                if (xtw != null)
-                    xtw.Close();
-            }
-            return sb.ToString();
-        }
-
-        public static string RestoreXml(string xmlStrInWebService)
-        {
-            string s = xmlStrInWebService;
-            while (s.Contains("&lt;") || s.Contains("&gt;") || 
-                s.Contains("&apos;") || s.Contains("&aquot;") || s.Contains("&amp;"))
-            {
-                s = s.Replace("&lt;", "<");
-                s = s.Replace("&gt;", ">");
-                s = s.Replace("&apos;", "'");
-                s = s.Replace("&aquot;", "\"");
-                s = s.Replace("&amp;", "&");
-            }
-            return s;
-        }
-
-        public static string ToDataFromWebService(string xml)
+        public string ToDataFromWebService(string xml)
         {
             string s = xml;
             s = s.Replace("&", "&amp;");
@@ -988,10 +508,10 @@ namespace WS_Simulator
             RichBoxTextToXML(this.rtbReply);
         }
 
-        private void sendToolStrip_Click(object sender, EventArgs e)
+        private async void sendToolStrip_Click(object sender, EventArgs e)
         {
-            SendTreeNodeList = false;
-            SendMessageToE3();
+            _testClient.SendTreeNodeList = false;
+            await SendMessageToE3(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text);
         }
 
         private void rtbRequest_MouseUp(object sender, MouseEventArgs e)
@@ -1064,8 +584,6 @@ namespace WS_Simulator
             }
         }
 
-
-
         private void saveToFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (selectRichTextBox != null)
@@ -1085,7 +603,12 @@ namespace WS_Simulator
                     string localFilePath = sfd.FileName.ToString();
                     string fileNameExt = localFilePath.Substring(localFilePath.LastIndexOf("\\") + 1);
 
-                    SaveFile(localFilePath, selectRichTextBox.Text);
+                    if (!(File.Exists(localFilePath) &&
+                        (MessageBox.Show(this, "File " + localFilePath + " already exists. Overwrite?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes)))
+                    {
+                        FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text); ;
+                    }
+
                 }
             }
         }
@@ -1116,307 +639,31 @@ namespace WS_Simulator
         private void toDispatchToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int configLocation = 0;
-            bool showError = true;
+            string errDesc = "";
+            string requestMessage;
 
-            if (sender.GetType() == typeof(bool))
+            if (selectRichTextBox != null && this.pathTree.SelectedNode != null)
             {
-                showError = (bool)sender;
-            }
-
-            if (selectRichTextBox != null)
-            {
-                if (IsE3EventInfo(out configLocation))
+                if (XMLProcessor.IsE3EventInfo(this.rtbRequest.Text, out configLocation, out errDesc))
                 {
                     RichBoxTextToXML(selectRichTextBox);
-                    normalCollection = (System.Collections.Hashtable)ConfigurationManager.GetSection("dispatcherMapping" + configLocation.ToString());
-                    batchCollection = (System.Collections.Hashtable)ConfigurationManager.GetSection("batchDispatcherMapping" + configLocation.ToString());
-                    methodMapping = (System.Collections.Hashtable)ConfigurationManager.GetSection("dispatcherMethodMapping");
-                    dispatcherConfig = (System.Collections.Hashtable)ConfigurationManager.GetSection("dispatchConfig");
 
-                    if (normalCollection == null || batchCollection == null ||
-                        methodMapping == null || dispatcherConfig == null)
+                    requestMessage = selectRichTextBox.Text;
+
+                    if (XMLProcessor.ChangeToDispatcherMessage(this.pathTree.SelectedNode.Text, ref requestMessage, out errDesc))
                     {
-                        if(showError) MessageBox.Show("The config for transfer message to dispatcher is not enough!");
-                        return;
+                        selectRichTextBox.Text = requestMessage;
+                    }else
+                    {
+                        UpdateReplyMessage?.Invoke(errDesc);
                     }
-
-                    ChangeToDispatcherMessage(selectRichTextBox);
                 }
                 else
                 {
-                    if (showError) MessageBox.Show("Request message is not controller test meesage!");
-                }
-                //need confirm null value
-            }
-        }
-
-        private bool IsE3EventInfo(out int dispatcherConfig)
-        {
-            string path = "";
-            string fullPathStr = "";
-            dispatcherConfig = 1;
-
-            try
-            {
-                if (this.rtbRequest.Text == "") return false;
-
-
-                fullPathStr = ConfigurationManager.ConnectionStrings["E3TestRootName"] == null ? "" :
-                        ConfigurationManager.ConnectionStrings["E3TestRootName"].ConnectionString;
-
-
-                if (fullPathStr != "")
-                {
-                    for (int configLocaion = 0; configLocaion < fullPathStr.Split(ConfigDelimeter).Count(); configLocaion++)
-                    {
-                        path = "";
-                        path = fullPathStr.Split(ConfigDelimeter)[configLocaion];
-                        if (path != "")
-                        {
-                            XmlDocument testXmlDoc = new XmlDocument();
-                            testXmlDoc.LoadXml(this.rtbRequest.Text);
-                            if (testXmlDoc == null)
-                            {
-                                return false;
-                            }
-                            if (testXmlDoc.SelectSingleNode(path) != null)
-                            {
-                                dispatcherConfig = dispatcherConfig + configLocaion;
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
-            }
-
-            return false;
-        }
-
-        private void ChangeToDispatcherMessage(RichTextBox inRichTextBox)
-        {
-            string tempStr = inRichTextBox.Text;
-            string path = @".\DispatcherFormat.xml";
-            XmlDocument xDoc = new XmlDocument();
-            XmlDocument xRequestDoc = new XmlDocument();
-            StringBuilder sb = new StringBuilder();
-            StringWriter sw = new StringWriter(sb);
-            XmlTextWriter xtw = null;
-
-            try
-            {
-                if (File.Exists(path) && this.rtbRequest.Text != "")
-                {
-                    xDoc.Load(path);
-                    xRequestDoc.LoadXml(this.rtbRequest.Text);
-                    XmlNodeList nodeList = xDoc.SelectNodes("/");
-
-                    XmlNamespaceManager xnm = new XmlNamespaceManager(xRequestDoc.NameTable);
-                    xnm.AddNamespace("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-                    xnm.AddNamespace("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-                    ReplaceDispatcher(nodeList, xRequestDoc);
-
-                    xtw = new XmlTextWriter(sw);
-                    xtw.Formatting = Formatting.Indented;
-                    xtw.Indentation = 8;
-                    xtw.IndentChar = ' ';
-                    xDoc.WriteTo(xtw);
-                    //xDoc.Save(xmlPath);
-                }
-                else
-                {
-                    MessageBox.Show("Can't find DispatcherFormat.xml in running folder!");
-                }
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
-            } finally
-            {
-                if (xtw != null) xtw.Close();
-            }
-
-            this.rtbRequest.Text = sb.ToString();
-        }
-
-        private void AutoChangeContextInfo(RichTextBox inRichTextBox)
-        {
-            string tempStr = inRichTextBox.Text;
-
-            try
-            {
-                foreach (ContextGroup singleContextGroup in autoGenerateContext.ContextGroupList)
-                {
-                    singleContextGroup.CurrentCount = CalculateCurrentCount(singleContextGroup.Count, singleContextGroup.Mode);
-                }
-
-                foreach (ContextGroup singleContextGroup in autoGenerateContext.ContextGroupList)
-                {
-                    tempStr = tempStr.Replace(singleContextGroup.Name, 
-                        (FormatCount(singleContextGroup.CurrentCount,singleContextGroup.Type)).ToString());
-                }
-
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
-            }
-            
-            inRichTextBox.Text = tempStr;
-        }
-
-        private string FormatCount(int count, string type)
-        {
-            string result = "";
-
-            result = string.Format(type, count);
-            return result;
-        }
-
-        private int CalculateCurrentCount(int contextCount, string contextMode)
-        {
-            int result = currentPerfTestCount;
-            bool assigned = false;
-
-            if (contextMode.ToUpper() == "INCREASE")
-            {
-                assigned = true;
-                result = currentPerfTestCount - 1;
-            }
-            else if (contextMode.ToUpper() == "LOOP")
-            {
-                assigned = true;
-                result = (currentPerfTestCount - 1) % (contextCount <= 0 ? 1 : contextCount);
-            }
-            else
-            {
-                for (int i = autoContextCountList.Count() - 1; i >= 0; i--)
-                {
-                    if (autoContextCountList[i] <= currentPerfTestCount && autoContextCountList[i] >= contextCount)
-                    {
-                        if (autoContextCountList[i] == contextCount)
-                        {
-                            result = contextCount == 0 ?
-                                (assigned ? result : result - 1) : result / contextCount;
-                            assigned = true;
-                        }
-                        else
-                        {
-                            result = result % autoContextCountList[i];
-                            assigned = true;
-                        }
-                    }
-                }
-            }
-            return assigned ? result : 0;
-        }
-
-        private void ReplaceDispatcher(XmlNodeList nodeList, XmlDocument requestDoc)
-        {
-            string autoChangeMe = "";
-            foreach (XmlNode tempNode in nodeList)
-            {
-                if (tempNode.NodeType != XmlNodeType.Text && tempNode.NodeType != XmlNodeType.Document)
-                {
-                    string tempPath = GetNodePath(tempNode);
-
-                    if (dispatcherConfig.ContainsKey("AutoChange"))
-                    {
-                        if (dispatcherConfig["AutoChange"].ToString() == tempPath)
-                        {
-                            autoChangeMe = GetAutoChangeName();
-                            if (autoChangeMe != "") tempNode.InnerText = autoChangeMe;
-                        }
-                    }
-
-                    if (dispatcherConfig.ContainsKey("IsBatch") && this.pathTree.SelectedNode != null &&
-                        this.pathTree.SelectedNode.Text.Contains(dispatcherConfig["IsBatch"].ToString()))
-                    {
-                        if (batchCollection.ContainsKey(tempPath))
-                        {
-                            if (tempNode.ChildNodes.Count == 1 && tempNode.InnerText == tempNode.InnerXml)
-                            {
-                                if (requestDoc.SelectSingleNode(batchCollection[tempPath].ToString()) != null)
-                                {
-                                    tempNode.InnerText = requestDoc.SelectSingleNode(batchCollection[tempPath].ToString()).InnerText;
-                                }
-                            }
-                            else
-                            {
-                                if (requestDoc.SelectSingleNode(batchCollection[tempPath].ToString()) != null)
-                                {
-                                    tempNode.InnerXml = requestDoc.SelectSingleNode(batchCollection[tempPath].ToString()).InnerXml;
-                                }
-                            }
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (normalCollection.ContainsKey(tempPath))
-                        {
-                            if (tempNode.ChildNodes.Count == 1)
-                            {
-                                if (requestDoc.SelectSingleNode(normalCollection[tempPath].ToString()) != null)
-                                {
-                                    tempNode.InnerText = requestDoc.SelectSingleNode(normalCollection[tempPath].ToString()).InnerText;
-                                }
-                            }
-                            else
-                            {
-                                if (requestDoc.SelectSingleNode(normalCollection[tempPath].ToString()) != null)
-                                {
-                                    tempNode.InnerXml = requestDoc.SelectSingleNode(normalCollection[tempPath].ToString()).InnerXml;
-                                }
-                            }
-                            continue;
-                        }
-                    }
-                }
-
-                if (tempNode.ChildNodes.Count > 0)
-                {
-                    ReplaceDispatcher(tempNode.ChildNodes, requestDoc);
+                    UpdateReplyMessage?.Invoke(errDesc);
                 }
             }
         }
-
-        private string GetNodePath(XmlNode node)
-        {
-            string nodePath = node.Name;
-            while (node.ParentNode != null && node.ParentNode.NodeType !=XmlNodeType.Document
-                && node.ParentNode.NodeType != XmlNodeType.XmlDeclaration
-                && node.ParentNode.NodeType != XmlNodeType.Text)
-            {
-                node = node.ParentNode;
-                nodePath = node.Name + "/" + nodePath;
-            }
-            nodePath = "/" + nodePath;
-            return nodePath;
-        }
-
-        private string GetAutoChangeName()
-        {
-            string tempStr = "";
-            if (this.pathTree.SelectedNode != null)
-            {
-                foreach (var tempVar in methodMapping.Keys)
-                {
-                    if (this.pathTree.SelectedNode.Text.Contains(tempVar.ToString()))
-                    {
-                        tempStr = methodMapping[tempVar.ToString()].ToString();
-                    }
-                }
-            }
-
-            return tempStr;
-        }
-
-
 
         private void reloadFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1591,15 +838,15 @@ namespace WS_Simulator
         {
             try
             {
-                currentPerfTestCount = 1;
+                _testClient.CurrentPerfTestCount = 1;
                 if (cbPerfTest.Checked == true)
                 {
                     if (this.tbMsgCount.Text.Contains(";"))
                     {
                         if (this.tbMsgCount.Text.Split(ConfigDelimeter).Count() == 2)
                         {
-                            perfMsgCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[0]);
-                            currentPerfTestCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[1]);
+                            _testClient.PerfMsgCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[0]);
+                            _testClient.CurrentPerfTestCount = Convert.ToInt32(this.tbMsgCount.Text.Split(ConfigDelimeter)[1]);
                         }
                         else
                         {
@@ -1608,16 +855,17 @@ namespace WS_Simulator
                     }
                     else
                     {
-                        perfMsgCount = Convert.ToInt32(this.tbMsgCount.Text);
+                        _testClient.PerfMsgCount = Convert.ToInt32(this.tbMsgCount.Text);
                     }
                 }
                 else
                 {
-                    perfMsgCount = 1;
+                    _testClient.PerfMsgCount = 1;
                 }
 
-                this.lbCurrentLoop.Text = "CurrentLoop: " + currentPerfTestCount.ToString();
-                RunAllNodesInDirectory(true);
+                UpdateCurrLoopText?.Invoke();
+                _testClient.CurrentLoopDirectoryNode = this.pathTree.SelectedNode;
+                _testClient.RunAllNodesInDirectory(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
             }
             catch (Exception err)
             {
@@ -1626,168 +874,23 @@ namespace WS_Simulator
         }
 
 
-        private void RunAllNodesInDirectory(bool firstLoop)
-        {
-            TreeNode directoryNode;
-            if(firstLoop)
-            {
-                directoryNode = currentLoopDirectoryNode = this.pathTree.SelectedNode;
-            }else
-            {
-                directoryNode = currentLoopDirectoryNode;
-            }
-
-            try
-            {
-                //initial wait send node related variable
-                currentSendNodeCount = 1;
-                currentActualSendNodeCount = 0;
-                waitSendTreeNode = new Dictionary<int, TreeNode>();
-                SendTreeNodeList = true;
-                durationSendFlag = "";
-
-                if (sendStartNode != null)
-                {
-                    durationCheckNeed = true;
-                }
-                else
-                {
-                    durationCheckNeed = false;
-                }
-
-                if (directoryNode.Nodes.Count > 0)
-                {
-                    int tempNodeCount = 0;
-                    foreach (TreeNode tempNode in directoryNode.Nodes)
-                    {
-                        if (tempNode.Nodes.Count == 0)
-                        {
-                            waitSendTreeNode.Add(++tempNodeCount, tempNode);
-                        }
-                    }
-
-                    if (!waitSendTreeNode.ContainsValue(sendStartNode))
-                    {
-                        durationCheckNeed = false;
-                    }
-
-                    SendAllWaitNodes();
-                }
-            }
-            catch(Exception err)
-            {
-                MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
-            }
-        }
-
-        private void SendAllWaitNodes()
-        {
-            bool currentNodeNeedSend;
-
-            if (currentSendNodeCount <= waitSendTreeNode.Count)
-            {
-                if (waitSendTreeNode.ContainsKey(currentSendNodeCount))
-                {
-                    TreeNode tempNode = waitSendTreeNode[currentSendNodeCount];
-
-                    currentNodeNeedSend = true;
-                    if (durationCheckNeed)
-                    {
-                        if (durationSendFlag == durSendEnd)
-                        {
-                            currentNodeNeedSend = false;
-                            SendTreeNodeList = false;
-                        }
-                        else
-                        {
-                            if (durationSendFlag == "")
-                            {
-                                if (tempNode == sendStartNode)
-                                {
-                                    durationSendFlag = durSendStart;
-                                    currentNodeNeedSend = true;
-                                }
-                                else
-                                {
-                                    currentNodeNeedSend = false;
-                                }
-                            }
-                            if (durationSendFlag == durSendStart)
-                            {
-                                if (tempNode == sendEndNode)
-                                {
-                                    durationSendFlag = durSendEnd;
-                                    currentNodeNeedSend = true;
-                                }
-                                else
-                                {
-                                    currentNodeNeedSend = true;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (durationSendFlag == durSendEnd)
-                        {
-                            currentNodeNeedSend = false;
-                            SendTreeNodeList = false;
-                        }
-                    }
-
-                    string tempName = tempNode.Text;
-                    tempName = tempName.Substring(tempName.LastIndexOf("."));
-
-                    if (currentNodeNeedSend && multiNodesExtensionName.Contains(tempName))
-                    {
-                        currentActualSendNodeCount++;
-                        this.pathTree.SelectedNode = tempNode;
-
-                        LoadTestFile();
-
-                        SendButtonClick();
-                    }
-                    else
-                    {
-                        this.lbCurrentCount.Text = currentActualSendNodeCount + "/" + currentSendNodeCount + "/" + waitSendTreeNode.Count;
-                        currentSendNodeCount++;
-                        SendAllWaitNodes();
-                    }
-                }
-            }
-            else
-            {
-                SendTreeNodeList = false;
-                waitSendTreeNode = new Dictionary<int, TreeNode>();
-                if (cbPerfTest.Checked == true)
-                {
-                    if (currentPerfTestCount < perfMsgCount)
-                    {
-                        currentPerfTestCount++;
-                        this.lbCurrentLoop.Text = "CurrentLoop: " + currentPerfTestCount.ToString();
-                        RunAllNodesInDirectory(false);
-                    }
-                }
-            }
-        }
-
         private void SetStartStripMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode fileNode = this.pathTree.SelectedNode;
 
             if (fileNode.Nodes.Count == 0)
             {
-                if (sendStartNode != null)
+                if (_testClient.SendStartNode != null)
                 {
-                    sendStartNode.ForeColor = Color.Black;
+                    _testClient.SendStartNode.ForeColor = Color.Black;
                 }
-                if (sendEndNode != null)
+                if (_testClient.SendEndNode != null)
                 {
-                    sendEndNode.ForeColor = Color.Black;
+                    _testClient.SendEndNode.ForeColor = Color.Black;
                 }
-                sendStartNode = fileNode;
-                sendStartNode.ForeColor = Color.Red;
-                sendEndNode = null;
+                _testClient.SendStartNode = fileNode;
+                _testClient.SendStartNode.ForeColor = Color.Red;
+                _testClient.SendEndNode = null;
             }
 
         }
@@ -1798,29 +901,29 @@ namespace WS_Simulator
 
             if (fileNode.Nodes.Count == 0)
             {
-                sendEndNode = fileNode;
-                sendEndNode.ForeColor = Color.Red;
+                _testClient.SendEndNode = fileNode;
+                _testClient.SendEndNode.ForeColor = Color.Red;
             }
         }
 
         private void clearStartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (sendStartNode != null)
+            if (_testClient.SendStartNode != null)
             {
-                sendStartNode.ForeColor = Color.Black;
+                _testClient.SendStartNode.ForeColor = Color.Black;
             }
-            if (sendEndNode != null)
+            if (_testClient.SendEndNode != null)
             {
-                sendEndNode.ForeColor = Color.Black;
+                _testClient.SendEndNode.ForeColor = Color.Black;
             }
-            sendStartNode = null;
-            sendEndNode = null;
+            _testClient.SendStartNode = null;
+            _testClient.SendEndNode = null;
         }
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            durationSendFlag = durSendEnd;
-            SendTreeNodeList = false;
+            _testClient.DurationSendFlag = NodeType.END;
+            _testClient.SendTreeNodeList = false;
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -1831,8 +934,8 @@ namespace WS_Simulator
             waitSecond = 0;
             myTimer.Enabled = false;
 
-            durationSendFlag = durSendEnd;
-            SendTreeNodeList = false;
+            _testClient.DurationSendFlag = NodeType.END;
+            _testClient.SendTreeNodeList = false;
         }
 
         private void openFileFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1846,6 +949,22 @@ namespace WS_Simulator
                     Process.Start($@"{((DirectoryInfo)directoryNode.Tag).FullName}");
                 }
             }
+        }
+
+        private async void cmbMethodName_TextChanged(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(this.cmbMethodName.Text))
+            {
+                string methodName = this.cmbMethodName.Text;
+                _testClient.MethodName = methodName;
+                await Task.Run(() => WebServiceProcessor.SetInputNode(methodName));
+            }
+
+        }
+
+        private void cbPerfTest_CheckedChanged(object sender, EventArgs e)
+        {
+            _testClient.IsPerfTest = cbPerfTest.Checked;
         }
     }
 }

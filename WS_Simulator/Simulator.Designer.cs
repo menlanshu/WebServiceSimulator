@@ -31,8 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Simulator));
-            this.treeMethods = new System.Windows.Forms.TreeView();
-            this.treeInput = new System.Windows.Forms.TreeView();
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,22 +88,6 @@
             this.folderContextMenu.SuspendLayout();
             this.fileContextMenu.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // treeMethods
-            // 
-            this.treeMethods.LineColor = System.Drawing.Color.Empty;
-            this.treeMethods.Location = new System.Drawing.Point(0, 0);
-            this.treeMethods.Name = "treeMethods";
-            this.treeMethods.Size = new System.Drawing.Size(121, 97);
-            this.treeMethods.TabIndex = 0;
-            // 
-            // treeInput
-            // 
-            this.treeInput.LineColor = System.Drawing.Color.Empty;
-            this.treeInput.Location = new System.Drawing.Point(0, 0);
-            this.treeInput.Name = "treeInput";
-            this.treeInput.Size = new System.Drawing.Size(121, 97);
-            this.treeInput.TabIndex = 0;
             // 
             // mainMenu
             // 
@@ -263,6 +245,7 @@
             this.cmbMethodName.Name = "cmbMethodName";
             this.cmbMethodName.Size = new System.Drawing.Size(391, 25);
             this.cmbMethodName.TabIndex = 0;
+            this.cmbMethodName.TextChanged += new System.EventHandler(this.cmbMethodName_TextChanged);
             // 
             // rtbRequest
             // 
@@ -467,6 +450,7 @@
             this.cbPerfTest.TabIndex = 8;
             this.cbPerfTest.Text = "PerfTest";
             this.cbPerfTest.UseVisualStyleBackColor = true;
+            this.cbPerfTest.CheckedChanged += new System.EventHandler(this.cbPerfTest_CheckedChanged);
             // 
             // tbMsgCount
             // 

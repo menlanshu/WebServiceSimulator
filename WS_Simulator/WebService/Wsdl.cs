@@ -467,14 +467,20 @@
 
         public void Generate()
         {
+            // Check current status
+            // TODO - See if we can delete this row
             CheckPoint(MessageType.Begin, "Initializing");
+
+            // Initial all object that need to be used when use webservice
             ServiceDescriptionCollection descriptions = new ServiceDescriptionCollection();
             XmlSchemas schemas = new XmlSchemas();
             StringCollection urls = new StringCollection();
             StringCollection localPaths = new StringCollection();
+
             GetPaths(localPaths, urls);
             descriptions.Clear();
             schemas.Clear();
+
             if ((localPaths != null) && (localPaths.Count > 0))
             {
                 string path = localPaths[0];
@@ -494,7 +500,10 @@
                     return;
                 }
             }
+
             CheckPoint(MessageType.Begin, "Generating WSDL");
+
+
             try
             {
                 DiscoveryClientProtocol client = CreateDiscoveryClient();
