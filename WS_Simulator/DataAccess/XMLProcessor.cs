@@ -173,7 +173,6 @@ namespace WS_Simulator.DataAccess
             return true;
         }
 
-
         public static bool ChangeToDispatcherMessage(string nodeName, ref string requestMessage, out string errDesc)
         {
             bool result = false;
@@ -360,6 +359,17 @@ namespace WS_Simulator.DataAccess
                 s = s.Replace("&aquot;", "\"");
                 s = s.Replace("&amp;", "&");
             }
+            return s;
+        }
+
+        public static string ToDataFromWebService(string xml)
+        {
+            string s = xml;
+            s = s.Replace("&", "&amp;");
+            s = s.Replace("\"", "&aquot;");
+            s = s.Replace("'", "&apos;");
+            s = s.Replace(">", "&gt;");
+            s = s.Replace("<", "&lt;");
             return s;
         }
     }

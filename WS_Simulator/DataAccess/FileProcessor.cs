@@ -11,7 +11,7 @@ namespace WS_Simulator.DataAccess
 {
     public static class FileProcessor
     {
-        public static void ReadFile(string filePath, Action<string> updateAfterReadFile)
+        public static string ReadFile(string filePath, Action<string> updateAfterReadFile)
         {
             FileStream tempFileStream = null;
             StreamReader tempReader = null;
@@ -28,6 +28,7 @@ namespace WS_Simulator.DataAccess
                     tempFileStr = tempReader.ReadToEnd();
 
                     updateAfterReadFile(tempFileStr);
+
                 }
             }
             catch (Exception err)
@@ -40,6 +41,7 @@ namespace WS_Simulator.DataAccess
                 if (tempReader != null) tempReader.Close();
             }
 
+            return tempFileStr;
         }
 
         public static void SaveFile(string fileName, string contents)

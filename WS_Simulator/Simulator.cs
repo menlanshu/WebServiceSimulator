@@ -25,17 +25,15 @@ namespace WS_Simulator
     public partial class Simulator : Form
     {
         private Action TimerStart;
-        private Action<string> UpdateReplyMessage;
         private Action UpdateCurrLoopText;
-        private Action<TreeNode> SelectNodeAndSend;
 
-        private string m_DirectoryPath;
+        private Action<string> UpdateReplyMessage;
+        private Action<string> UpdateAfterReadFile;
+        private Func<TreeNode, string> SelectNodeAndSend;
+
         public static char[] ConfigDelimeter = (";").ToCharArray();
         private int waitSecond = 0;
-
         private RichTextBox selectRichTextBox;
-
-
 
         SearchForm testSearch;
         string requestSourceStr = "";
@@ -91,17 +89,32 @@ namespace WS_Simulator
                     }
                 }
 
+
+                if(_testClient.InitialGenerateContext(out errDesc) == false)
+                { 
+                    ShowErrorMessage(errDesc);
+                    return;
+                }
+
                 _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
+                _testClient.IsDBHelperNeed = _wsConfig.DBHelperNeed;
+                _testClient.TimerStart += TimerStartSet;
 
                 WireUpForms();
 
-                LoadFileTree();
+                (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
+                if(okay)
+                {
+                    _testClient.RootDirectoryPath = directoryPath;
+                }
             }
             catch (Exception err)
             {
                 MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
             }
         }
+
+
         // Initial Control size and font size
         private void InitilizeControl()
         {
@@ -123,6 +136,8 @@ namespace WS_Simulator
             myTimer.Enabled = false;
 
         }
+        
+        
         // Initial Control event and delegate
         private void InitializeFormEventAndDelegate()
         {
@@ -131,44 +146,98 @@ namespace WS_Simulator
             this.Resize += frmSimulator_Resize;
 
             this.UpdateReplyMessage += UpdateRTBReplyMsg;
+            this.UpdateAfterReadFile += UpdateAfterReadFileMethod;
             this.UpdateCurrLoopText += UpdateCurrentLoopTextMethod;
             this.SelectNodeAndSend += SelectNodeAndSendMethod;
             this.TimerStart += TimerStartSet;
         }
-
-        private void SelectNodeAndSendMethod(TreeNode currNode)
-        {
-            this.BeginInvoke((Action<TreeNode>)((node) =>
-            {
-                this.pathTree.SelectedNode = node;
-
-                LoadTestFile();
-
-                SendButtonClick(_testClient.MethodName, node, this.rtbRequest.Text);
-            }), currNode
-            );
-        }
-
         private void UpdateCurrentLoopTextMethod()
         {
             this.BeginInvoke((Action)(() => this.lbCurrentLoop.Text = "CurrentLoop: " + _testClient.CurrentPerfTestCount.ToString()));
         }
-
         private void TimerStartSet()
         {
-            this.btnSend.Enabled = false;
-            waitSecond = 0;
-            
-            myTimer.Enabled = true;
-            myTimer.Start();
-        }
+            this.Invoke((Action)(() =>
+            {
+                this.btnSend.Enabled = false;
+                waitSecond = 0;
 
+                myTimer.Enabled = true;
+                myTimer.Start();
+            }));
+            
+        }
+        private void UpdateRTBReplyMsg(string replyMessage)
+        {
+            this.BeginInvoke((Action<string>)((replyMsgText) => {
+                if (!this.btnSend.Enabled)
+                {
+                    waitSecond = 0;
+                    myTimer.Enabled = false;
+
+                    this.rtbReply.Clear();
+                    this.rtbReply.Text = replyMsgText;
+
+                    this.btnSend.Enabled = true;
+                }
+                else
+                {
+                    this.rtbReply.Clear();
+                    this.rtbReply.Text = replyMsgText;
+                }
+
+                if (_testClient.SendTreeNodeList)
+                {
+                    this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
+                    _testClient.CurrentSendNodeCount++;
+                    if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
+                    {
+                        Thread.Sleep(_wsConfig.SleepTime);
+                    }
+
+                    //_testClient.SendAllWaitNodes(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
+                }
+            }), replyMessage
+            );
+        }
+        private void UpdateAfterReadFileMethod(string requestMessage)
+        {
+            this.BeginInvoke((Action<string>)(
+                (fileInfo) =>
+                {
+                    this.rtbRequest.Clear();
+                    this.rtbRequest.Text = fileInfo;
+
+                    if (cbToDispatcher.Checked == true)
+                    {
+                        selectRichTextBox = this.rtbRequest;
+                        toDispatchToolStripMenuItem_Click(this, null);
+                    }
+
+                    if (cbAutoChangeContext.Checked == true)
+                    {
+                        this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text, UpdateReplyMessage);
+                    }
+                }), requestMessage);
+        }
         private void ShowErrorMessage(string errDesc)
         {
             MessageBox.Show(errDesc);
             this.Dispose();
         }
+        private string SelectNodeAndSendMethod(TreeNode currNode)
+        {
+            string requestMessage = (string)this.Invoke((Func<TreeNode, string>)((node) =>
+            {
+                this.pathTree.SelectedNode = node;
 
+                return SimulatorFormHandler.LoadTestFile(node, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+
+            }), currNode
+            );
+
+            return requestMessage;
+        }
         #endregion
 
         #region event handle region
@@ -207,18 +276,18 @@ namespace WS_Simulator
             WireUpWSMethodList();
         }
 
-
-        private void btnSend_Click(object sender, EventArgs e)
+        private async void btnSend_Click(object sender, EventArgs e)
         {
+            string methodName = this.cmbMethodName.Text;
             _testClient.SendTreeNodeList = false;
 
-            if (string.IsNullOrEmpty(this.cmbMethodName.Text))
+            if (string.IsNullOrEmpty(methodName))
             {
                 MessageBox.Show("Method Name can not be empty!");
                 return;
             }
 
-            SendButtonClick(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text);
+            await SendButtonClick(methodName, this.pathTree.SelectedNode, this.rtbRequest.Text);
         }
 
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
@@ -241,18 +310,16 @@ namespace WS_Simulator
             if (this.pathTree.SelectedNode != null)
             {
                 this.pathTree.SelectedNode.BackColor = Color.LightGreen;
+                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
             }
-
-            LoadTestFile();
         }
 
-        private async void SendButtonClick(string methodName, TreeNode sendNode, string requestMessage)
+        private async Task SendButtonClick(string methodName, TreeNode sendNode, string requestMessage)
         {
             _testClient.SendIndex = 0;
             _testClient.TotalCount = 1;
-            _testClient.IsBatch = _wsConfig.BatchMethodName.Contains(methodName);
 
-            await SendMessageToE3(methodName, sendNode, requestMessage);
+            await _testClient.SendMessageToE3(methodName, sendNode, requestMessage, UpdateReplyMessage, TimerStart);
         }
 
         private void myTimer_Tick(object sender, EventArgs e)
@@ -261,205 +328,6 @@ namespace WS_Simulator
         }
 
         #endregion
-
-        #region Control Utility region
-        private void LoadFileTree(string directoryPath = ".")
-        {
-            if (Directory.Exists(directoryPath))
-            {
-                m_DirectoryPath = directoryPath;
-                DirectoryInfo tempDirectory = new DirectoryInfo(directoryPath);
-
-                this.pathTree.Nodes[0].Nodes.Clear();
-                this.pathTree.Nodes[0].Text = "RootNode";
-                this.pathTree.Nodes[0].ContextMenuStrip = this.folderContextMenu;
-
-                foreach (FileSystemInfo tempInfo in tempDirectory.EnumerateFileSystemInfos())
-                {
-                    LoadWholeTree(tempInfo, this.pathTree.Nodes[0]);
-                }
-
-                this.pathTree.Nodes[0].Expand();
-            }
-        }
-
-        private void LoadWholeTree(FileSystemInfo tempSystemInfo, TreeNode tempNode)
-        {
-
-            try
-            {
-                if (tempSystemInfo is DirectoryInfo)
-                {
-                    TreeNode tempDireNode = new TreeNode(tempSystemInfo.Name);
-
-                    tempDireNode.ContextMenuStrip = this.folderContextMenu;
-                    tempDireNode.Tag = tempSystemInfo;
-
-                    tempNode.Nodes.Add(tempDireNode);
-
-                    foreach (FileSystemInfo tempInfo in ((DirectoryInfo)tempSystemInfo).EnumerateFileSystemInfos())
-                    {
-                        LoadWholeTree(tempInfo, tempDireNode);
-                    }
-                }
-                else if (tempSystemInfo is FileInfo)
-                {
-                    if (_wsConfig.FileExtensionName.Contains(tempSystemInfo.Extension))
-                    {
-                        TreeNode tempFileNode = new TreeNode(tempSystemInfo.Name);
-
-                        tempFileNode.ContextMenuStrip = this.fileContextMenu;
-                        tempFileNode.Tag = tempSystemInfo;
-
-                        tempNode.Nodes.Add(tempFileNode);
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                throw new Exception($"Exception happen in LoadWholeTree : { err.Message }");
-            }
-
-        }
-
-        #endregion
-
-        private void UpdateRTBReplyMsg(string replyMessage)
-        {
-            this.BeginInvoke((Action<string>)((replyMsgText) => {
-            if (!this.btnSend.Enabled)
-            {
-                waitSecond = 0;
-                myTimer.Enabled = false;
-
-                this.rtbReply.Clear();
-                this.rtbReply.Text = replyMsgText;
-
-                this.btnSend.Enabled = true;
-            } else
-            {
-                this.rtbReply.Clear();
-                this.rtbReply.Text = replyMsgText;
-            }
-
-            if (_testClient.SendTreeNodeList)
-            {
-                this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
-                _testClient.CurrentSendNodeCount++;
-                if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
-                {
-                    Thread.Sleep(_wsConfig.SleepTime);
-                }
-
-                _testClient.SendAllWaitNodes(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
-            } }), replyMessage
-            );
-        }
-
-        private void LoadTestFile()
-        {
-            string filePath = "";
-            string replyMessage = "";
-
-            try
-            {
-                if (this.pathTree.SelectedNode != null)
-                {
-                    filePath = m_DirectoryPath + this.pathTree.SelectedNode.FullPath.Substring(8);
-
-                    FileProcessor.ReadFile(filePath, 
-                        (fileInfo) =>
-                            {
-                                this.rtbRequest.Clear();
-                                this.rtbRequest.Text = fileInfo;
-
-                                if (cbToDispatcher.Checked == true)
-                                {
-                                    selectRichTextBox = this.rtbRequest;
-                                    toDispatchToolStripMenuItem_Click(this, null);
-                                }
-
-                                if (cbAutoChangeContext.Checked == true)
-                                {
-                                    this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text, UpdateReplyMessage);
-                                }
-                            }
-                        );
-                }
-            }
-            catch (Exception err)
-            {
-                replyMessage = $"Exception happen in LoadTestFile : { err.Message} {Environment.NewLine} File Path: {filePath}";
-                UpdateReplyMessage?.Invoke(replyMessage);
-            }
-        }
-
-        private async Task SendMessageToE3(string methodName, TreeNode sendNode, string requestMessage)
-        {
-            string nodeName = sendNode.Text;
-            bool isSqlFile = false;
-            string replyMessage;
-
-            try
-            {
-                requestMessage = XMLProcessor.RestoreXml(requestMessage);
-                
-                // TODO - See any influence for this mark
-                //this.rtbRequest.Text = requestMessage;
-
-                if (string.IsNullOrEmpty(requestMessage))
-                {
-                    replyMessage = "Request message is empty, can't send message to R2R";
-                    UpdateReplyMessage?.Invoke(replyMessage);
-                    return;
-                }
-
-                string nodeNamePostFix = nodeName.Substring(nodeName.LastIndexOf("."));
-                if (nodeNamePostFix.ToUpper() == ".SQL" && !_wsConfig.DBHelperNeed)
-                {
-                    replyMessage = "Do not support SQL according to configuration!";
-                    UpdateReplyMessage?.Invoke(replyMessage);
-                    return;
-                }
-                else if (nodeNamePostFix.ToUpper() == ".SQL" && _wsConfig.DBHelperNeed)
-                {
-                    isSqlFile = true;
-                }
-
-                // TODO - Check this mark has any influence
-                //if (!isSqlFile && !cmbMethodName.Items.Contains(methodName))
-                //{
-                //    MessageBox.Show("You key in a illegal method name for test, please check it");
-                //    return;
-                //}
-
-                TimerStart();
-
-                if (isSqlFile)
-                {
-                    await Task.Run(() => DBProcessor.HandleDBAction(requestMessage, UpdateReplyMessage));
-                }
-                else
-                {
-                    // TODO - this is not a good practice
-                    _testClient.RequestMessage = requestMessage;
-                    await Task.Run(() => WebServiceProcessor.InvokeWebMethod(_testClient.TotalCount, UpdateReplyMessage));
-                }
-
-            }
-            catch (Exception err)
-            {
-                replyMessage = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
-                UpdateReplyMessage?.Invoke(replyMessage);
-
-                //if (_wsConfig.SendTreeNodeList)
-                //{
-                //    this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + waitSendTreeNode.Count;
-                //    _testClient.CurrentSendNodeCount++;
-                //    SendAllWaitNodes();
-                //}
-            }
-        }
 
         private void RichBoxTextToXML(RichTextBox inRichTextBox)
         {
@@ -487,17 +355,6 @@ namespace WS_Simulator
             }
         }
 
-        public string ToDataFromWebService(string xml)
-        {
-            string s = xml;
-            s = s.Replace("&", "&amp;");
-            s = s.Replace("\"", "&aquot;");
-            s = s.Replace("'", "&apos;");
-            s = s.Replace(">", "&gt;");
-            s = s.Replace("<", "&lt;");
-            return s;
-        }
-
         private void tbnRequestToXML_Click(object sender, EventArgs e)
         {
             RichBoxTextToXML(this.rtbRequest);
@@ -511,7 +368,7 @@ namespace WS_Simulator
         private async void sendToolStrip_Click(object sender, EventArgs e)
         {
             _testClient.SendTreeNodeList = false;
-            await SendMessageToE3(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text);
+            await _testClient.SendMessageToE3(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text, UpdateReplyMessage, TimerStart);
         }
 
         private void rtbRequest_MouseUp(object sender, MouseEventArgs e)
@@ -559,7 +416,7 @@ namespace WS_Simulator
         private void loadFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = this.m_DirectoryPath;
+            dialog.SelectedPath = _testClient.RootDirectoryPath;
             dialog.Description = "Please choose the folder for test xml files. ";
             
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -578,7 +435,11 @@ namespace WS_Simulator
                     }
                     else
                     {
-                        LoadFileTree(dialog.SelectedPath);
+                        (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
+                        if (okay)
+                        {
+                            _testClient.RootDirectoryPath = directoryPath;
+                        }
                     }
                 }
             }
@@ -596,18 +457,14 @@ namespace WS_Simulator
                 sfd.FilterIndex = 1;
                 sfd.RestoreDirectory = true;
 
-                sfd.InitialDirectory = this.m_DirectoryPath;
+                sfd.InitialDirectory = _testClient.RootDirectoryPath;
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     string localFilePath = sfd.FileName.ToString();
                     string fileNameExt = localFilePath.Substring(localFilePath.LastIndexOf("\\") + 1);
-
-                    if (!(File.Exists(localFilePath) &&
-                        (MessageBox.Show(this, "File " + localFilePath + " already exists. Overwrite?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes)))
-                    {
-                        FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text); ;
-                    }
+                    
+                    FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text); ;
 
                 }
             }
@@ -633,7 +490,12 @@ namespace WS_Simulator
                 MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
             }
 
-            LoadFileTree(path);
+            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, path);
+            if (okay)
+            {
+                _testClient.RootDirectoryPath = directoryPath;
+            }
+            
         }
 
         private void toDispatchToolStripMenuItem_Click(object sender, EventArgs e)
@@ -667,7 +529,12 @@ namespace WS_Simulator
 
         private void reloadFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            LoadFileTree(m_DirectoryPath);
+            (bool okay, string directoryPath)  = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, 
+                _wsConfig.FileExtensionName, _testClient.RootDirectoryPath);
+            if (okay)
+            {
+                _testClient.RootDirectoryPath = directoryPath;
+            }
         }
 
         #region utility function
@@ -873,7 +740,6 @@ namespace WS_Simulator
             }
         }
 
-
         private void SetStartStripMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode fileNode = this.pathTree.SelectedNode;
@@ -936,6 +802,7 @@ namespace WS_Simulator
 
             _testClient.DurationSendFlag = NodeType.END;
             _testClient.SendTreeNodeList = false;
+            _testClient.ManualStop = true;
         }
 
         private void openFileFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -957,6 +824,7 @@ namespace WS_Simulator
             {
                 string methodName = this.cmbMethodName.Text;
                 _testClient.MethodName = methodName;
+                _testClient.IsBatch = _wsConfig.BatchMethodName.Contains(methodName);
                 await Task.Run(() => WebServiceProcessor.SetInputNode(methodName));
             }
 
