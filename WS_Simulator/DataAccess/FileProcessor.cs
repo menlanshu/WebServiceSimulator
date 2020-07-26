@@ -27,7 +27,7 @@ namespace WS_Simulator.DataAccess
                     tempReader = new StreamReader(tempFileStream);
                     tempFileStr = tempReader.ReadToEnd();
 
-                    updateAfterReadFile(tempFileStr);
+                    updateAfterReadFile?.Invoke(tempFileStr);
 
                 }
             }

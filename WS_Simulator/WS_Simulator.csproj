@@ -99,7 +99,10 @@
     <Compile Include="FormHandler\SimulatorFormHandler.cs" />
     <Compile Include="Interface\ISearchFormRequester.cs" />
     <Compile Include="Models\Enum.cs" />
+    <Compile Include="Models\LocalFSNode.cs" />
+    <Compile Include="Models\Node.cs" />
     <Compile Include="Models\TestClient.cs" />
+    <Compile Include="Models\TestNode.cs" />
     <Compile Include="Models\WSConfig.cs" />
     <Compile Include="SearchForm.cs">
       <SubType>Form</SubType>

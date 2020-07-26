@@ -126,7 +126,7 @@ namespace WS_Simulator.FormHandler
 
         }
 
-        public static string LoadTestFile(TreeNode selectNode, string rootPath, 
+        public static string LoadTestFile(string nodePath, string rootPath, 
             Action<string> updateReplyMessage, Action<string> updateAfterReadFile)
         {
             string filePath = "";
@@ -135,12 +135,10 @@ namespace WS_Simulator.FormHandler
 
             try
             {
-                if (selectNode != null)
-                {
-                    filePath = rootPath + selectNode.FullPath.Substring(8);
+                // TODO - Optimize the node path!!
+                filePath = rootPath + nodePath.Substring(8);
 
-                    requestMessage = FileProcessor.ReadFile(filePath, updateAfterReadFile);
-                }
+                requestMessage = FileProcessor.ReadFile(filePath, updateAfterReadFile);
             }
             catch (Exception err)
             {

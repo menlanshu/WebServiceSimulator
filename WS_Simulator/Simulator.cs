@@ -90,14 +90,23 @@ namespace WS_Simulator
 
                 _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
                 _testClient.IsDBHelperNeed = _wsConfig.DBHelperNeed;
+
                 _testClient.TimerStart += TimerStartSet;
+                _testClient.UpdateAfterReadFile = UpdateAfterReadFileMethod;
+                _testClient.UpdateReplyMessage = UpdateRTBReplyMsg;
 
                 WireUpForms();
 
                 (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
+                
                 if(okay)
                 {
                     _testClient.RootDirectoryPath = directoryPath;
+                    _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                }
+                else
+                {
+                    MessageBox.Show(this, "Load Current Directory fail", "Reminder");
                 }
             }
             catch (Exception err)
@@ -204,7 +213,7 @@ namespace WS_Simulator
 
                     if (cbAutoChangeContext.Checked == true)
                     {
-                        this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text, UpdateReplyMessage);
+                        this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text);
                     }
                 }), requestMessage);
         }
@@ -219,7 +228,7 @@ namespace WS_Simulator
             {
                 this.pathTree.SelectedNode = node;
 
-                return SimulatorFormHandler.LoadTestFile(node, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                return SimulatorFormHandler.LoadTestFile(node.FullPath, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
 
             }), currNode
             );
@@ -274,11 +283,13 @@ namespace WS_Simulator
                 return;
             }
 
-            _testClient.AddTestNode(this.pathTree.SelectedNode);
+            _testClient.AddTestNode(this.pathTree.SelectedNode, 
+                (nodePath, rootPath, updateReplyMessage, updateAfterReadFile) => 
+                SimulatorFormHandler.LoadTestFile(nodePath, rootPath,updateReplyMessage, updateAfterReadFile));
             _testClient.RequestMessage = this.rtbRequest.Text;
 
             //await _testClient.SendMessageToE3(this.pathTree.SelectedNode, this.rtbRequest.Text, UpdateReplyMessage, TimerStart);
-            await _testClient.RunAllNodesInDirectory(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
+            await _testClient.RunAllNodesInDirectory(UpdateCurrLoopText, SelectNodeAndSend);
         }
 
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
@@ -300,7 +311,7 @@ namespace WS_Simulator
             if (this.pathTree.SelectedNode != null)
             {
                 this.pathTree.SelectedNode.BackColor = Color.LightGreen;
-                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode.FullPath, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
             }
         }
 
@@ -415,6 +426,10 @@ namespace WS_Simulator
                         if (okay)
                         {
                             _testClient.RootDirectoryPath = directoryPath;
+                            _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                        }else
+                        {
+                            MessageBox.Show(this, "Load Current Directory fail", "Reminder");
                         }
                     }
                 }
@@ -470,6 +485,11 @@ namespace WS_Simulator
             if (okay)
             {
                 _testClient.RootDirectoryPath = directoryPath;
+                _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+            }
+            else
+            {
+                MessageBox.Show(this, "Load Current Directory fail", "Reminder");
             }
             
         }
@@ -510,6 +530,11 @@ namespace WS_Simulator
             if (okay)
             {
                 _testClient.RootDirectoryPath = directoryPath;
+                _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+            }
+            else
+            {
+                MessageBox.Show(this, "Load Current Directory fail", "Reminder");
             }
         }
 
@@ -708,8 +733,10 @@ namespace WS_Simulator
                 }
 
                 UpdateCurrLoopText?.Invoke();
-                _testClient.AddTestNode(this.pathTree.SelectedNode);
-                _testClient.RunAllNodesInDirectory(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
+                _testClient.AddTestNode(this.pathTree.SelectedNode,
+                (nodePath, rootPath, updateReplyMessage, updateAfterReadFile) =>
+                SimulatorFormHandler.LoadTestFile(nodePath, rootPath, updateReplyMessage, updateAfterReadFile));
+                _testClient.RunAllNodesInDirectory(UpdateCurrLoopText, SelectNodeAndSend);
             }
             catch (Exception err)
             {
@@ -765,7 +792,7 @@ namespace WS_Simulator
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _testClient.DurationSendFlag = NodeType.END;
+            _testClient.DurationSendFlag = TestNodeType.END;
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -776,7 +803,7 @@ namespace WS_Simulator
             waitSecond = 0;
             myTimer.Enabled = false;
 
-            _testClient.DurationSendFlag = NodeType.END;
+            _testClient.DurationSendFlag = TestNodeType.END;
             _testClient.ManualStop = true;
         }
 

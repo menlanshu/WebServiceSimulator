@@ -12,10 +12,24 @@ namespace WS_Simulator.Models
         APP
     }
 
-    public enum NodeType
+    public enum TestNodeType
     {
         NORMAL,
         START,
         END
+    }
+
+    public enum TreeNodeType
+    {
+        Root,
+        Directory,
+        File
+    }
+
+    public enum TestStatus
+    {
+        WaitForSend,
+        Sending,
+        Sended
     }
 }
