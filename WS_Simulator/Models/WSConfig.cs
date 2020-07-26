@@ -25,8 +25,6 @@ namespace WS_Simulator.Models
         public List<string> FileExtensionName { get; set; }
         public List<string> MultiNodeExtensionName { get; set; }
         public List<string> NeedWaitMessageList { get; set; }
-        public Dictionary<int, TreeNode> WaitSendTreeNode { get; set; } = new Dictionary<int, TreeNode>();
-
         public int SleepTime { get; set; }
         public int CurrentSendNodeCount { get; set; }
         public int CurrentActualSendNodeCount { get; set; }
@@ -40,9 +38,6 @@ namespace WS_Simulator.Models
 
         public DBHelper MyDBHelper { get; set; }
         public bool DBHelperNeed { get; set; }
-
-        public int SendIndex { get; set; }
-        public int TotalCount { get; set; }
         public bool IsBatch { get; set; }
 
         public Hashtable NormalCollection { get; set; }

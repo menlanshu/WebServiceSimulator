@@ -7,19 +7,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WS_Simulator.Interface;
 
 namespace WS_Simulator
 {
     public partial class SearchForm : Form
     {
-        Simulator m_SourceForm;
+        ISearchFormRequester _requestForm;
         string m_ComponentName;
 
         public SearchForm(Simulator inSourceForm, string componentName, string selectText = "")
         {
             InitializeComponent();
 
-            m_SourceForm = inSourceForm;
+            _requestForm = inSourceForm;
             m_ComponentName = componentName;
             this.txbSearch.Text = selectText;
 
@@ -60,7 +61,7 @@ namespace WS_Simulator
             }
             else
             {
-                m_SourceForm.SearchFormRequest(m_ComponentName, this.txbSearch.Text, !cbUp.Checked, cbCase.Checked);
+                _requestForm.SearchFormRequest(m_ComponentName, this.txbSearch.Text, !cbUp.Checked, cbCase.Checked);
             }
 
         }
@@ -73,7 +74,7 @@ namespace WS_Simulator
             }
             else
             {
-                m_SourceForm.ReplaceFormRequest(m_ComponentName, this.txbSearch.Text, this.txbReplace.Text);
+                _requestForm.ReplaceFormRequest(m_ComponentName, this.txbSearch.Text, this.txbReplace.Text);
             }
         }
 

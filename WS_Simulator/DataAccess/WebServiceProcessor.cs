@@ -84,7 +84,7 @@ namespace WS_Simulator.DataAccess
                 }
             }
         }
-        public static void InvokeWebMethod(int totalCount, Action<string> updateReplyMessage)
+        public static void InvokeWebMethod(Action<string> updateReplyMessage)
         {
             string replyHeader = "";
             string replyMessage = "";
@@ -100,37 +100,34 @@ namespace WS_Simulator.DataAccess
                     MethodInfo method = currentMethodProperty.GetMethod();
                     System.Type declaringType = method.DeclaringType;
                     //for (int tempInfoCount = 0; tempInfoCount < _testClient.TotalCount; tempInfoCount++)
-                    for (int tempInfoCount = 0; tempInfoCount < totalCount; tempInfoCount++)
+                    try
                     {
-                        try
-                        {
 
-                            WSSWebRequest.RequestTrace = properties;
-                            object[] parameters = currentMethodProperty.ReadChildren() as object[];
-                            object result = method.Invoke(proxy, BindingFlags.Public, null, parameters, null);
-                            //MethodProperty property2 = new MethodProperty(currentMethodProperty.GetProxyProperty(), method, result, parameters);
-                        }
-                        catch (Exception err)
+                        WSSWebRequest.RequestTrace = properties;
+                        object[] parameters = currentMethodProperty.ReadChildren() as object[];
+                        object result = method.Invoke(proxy, BindingFlags.Public, null, parameters, null);
+                        //MethodProperty property2 = new MethodProperty(currentMethodProperty.GetProxyProperty(), method, result, parameters);
+                    }
+                    catch (Exception err)
+                    {
+                        replyMessage += err.Message + Environment.NewLine;
+                    }
+                    finally
+                    {
+                        WSSWebRequest.RequestTrace = null;
+                        //richRequest.Text = properties.requestPayLoad;
+                        //replyMessage = properties.responsePayLoad;
+                        if (properties != null && !string.IsNullOrEmpty(properties.responsePayLoad))
                         {
-                            replyMessage += err.Message + Environment.NewLine;
+                            replyHeader = GetReplyHeader(properties.responsePayLoad);
+                            if (replyHeader.Contains("ResponseCode: 200 (OK)"))
+                            {
+                                replyMessage += GetReplyBody(properties.responsePayLoad) + Environment.NewLine;
+                            }
                         }
-                        finally
+                        else
                         {
-                            WSSWebRequest.RequestTrace = null;
-                            //richRequest.Text = properties.requestPayLoad;
-                            //replyMessage = properties.responsePayLoad;
-                            if (properties != null && !string.IsNullOrEmpty(properties.responsePayLoad))
-                            {
-                                replyHeader = GetReplyHeader(properties.responsePayLoad);
-                                if (replyHeader.Contains("ResponseCode: 200 (OK)"))
-                                {
-                                    replyMessage += GetReplyBody(properties.responsePayLoad) + Environment.NewLine;
-                                }
-                            }
-                            else
-                            {
-                                replyMessage += "For some reason, no reponse." + Environment.NewLine;
-                            }
+                            replyMessage += "For some reason, no reponse." + Environment.NewLine;
                         }
                     }
                     replyMessage += "</Reply>";

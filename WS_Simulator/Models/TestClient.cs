@@ -24,19 +24,15 @@ namespace WS_Simulator.Models
         public List<string> NeedSendExtensionName { get; set; }
         public GenerateContext AutoGenerateContext { get; private set; }
 
-        public Dictionary<int, TreeNode> WaitSendTreeNode { get; set; } = new Dictionary<int, TreeNode>();
+        public List<TreeNode> WaitSendTreeNode { get; private set; } = new List<TreeNode>();
         public TreeNode SendStartNode { get; set; }
         public TreeNode SendEndNode { get; set; }
 
-        public bool SendTreeNodeList { get; set; }
         public bool DurationCheckNeed { get; set; }
         public NodeType DurationSendFlag { get; set; }
-        public int SendIndex { get; set; }
-        public int TotalCount { get; set; }
         public bool IsBatch { get; set; }
         public bool IsDBHelperNeed { get; set; }
 
-        public TreeNode CurrentLoopDirectoryNode { get; set; }
         public int CurrentPerfTestCount { get; set; }
         public int PerfMsgCount { get; set; }
         public string MethodName { get; set; }
@@ -45,7 +41,7 @@ namespace WS_Simulator.Models
 
         public string RequestMessage { get; set; }
 
-        public async Task SendMessageToE3(string methodName, TreeNode sendNode, string requestMessage,
+        private async Task SendMessageToE3(TreeNode sendNode, string requestMessage,
             Action<string> updateReplyMessage, Action timeStart)
         {
             string nodeName = sendNode.Text;
@@ -78,13 +74,6 @@ namespace WS_Simulator.Models
                     isSqlFile = true;
                 }
 
-                // TODO - Check this mark has any influence
-                //if (!isSqlFile && !cmbMethodName.Items.Contains(methodName))
-                //{
-                //    MessageBox.Show("You key in a illegal method name for test, please check it");
-                //    return;
-                //}
-
                 timeStart?.Invoke();
 
                 if (isSqlFile)
@@ -95,7 +84,7 @@ namespace WS_Simulator.Models
                 {
                     // TODO - this is not a good practice
                     RequestMessage = requestMessage;
-                    await Task.Run(() => WebServiceProcessor.InvokeWebMethod(TotalCount, updateReplyMessage));
+                    await Task.Run(() => WebServiceProcessor.InvokeWebMethod(updateReplyMessage));
                 }
 
             }
@@ -103,13 +92,6 @@ namespace WS_Simulator.Models
             {
                 replyMessage = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
                 updateReplyMessage?.Invoke(replyMessage);
-
-                //if (_wsConfig.SendTreeNodeList)
-                //{
-                //    this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + waitSendTreeNode.Count;
-                //    _testClient.CurrentSendNodeCount++;
-                //    SendAllWaitNodes();
-                //}
             }
         }
 
@@ -140,7 +122,7 @@ namespace WS_Simulator.Models
                 string currentNodeValue = "";
                 foreach (string tempPath in path.Split(ConfigDelimeter))
                 {
-                    (currentNodeValue, TotalCount) = XMLProcessor.GetVlaueByPath(tempPath, RequestMessage, IsBatch, TotalCount, SendIndex, getInnerXml);
+                    currentNodeValue = XMLProcessor.GetVlaueByPath(tempPath, RequestMessage, IsBatch, getInnerXml);
                     nodeValue += currentNodeValue;
                 }
             }
@@ -155,8 +137,6 @@ namespace WS_Simulator.Models
                 //initial wait send node related variable
                 CurrentSendNodeCount = 1;
                 CurrentActualSendNodeCount = 0;
-                WaitSendTreeNode = new Dictionary<int, TreeNode>();
-                SendTreeNodeList = true;
                 DurationSendFlag = NodeType.NORMAL;
                 ManualStop = false;
 
@@ -169,24 +149,12 @@ namespace WS_Simulator.Models
                     DurationCheckNeed = false;
                 }
 
-                if (CurrentLoopDirectoryNode.Nodes.Count > 0)
+                if (!WaitSendTreeNode.Contains(SendStartNode))
                 {
-                    int tempNodeCount = 0;
-                    foreach (TreeNode tempNode in CurrentLoopDirectoryNode.Nodes)
-                    {
-                        if (tempNode.Nodes.Count == 0)
-                        {
-                            WaitSendTreeNode.Add(++tempNodeCount, tempNode);
-                        }
-                    }
-
-                    if (!WaitSendTreeNode.ContainsValue(SendStartNode))
-                    {
-                        DurationCheckNeed = false;
-                    }
-
-                    await SendAllWaitNodes(updateReplyMessage, updateCurrentLoopText, selectAndSendNode);
+                    DurationCheckNeed = false;
                 }
+
+                await SendAllWaitNodes(updateReplyMessage, updateCurrentLoopText, selectAndSendNode);
             }
             catch (Exception err)
             {
@@ -205,7 +173,7 @@ namespace WS_Simulator.Models
 
             bool currentNodeNeedSend;
 
-            foreach (var tempNode in WaitSendTreeNode.Values)
+            foreach (var tempNode in WaitSendTreeNode)
             {
                 currentNodeNeedSend = true;
                 if (DurationCheckNeed)
@@ -213,7 +181,6 @@ namespace WS_Simulator.Models
                     if (DurationSendFlag == NodeType.END)
                     {
                         currentNodeNeedSend = false;
-                        SendTreeNodeList = false;
                     }
                     else
                     {
@@ -248,7 +215,6 @@ namespace WS_Simulator.Models
                     if (DurationSendFlag == NodeType.END)
                     {
                         currentNodeNeedSend = false;
-                        SendTreeNodeList = false;
                     }
                 }
 
@@ -261,16 +227,15 @@ namespace WS_Simulator.Models
 
                     RequestMessage = selectAndSendNode?.Invoke(tempNode);
 
-                    SendIndex = 0;
-                    TotalCount = 1;
-
-                    await SendMessageToE3(MethodName, tempNode, RequestMessage, updateReplyMessage, TimerStart);
+                    await SendMessageToE3(tempNode, RequestMessage, updateReplyMessage, TimerStart);
+                }else
+                {
+                    updateReplyMessage?.Invoke("No need send message.");
                 }
 
             }
 
-            SendTreeNodeList = false;
-            WaitSendTreeNode = new Dictionary<int, TreeNode>();
+            WaitSendTreeNode = new List<TreeNode>();
 
             if (IsPerfTest == true && ManualStop == false)
             {
@@ -281,93 +246,6 @@ namespace WS_Simulator.Models
                     await RunAllNodesInDirectory(updateReplyMessage, updateCurrentLoopText, selectAndSendNode);
                 }
             }
-
-
-            //if (CurrentSendNodeCount <= WaitSendTreeNode.Count)
-            //{
-            //    if (WaitSendTreeNode.ContainsKey(CurrentSendNodeCount))
-            //    {
-            //        TreeNode tempNode = WaitSendTreeNode[CurrentSendNodeCount];
-
-            //        currentNodeNeedSend = true;
-            //        if (DurationCheckNeed)
-            //        {
-            //            if (DurationSendFlag == NodeType.END)
-            //            {
-            //                currentNodeNeedSend = false;
-            //                SendTreeNodeList = false;
-            //            }
-            //            else
-            //            {
-            //                if (DurationSendFlag == NodeType.NORMAL)
-            //                {
-            //                    if (tempNode == SendStartNode)
-            //                    {
-            //                        DurationSendFlag = NodeType.START;
-            //                        currentNodeNeedSend = true;
-            //                    }
-            //                    else
-            //                    {
-            //                        currentNodeNeedSend = false;
-            //                    }
-            //                }
-            //                if (DurationSendFlag == NodeType.START)
-            //                {
-            //                    if (tempNode == SendEndNode)
-            //                    {
-            //                        DurationSendFlag = NodeType.END;
-            //                        currentNodeNeedSend = true;
-            //                    }
-            //                    else
-            //                    {
-            //                        currentNodeNeedSend = true;
-            //                    }
-            //                }
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (DurationSendFlag == NodeType.END)
-            //            {
-            //                currentNodeNeedSend = false;
-            //                SendTreeNodeList = false;
-            //            }
-            //        }
-
-            //        string tempName = tempNode.Text;
-            //        tempName = tempName.Substring(tempName.LastIndexOf("."));
-
-            //        if (currentNodeNeedSend && NeedSendExtensionName.Contains(tempName))
-            //        {
-            //            CurrentActualSendNodeCount++;
-
-            //            RequestMessage = selectAndSendNode?.Invoke(tempNode);
-
-            //            SendIndex = 0;
-            //            TotalCount = 1;
-
-            //            await SendMessageToE3(MethodName, tempNode, RequestMessage, updateReplyMessage, TimerStart);
-            //        }
-            //        else
-            //        {
-            //            updateReplyMessage?.Invoke(replyMessage);
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    SendTreeNodeList = false;
-            //    WaitSendTreeNode = new Dictionary<int, TreeNode>();
-            //    if (IsPerfTest == true)
-            //    {
-            //        if (CurrentPerfTestCount < PerfMsgCount)
-            //        {
-            //            CurrentPerfTestCount++;
-            //            updateCurrentLoopText?.Invoke();
-            //            await RunAllNodesInDirectory(updateReplyMessage, updateCurrentLoopText, selectAndSendNode);
-            //        }
-            //    }
-            //}
         }
 
         private int CalculateCurrentCount(int contextCount, string contextMode)
@@ -473,6 +351,32 @@ namespace WS_Simulator.Models
             return result;
         }
 
+        public void AddTestNode(TreeNode sendNode)
+        {
+            WaitSendTreeNode = new List<TreeNode>();
+            if(sendNode.Nodes.Count > 0)
+            {
+                foreach (TreeNode node in sendNode.Nodes)
+                {
+                    WaitSendTreeNode.Add(node);
+                }
+            }else
+            {
+                WaitSendTreeNode.Add(sendNode);
+            }
+        }
+
+
+        public bool InTesting()
+        {
+            if(WaitSendTreeNode.Count > 0)
+            {
+                return true;
+            }else
+            {
+                return false;
+            }    
+        }
 
     }
 }

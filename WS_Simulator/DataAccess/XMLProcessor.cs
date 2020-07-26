@@ -22,12 +22,12 @@ namespace WS_Simulator.DataAccess
         private static Hashtable _batchCollection;
         private static Hashtable _methodMapping;
         private static Hashtable _dispatcherConfig;
-        public static (string pathValue, int totalCount) GetVlaueByPath(string path, string requestMessage, 
-            bool isBatch, int totalCount, int sendIndex, bool getInnerXml = false)
+        public static string GetVlaueByPath(string path, string requestMessage, bool isBatch, bool getInnerXml = false)
         {
             XmlDocument testXmlDoc = new XmlDocument();
             string pathValue = "";
-            if (requestMessage == "") return (pathValue, totalCount);
+
+            if (requestMessage == "") return pathValue;
 
             testXmlDoc.LoadXml(requestMessage);
 
@@ -46,23 +46,22 @@ namespace WS_Simulator.DataAccess
                     if (testXmlDoc.SelectSingleNode(path).InnerText != testXmlDoc.SelectSingleNode(path).InnerXml)
                     {
                         XmlNodeList tempNodeList = testXmlDoc.SelectNodes(path);
-                        if (tempNodeList.Count > 1 && !isBatch && sendIndex == 0)
-                        {
-                            totalCount = tempNodeList.Count;
-                            pathValue = tempNodeList[sendIndex] == null ?
-                                $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
-                        }
-                        else if (tempNodeList.Count == 1)
+                        //if (tempNodeList.Count > 1 && !isBatch)
+                        //{
+                        //    pathValue = tempNodeList[sendIndex] == null ?
+                        //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
+                        //}
+                        if (tempNodeList.Count == 1)
                         {
                             pathValue = testXmlDoc.SelectSingleNode(path) == null ?
                                 $"<defaultValue>{DefaultValue}</defaultValue>" :
                                 (getInnerXml ? testXmlDoc.SelectSingleNode(path).InnerXml : testXmlDoc.SelectSingleNode(path).OuterXml);
                         }
-                        else if (sendIndex < totalCount)
-                        {
-                            pathValue = tempNodeList[sendIndex] == null ?
-                                $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
-                        }
+                        //else if (sendIndex < totalCount)
+                        //{
+                        //    pathValue = tempNodeList[sendIndex] == null ?
+                        //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
+                        //}
                     }
                     else
                     {
@@ -72,7 +71,7 @@ namespace WS_Simulator.DataAccess
                 }
             }
 
-            return (pathValue, totalCount);
+            return pathValue;
         }
 
         public static bool IsE3EventInfo(string requestMessage, out int dispatcherConfig, out string errDesc)

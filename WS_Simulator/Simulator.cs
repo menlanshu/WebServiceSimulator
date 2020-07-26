@@ -1,28 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using System.Configuration;
-using System.Xml;
 using System.Threading;
 using WebServiceStudio;
-using System.Reflection;
-using System.Web.Services.Protocols;
-using System.Net;
 using System.Diagnostics;
 using WS_Simulator.FormHandler;
 using WS_Simulator.Models;
 using WS_Simulator.DataAccess;
+using WS_Simulator.Interface;
 
 namespace WS_Simulator
 {
-    public partial class Simulator : Form
+    public partial class Simulator : Form, ISearchFormRequester
     {
         private Action TimerStart;
         private Action UpdateCurrLoopText;
@@ -186,17 +178,13 @@ namespace WS_Simulator
                     this.rtbReply.Text = replyMsgText;
                 }
 
-                if (_testClient.SendTreeNodeList)
+                this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
+                _testClient.CurrentSendNodeCount++;
+                if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
                 {
-                    this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
-                    _testClient.CurrentSendNodeCount++;
-                    if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
-                    {
-                        Thread.Sleep(_wsConfig.SleepTime);
-                    }
-
-                    //_testClient.SendAllWaitNodes(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
+                    Thread.Sleep(_wsConfig.SleepTime);
                 }
+
             }), replyMessage
             );
         }
@@ -279,7 +267,6 @@ namespace WS_Simulator
         private async void btnSend_Click(object sender, EventArgs e)
         {
             string methodName = this.cmbMethodName.Text;
-            _testClient.SendTreeNodeList = false;
 
             if (string.IsNullOrEmpty(methodName))
             {
@@ -287,14 +274,17 @@ namespace WS_Simulator
                 return;
             }
 
-            await SendButtonClick(methodName, this.pathTree.SelectedNode, this.rtbRequest.Text);
+            _testClient.AddTestNode(this.pathTree.SelectedNode);
+            _testClient.RequestMessage = this.rtbRequest.Text;
+
+            //await _testClient.SendMessageToE3(this.pathTree.SelectedNode, this.rtbRequest.Text, UpdateReplyMessage, TimerStart);
+            await _testClient.RunAllNodesInDirectory(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
         }
 
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
         {
 
-            // TODO - Check this part need optimize or not
-            if (_testClient.SendTreeNodeList)
+            if(_testClient.InTesting())
             {
                 return;
             }
@@ -305,21 +295,13 @@ namespace WS_Simulator
                 this.pathTree.SelectedNode.BackColor = Color.White;
             }
 
-            /// set color of current node
+            // Set color of current node
             this.pathTree.SelectedNode = this.pathTree.GetNodeAt(e.X, e.Y);
             if (this.pathTree.SelectedNode != null)
             {
                 this.pathTree.SelectedNode.BackColor = Color.LightGreen;
                 SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
             }
-        }
-
-        private async Task SendButtonClick(string methodName, TreeNode sendNode, string requestMessage)
-        {
-            _testClient.SendIndex = 0;
-            _testClient.TotalCount = 1;
-
-            await _testClient.SendMessageToE3(methodName, sendNode, requestMessage, UpdateReplyMessage, TimerStart);
         }
 
         private void myTimer_Tick(object sender, EventArgs e)
@@ -363,12 +345,6 @@ namespace WS_Simulator
         private void btnReplyToXML_Click(object sender, EventArgs e)
         {
             RichBoxTextToXML(this.rtbReply);
-        }
-
-        private async void sendToolStrip_Click(object sender, EventArgs e)
-        {
-            _testClient.SendTreeNodeList = false;
-            await _testClient.SendMessageToE3(this.cmbMethodName.Text, this.pathTree.SelectedNode, this.rtbRequest.Text, UpdateReplyMessage, TimerStart);
         }
 
         private void rtbRequest_MouseUp(object sender, MouseEventArgs e)
@@ -718,6 +694,7 @@ namespace WS_Simulator
                         else
                         {
                             MessageBox.Show("Only support PerfMsgCount and Start Test Count split by ; in PerfMsgCount TextBox");
+                            return;
                         }
                     }
                     else
@@ -731,7 +708,7 @@ namespace WS_Simulator
                 }
 
                 UpdateCurrLoopText?.Invoke();
-                _testClient.CurrentLoopDirectoryNode = this.pathTree.SelectedNode;
+                _testClient.AddTestNode(this.pathTree.SelectedNode);
                 _testClient.RunAllNodesInDirectory(UpdateReplyMessage, UpdateCurrLoopText, SelectNodeAndSend);
             }
             catch (Exception err)
@@ -789,7 +766,6 @@ namespace WS_Simulator
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _testClient.DurationSendFlag = NodeType.END;
-            _testClient.SendTreeNodeList = false;
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -801,7 +777,6 @@ namespace WS_Simulator
             myTimer.Enabled = false;
 
             _testClient.DurationSendFlag = NodeType.END;
-            _testClient.SendTreeNodeList = false;
             _testClient.ManualStop = true;
         }
 

@@ -45,8 +45,6 @@
             this.cmbMethodName = new System.Windows.Forms.ComboBox();
             this.rtbRequest = new System.Windows.Forms.RichTextBox();
             this.rtbReply = new System.Windows.Forms.RichTextBox();
-            this.pathContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.sendToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.myTimer = new System.Windows.Forms.Timer(this.components);
             this.rtbContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripToXML = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,7 +81,6 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
-            this.pathContextMenu.SuspendLayout();
             this.rtbContextMenu.SuspendLayout();
             this.folderContextMenu.SuspendLayout();
             this.fileContextMenu.SuspendLayout();
@@ -271,21 +268,6 @@
             this.rtbReply.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rtbReply_KeyDown);
             this.rtbReply.MouseUp += new System.Windows.Forms.MouseEventHandler(this.rtbReply_MouseUp);
             // 
-            // pathContextMenu
-            // 
-            this.pathContextMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.pathContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sendToolStrip});
-            this.pathContextMenu.Name = "pathContextMenu";
-            this.pathContextMenu.Size = new System.Drawing.Size(101, 26);
-            // 
-            // sendToolStrip
-            // 
-            this.sendToolStrip.Name = "sendToolStrip";
-            this.sendToolStrip.Size = new System.Drawing.Size(100, 22);
-            this.sendToolStrip.Text = "Send";
-            this.sendToolStrip.Click += new System.EventHandler(this.sendToolStrip_Click);
-            // 
             // myTimer
             // 
             this.myTimer.Tick += new System.EventHandler(this.myTimer_Tick);
@@ -299,33 +281,33 @@
             this.toolStripClear,
             this.saveToFileToolStripMenuItem});
             this.rtbContextMenu.Name = "pathContextMenu";
-            this.rtbContextMenu.Size = new System.Drawing.Size(134, 92);
+            this.rtbContextMenu.Size = new System.Drawing.Size(181, 114);
             // 
             // toolStripToXML
             // 
             this.toolStripToXML.Name = "toolStripToXML";
-            this.toolStripToXML.Size = new System.Drawing.Size(133, 22);
+            this.toolStripToXML.Size = new System.Drawing.Size(180, 22);
             this.toolStripToXML.Text = "ToXML";
             this.toolStripToXML.Click += new System.EventHandler(this.toolStripToXML_Click);
             // 
             // toDispatchToolStripMenuItem
             // 
             this.toDispatchToolStripMenuItem.Name = "toDispatchToolStripMenuItem";
-            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.toDispatchToolStripMenuItem.Text = "ToDispatch";
             this.toDispatchToolStripMenuItem.Click += new System.EventHandler(this.toDispatchToolStripMenuItem_Click);
             // 
             // toolStripClear
             // 
             this.toolStripClear.Name = "toolStripClear";
-            this.toolStripClear.Size = new System.Drawing.Size(133, 22);
+            this.toolStripClear.Size = new System.Drawing.Size(180, 22);
             this.toolStripClear.Text = "Clear";
             this.toolStripClear.Click += new System.EventHandler(this.toolStripClear_Click);
             // 
             // saveToFileToolStripMenuItem
             // 
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
-            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToFileToolStripMenuItem.Text = "SaveToFile";
             this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
             // 
@@ -518,7 +500,6 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
-            this.pathContextMenu.ResumeLayout(false);
             this.rtbContextMenu.ResumeLayout(false);
             this.folderContextMenu.ResumeLayout(false);
             this.fileContextMenu.ResumeLayout(false);
@@ -537,8 +518,6 @@
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.RichTextBox rtbRequest;
         private System.Windows.Forms.RichTextBox rtbReply;
-        private System.Windows.Forms.ContextMenuStrip pathContextMenu;
-        private System.Windows.Forms.ToolStripMenuItem sendToolStrip;
         private System.Windows.Forms.ComboBox cmbMethodName;
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.Timer myTimer;

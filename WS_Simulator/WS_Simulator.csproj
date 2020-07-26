@@ -97,6 +97,7 @@
     <Compile Include="DataAccess\WebServiceProcessor.cs" />
     <Compile Include="DataAccess\XMLProcessor.cs" />
     <Compile Include="FormHandler\SimulatorFormHandler.cs" />
+    <Compile Include="Interface\ISearchFormRequester.cs" />
     <Compile Include="Models\Enum.cs" />
     <Compile Include="Models\TestClient.cs" />
     <Compile Include="Models\WSConfig.cs" />
