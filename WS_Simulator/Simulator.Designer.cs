@@ -69,6 +69,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
+            this.loadFromDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveCurrTreeToDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -102,6 +105,10 @@
             // 
             // loadFileToolStripMenuItem
             // 
+            this.loadFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadFromFolderToolStripMenuItem,
+            this.loadFromDBToolStripMenuItem,
+            this.saveCurrTreeToDBToolStripMenuItem});
             this.loadFileToolStripMenuItem.Name = "loadFileToolStripMenuItem";
             this.loadFileToolStripMenuItem.Size = new System.Drawing.Size(78, 22);
             this.loadFileToolStripMenuItem.Text = "LoadFolder";
@@ -474,6 +481,26 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
+            // loadFromDBToolStripMenuItem
+            // 
+            this.loadFromDBToolStripMenuItem.Name = "loadFromDBToolStripMenuItem";
+            this.loadFromDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromDBToolStripMenuItem.Text = "LoadFromDB";
+            // 
+            // saveCurrTreeToDBToolStripMenuItem
+            // 
+            this.saveCurrTreeToDBToolStripMenuItem.Name = "saveCurrTreeToDBToolStripMenuItem";
+            this.saveCurrTreeToDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveCurrTreeToDBToolStripMenuItem.Text = "SaveCurrTreeToDB";
+            this.saveCurrTreeToDBToolStripMenuItem.Click += new System.EventHandler(this.saveCurrTreeToDBToolStripMenuItem_Click);
+            // 
+            // loadFromFolderToolStripMenuItem
+            // 
+            this.loadFromFolderToolStripMenuItem.Name = "loadFromFolderToolStripMenuItem";
+            this.loadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromFolderToolStripMenuItem.Text = "LoadFromFolder";
+            this.loadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.loadFromFolderToolStripMenuItem_Click);
+            // 
             // Simulator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -562,6 +589,9 @@
         private System.Windows.Forms.Label lbCurrentLoop;
         private System.Windows.Forms.ToolStripMenuItem openFileFolderToolStripMenuItem;
         private System.Windows.Forms.CheckBox autoSaveReplyCB;
+        private System.Windows.Forms.ToolStripMenuItem loadFromDBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveCurrTreeToDBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadFromFolderToolStripMenuItem;
     }
 }
 

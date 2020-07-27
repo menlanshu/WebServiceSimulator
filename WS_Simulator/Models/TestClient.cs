@@ -403,39 +403,34 @@ namespace WS_Simulator.Models
         // Initial Current Node list according to root node of path tree
         public void InitialCurrNodeList(TreeNode rootNode)
         {
-            int nodeId = 1;
             CurrNodeList = new List<Node>();
 
             // assign root node
-            Node newNode = new Node(nodeId, TreeNodeType.Root, rootNode);
-            newNode.Id = nodeId;
+            Node newNode = new Node(TreeNodeType.Root, rootNode, null);
             CurrNodeList.Add(newNode);
 
             // get all child node of root node
             foreach (TreeNode node in rootNode.Nodes)
             {
-                CovertTreeNodeToNodeList(node);
+                CovertTreeNodeToNodeList(node, newNode);
             }
         }
 
-        private void CovertTreeNodeToNodeList(TreeNode currNode)
+        private void CovertTreeNodeToNodeList(TreeNode currNode, Node motherNode)
         {
-            int currNodeId = CurrNodeList.Max(x => x.Id);
             if(currNode.Tag is DirectoryInfo)
             {
-                currNodeId++;
-                Node newNode = new Node(currNodeId, TreeNodeType.Directory, currNode);
+                Node newNode = new Node( TreeNodeType.Directory, currNode, motherNode);
 
                 foreach(TreeNode node in currNode.Nodes)
                 {
-                    CovertTreeNodeToNodeList(node);
+                    CovertTreeNodeToNodeList(node, newNode);
                 }
             }
             else
             {
                 // Covert file node to local file system node
-                currNodeId++;
-                Node newNode = new Node(currNodeId, TreeNodeType.File, currNode);
+                Node newNode = new Node(TreeNodeType.File, currNode, motherNode);
 
                 CurrNodeList.Add(newNode);
             }

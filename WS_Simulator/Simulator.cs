@@ -16,7 +16,7 @@ using System.Text;
 
 namespace WS_Simulator
 {
-    public partial class Simulator : Form, ISearchFormRequester
+    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester
     {
         private Action UpdateCurrLoopText;
 
@@ -446,38 +446,7 @@ namespace WS_Simulator
 
         private void loadFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
-            dialog.SelectedPath = _testClient.RootDirectoryPath;
-            dialog.Description = "Please choose the folder for test xml files. ";
             
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                if (string.IsNullOrEmpty(dialog.SelectedPath))
-                {
-                    MessageBox.Show(this, "Directory path can not be empty.", "Reminder");
-                    return;
-                }
-                else
-                {
-                    if (!Directory.Exists(dialog.SelectedPath))
-                    {
-                        MessageBox.Show(this, "Directory path not exist.", "Reminder");
-                        return;
-                    }
-                    else
-                    {
-                        (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
-                        if (okay)
-                        {
-                            _testClient.RootDirectoryPath = directoryPath;
-                            _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
-                        }else
-                        {
-                            MessageBox.Show(this, "Load Current Directory fail", "Reminder");
-                        }
-                    }
-                }
-            }
         }
 
         private void saveToFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -873,6 +842,74 @@ namespace WS_Simulator
         {
             _testClient.AutoSaveReply = autoSaveReplyCB.Checked;
         }
+
+        private void saveCurrTreeToDBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveToDB frm = new SaveToDB(this);
+            frm.Show();
+        }
+
+        private void loadFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.SelectedPath = _testClient.RootDirectoryPath;
+            dialog.Description = "Please choose the folder for test xml files. ";
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(dialog.SelectedPath))
+                {
+                    MessageBox.Show(this, "Directory path can not be empty.", "Reminder");
+                    return;
+                }
+                else
+                {
+                    if (!Directory.Exists(dialog.SelectedPath))
+                    {
+                        MessageBox.Show(this, "Directory path not exist.", "Reminder");
+                        return;
+                    }
+                    else
+                    {
+                        (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
+                        if (okay)
+                        {
+                            _testClient.RootDirectoryPath = directoryPath;
+                            _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                        }
+                        else
+                        {
+                            MessageBox.Show(this, "Load Current Directory fail", "Reminder");
+                        }
+                    }
+                }
+            }
+        }
+
+        public (bool, string) SaveRepositoryToDB(string name)
+        {
+            bool result = false;
+            string errDesc = "";
+
+            if (!SQLiteDBProcessor.CheckRepositoryName(name))
+            {
+                TestRepository testRepository = new TestRepository();
+                testRepository.RepositoryName = name;
+
+
+                FileProcessor.LoadMessageForAllNodes(_testClient.CurrNodeList, _testClient.RootDirectoryPath);
+                testRepository.TestNodeList = _testClient.CurrNodeList;
+                SQLiteDBProcessor.SaveDataToDB(testRepository);
+
+                result = true;
+            }else
+            {
+                errDesc = "Repository Name Already exist, please change it";
+            }
+
+            return (result, errDesc);
+        }
+
     }
 }
 

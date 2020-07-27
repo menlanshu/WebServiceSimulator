@@ -6,11 +6,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using WS_Simulator.Models;
 
 namespace WS_Simulator.DataAccess
 {
     public static class FileProcessor
     {
+        public static void LoadMessageForAllNodes(List<Node> nodeList, string rootPath)
+        {
+            foreach(Node node in nodeList)
+            {
+                string filePath = rootPath + node.TreeNodeValue.FullPath.Substring(8);
+                node.TreeNodeMessage = ReadFile(filePath, null);
+            }
+        }
+
         public static string ReadFile(string filePath, Action<string> updateAfterReadFile)
         {
             FileStream tempFileStream = null;

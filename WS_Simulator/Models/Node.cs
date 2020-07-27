@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,16 +13,27 @@ namespace WS_Simulator.Models
     {
         public int Id { get; set; }
         public string TreeNodeName { get; set; }
+        [NotMapped]
         public TreeNode TreeNodeValue { get; set; }
+        public string TreeNodeMessage { get; set; }
+        public string TreeNodeReplyMessage { get; set; }
+
+        public int? MotherNodeId { get; set; }
+        public Node MotherNode { get; set; }
         public TreeNodeType TreeNodeType { get; set; }
         public TestNodeType TreeNodeTestType { get; set; } = TestNodeType.NORMAL;
 
-        public Node(int id, TreeNodeType treeNodeType, TreeNode treeNodeValue)
+        public Node(TreeNodeType treeNodeType, TreeNode treeNodeValue, Node motherNode)
         {
-            Id = id;
             TreeNodeType = treeNodeType;
             TreeNodeValue = treeNodeValue;
             TreeNodeName = treeNodeValue.Text;
+
+            MotherNode = motherNode;
+        }
+
+        public Node()
+        { 
         }
     }
 }
