@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +19,9 @@ namespace WS_Simulator.Models
         public Action TimerStart;
         public Action<string> UpdateReplyMessage;
         public Action<string> UpdateAfterReadFile;
+        public Action<TreeNode, Color> UpdateNodeColor;
+        public Action<List<TestNode>> UpdateSendNodeListStatus;
+        public Action<TestNode> SaveReplyMsgToFile;
 
         private char[] ConfigDelimeter = (";").ToCharArray();
 
@@ -27,11 +33,8 @@ namespace WS_Simulator.Models
         public GenerateContext AutoGenerateContext { get; private set; }
 
         public List<TestNode> WaitSendTreeNode { get; private set; } = new List<TestNode>();
-        public TreeNode SendStartNode { get; set; }
-        public TreeNode SendEndNode { get; set; }
 
-        public bool DurationCheckNeed { get; set; }
-        public TestNodeType DurationSendFlag { get; set; }
+        public bool AutoSaveReply { get; set; }
         public bool IsBatch { get; set; }
         public bool IsDBHelperNeed { get; set; }
 
@@ -44,12 +47,12 @@ namespace WS_Simulator.Models
         public List<Node> CurrNodeList { get; set; } = new List<Node>();
 
         public string RequestMessage { get; set; }
+        public string ReplyMessage { get; set; }
 
         private async Task SendMessageToE3(TreeNode sendNode, string requestMessage)
         {
             string nodeName = sendNode.Text;
             bool isSqlFile = false;
-            string replyMessage;
 
             try
             {
@@ -60,16 +63,16 @@ namespace WS_Simulator.Models
 
                 if (string.IsNullOrEmpty(requestMessage))
                 {
-                    replyMessage = "Request message is empty, can't send message to R2R";
-                    UpdateReplyMessage?.Invoke(replyMessage);
+                    ReplyMessage = "Request message is empty, can't send message to R2R";
+                    UpdateReplyMessage?.Invoke(ReplyMessage);
                     return;
                 }
 
                 string nodeNamePostFix = nodeName.Substring(nodeName.LastIndexOf("."));
                 if (nodeNamePostFix.ToUpper() == ".SQL" && !IsDBHelperNeed)
                 {
-                    replyMessage = "Do not support SQL according to configuration!";
-                    UpdateReplyMessage?.Invoke(replyMessage);
+                    ReplyMessage = "Do not support SQL according to configuration!";
+                    UpdateReplyMessage?.Invoke(ReplyMessage);
                     return;
                 }
                 else if (nodeNamePostFix.ToUpper() == ".SQL" && IsDBHelperNeed)
@@ -81,20 +84,20 @@ namespace WS_Simulator.Models
 
                 if (isSqlFile)
                 {
-                    await Task.Run(() => DBProcessor.HandleDBAction(requestMessage, UpdateReplyMessage));
+                    ReplyMessage = await Task.Run(() => DBProcessor.HandleDBAction(requestMessage, UpdateReplyMessage));
                 }
                 else
                 {
                     // TODO - this is not a good practice
                     RequestMessage = requestMessage;
-                    await Task.Run(() => WebServiceProcessor.InvokeWebMethod(UpdateReplyMessage));
+                    ReplyMessage = await Task.Run(() => WebServiceProcessor.InvokeWebMethod(UpdateReplyMessage));
                 }
 
             }
             catch (Exception err)
             {
-                replyMessage = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
-                UpdateReplyMessage?.Invoke(replyMessage);
+                ReplyMessage = "Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message;
+                UpdateReplyMessage?.Invoke(ReplyMessage);
             }
         }
 
@@ -140,29 +143,31 @@ namespace WS_Simulator.Models
                 //initial wait send node related variable
                 CurrentSendNodeCount = 1;
                 CurrentActualSendNodeCount = 0;
-                DurationSendFlag = TestNodeType.NORMAL;
+                //DurationSendFlag = TestNodeType.NORMAL;
                 ManualStop = false;
 
-                if (SendStartNode != null)
-                {
-                    DurationCheckNeed = true;
-                }
-                else
-                {
-                    DurationCheckNeed = false;
-                }
+                //if (WaitSendTreeNode.Where(x => x.TreeNodeTestType == TestNodeType.START) != null)
+                //{
+                //    DurationCheckNeed = true;
+                //}
+                //else
+                //{
+                //    DurationCheckNeed = false;
+                //}
 
-                // TODO - Optimization
-                if (!WaitSendTreeNode.Select(x => x.TreeNodeValue).Contains(SendStartNode))
-                {
-                    DurationCheckNeed = false;
-                }
+                //TODO - Optimization
+                //if (!WaitSendTreeNode.Select(x => x.TreeNodeValue).Contains(SendStartNode))
+                //{
+                //    DurationCheckNeed = false;
+                //}
 
                 await SendAllWaitNodes(updateCurrentLoopText, selectAndSendNode);
             }
             catch (Exception err)
             {
-                UpdateReplyMessage?.Invoke($"Excepetion happen in { System.Reflection.MethodBase.GetCurrentMethod().Name} : { err.Message} ");
+                WaitSendTreeNode.Clear();
+                ReplyMessage = $"Excepetion happen in { System.Reflection.MethodBase.GetCurrentMethod().Name} : { err.Message} ";
+                UpdateReplyMessage?.Invoke(ReplyMessage);
             }
         }
 
@@ -171,75 +176,59 @@ namespace WS_Simulator.Models
 
             if (string.IsNullOrEmpty(MethodName))
             {
-                UpdateReplyMessage?.Invoke("Method name can not be empty!");
+                ReplyMessage = "Method name can not be empty!";
+                UpdateReplyMessage?.Invoke(ReplyMessage);
                 return;
             }
 
-            bool currentNodeNeedSend;
+            //bool currentNodeNeedSend;
 
             foreach (var tempNode in WaitSendTreeNode)
             {
-                currentNodeNeedSend = true;
-                if (DurationCheckNeed)
+                if (ManualStop == true)
                 {
-                    if (DurationSendFlag == TestNodeType.END)
-                    {
-                        currentNodeNeedSend = false;
-                    }
-                    else
-                    {
-                        if (DurationSendFlag == TestNodeType.NORMAL)
-                        {
-                            if (tempNode.TreeNodeValue == SendStartNode)
-                            {
-                                DurationSendFlag = TestNodeType.START;
-                                currentNodeNeedSend = true;
-                            }
-                            else
-                            {
-                                currentNodeNeedSend = false;
-                            }
-                        }
-                        if (DurationSendFlag == TestNodeType.START)
-                        {
-                            if (tempNode.TreeNodeValue == SendEndNode)
-                            {
-                                DurationSendFlag = TestNodeType.END;
-                                currentNodeNeedSend = true;
-                            }
-                            else
-                            {
-                                currentNodeNeedSend = true;
-                            }
-                        }
-                    }
+                    WaitSendTreeNode.Clear();
+                    return;
                 }
-                else
-                {
-                    if (DurationSendFlag == TestNodeType.END)
-                    {
-                        currentNodeNeedSend = false;
-                    }
-                }
+
+                // Send Node Start
+                tempNode.TreeNodeSendStatus = TestStatus.Sending;
+                UpdateSendNodeListStatus?.Invoke(WaitSendTreeNode);
+                Stopwatch newWatch = new Stopwatch();
+                newWatch.Start();
 
                 string tempName = tempNode.TreeNodeName;
                 tempName = tempName.Substring(tempName.LastIndexOf("."));
 
-                if (currentNodeNeedSend && NeedSendExtensionName.Contains(tempName))
+                //if (currentNodeNeedSend && NeedSendExtensionName.Contains(tempName))
+                if (NeedSendExtensionName.Contains(tempName))
                 {
                     CurrentActualSendNodeCount++;
 
                     //RequestMessage = selectAndSendNode?.Invoke(tempNode);
 
                     await SendMessageToE3(tempNode.TreeNodeValue, tempNode.TreeNodeMessage);
-                }else
+                } else
                 {
+                    ReplyMessage = "No need send message.";
                     UpdateReplyMessage?.Invoke("No need send message.");
+                }
+
+                // Send Node End
+                newWatch.Stop();
+                tempNode.TestPeriod = newWatch.ElapsedMilliseconds;
+                tempNode.TreeNodeSendStatus = TestStatus.Sended;
+                UpdateSendNodeListStatus?.Invoke(WaitSendTreeNode);
+
+                tempNode.TreeNodeReplyMessage = ReplyMessage;
+                if (AutoSaveReply == true)
+                {  
+                    await Task.Run(() => SaveReplyMsgToFile(tempNode));
                 }
 
             }
 
-            WaitSendTreeNode = new List<TestNode>();
+            WaitSendTreeNode.Clear();
 
             if (IsPerfTest == true && ManualStop == false)
             {
@@ -290,8 +279,6 @@ namespace WS_Simulator.Models
             return assigned ? result : 0;
         }
 
-        // Initial context
-        // TODO - call from where?
         public bool InitialGenerateContext(out string errDesc)
         {
             errDesc = "";
@@ -361,16 +348,42 @@ namespace WS_Simulator.Models
             WaitSendTreeNode = new List<TestNode>();
             if(sendNode.Nodes.Count > 0)
             {
-                foreach (TreeNode node in sendNode.Nodes)
+                // Check current directory is for duration test or not
+                List<Node> sendNodeList = CurrNodeList.Where(x => sendNode.Nodes.Contains(x.TreeNodeValue)).ToList();
+                bool durationCheckNeed = sendNodeList.Where(x => x.TreeNodeTestType == TestNodeType.START).Count() > 0;
+                bool saveTestNode = false;
+
+                foreach (Node node in sendNodeList)
                 {
-                    requestMessage = loadFile(node.FullPath, RootDirectoryPath, UpdateReplyMessage, null);
-                    TestNode newNode = new TestNode(TreeNodeType.File, node, TestStatus.WaitForSend, requestMessage, true);
-                    WaitSendTreeNode.Add(newNode);
+                    if (node.TreeNodeType == TreeNodeType.File)
+                    {
+                        if (durationCheckNeed == true && node.TreeNodeTestType == TestNodeType.START)
+                        {
+                            saveTestNode = true;
+                        }
+                        else if (durationCheckNeed == false)
+                        {
+                            saveTestNode = true;
+                        }
+
+                        if (saveTestNode == true)
+                        {
+                            requestMessage = loadFile(node.TreeNodeValue.FullPath, RootDirectoryPath, UpdateReplyMessage, null);
+                            TestNode newNode = new TestNode(node, TestStatus.WaitForSend, requestMessage, true);
+                            WaitSendTreeNode.Add(newNode);
+                        }
+
+                        if (durationCheckNeed == true && node.TreeNodeTestType == TestNodeType.END)
+                        {
+                            saveTestNode = false;
+                        }
+                    }
                 }
             }else
             {
+                Node currNode = CurrNodeList.Where(x => x.TreeNodeValue == sendNode).FirstOrDefault();
                 requestMessage = loadFile(sendNode.FullPath, RootDirectoryPath, UpdateReplyMessage, null);
-                TestNode newNode = new TestNode(TreeNodeType.File, sendNode, TestStatus.WaitForSend, requestMessage, true);
+                TestNode newNode = new TestNode(currNode, TestStatus.WaitForSend, requestMessage, true);
                 WaitSendTreeNode.Add(newNode);
             }
         }
@@ -387,13 +400,14 @@ namespace WS_Simulator.Models
             }    
         }
 
+        // Initial Current Node list according to root node of path tree
         public void InitialCurrNodeList(TreeNode rootNode)
         {
             int nodeId = 1;
             CurrNodeList = new List<Node>();
 
             // assign root node
-            Node newNode = new LocalFSNode(TreeNodeType.Root, rootNode);
+            Node newNode = new Node(nodeId, TreeNodeType.Root, rootNode);
             newNode.Id = nodeId;
             CurrNodeList.Add(newNode);
 
@@ -407,11 +421,10 @@ namespace WS_Simulator.Models
         private void CovertTreeNodeToNodeList(TreeNode currNode)
         {
             int currNodeId = CurrNodeList.Max(x => x.Id);
-            if(currNode.Nodes.Count > 0)
+            if(currNode.Tag is DirectoryInfo)
             {
                 currNodeId++;
-                Node newNode = new LocalFSNode(TreeNodeType.Directory, currNode);
-                newNode.Id = currNodeId;
+                Node newNode = new Node(currNodeId, TreeNodeType.Directory, currNode);
 
                 foreach(TreeNode node in currNode.Nodes)
                 {
@@ -422,11 +435,77 @@ namespace WS_Simulator.Models
             {
                 // Covert file node to local file system node
                 currNodeId++;
-                Node newNode = new LocalFSNode(TreeNodeType.File, currNode);
-                newNode.Id = currNodeId;
+                Node newNode = new Node(currNodeId, TreeNodeType.File, currNode);
 
                 CurrNodeList.Add(newNode);
             }
+        }
+
+
+        public void SetSendStartNode(TreeNode fileNode)
+        {
+            // TODO - tree to get a start and end for each directory
+            Node startNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.START).FirstOrDefault();
+            Node endNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.END).FirstOrDefault();
+
+            // TODO - Delete those code
+            UpdateNodeColor?.Invoke(startNode?.TreeNodeValue, Color.Black);
+            UpdateNodeColor?.Invoke(endNode?.TreeNodeValue, Color.Black);
+
+            if (startNode != null)
+            {
+                startNode.TreeNodeTestType = TestNodeType.NORMAL;
+            }
+            if(endNode != null)
+            {
+                endNode.TreeNodeTestType = TestNodeType.NORMAL;
+            }
+
+            Node newStartNode = CurrNodeList.Where(x => x.TreeNodeValue == fileNode).FirstOrDefault();
+            newStartNode.TreeNodeTestType = TestNodeType.START;
+
+            //UpdateNodeColor?.Invoke(SendStartNode, Color.Black);
+            UpdateNodeColor?.Invoke(newStartNode?.TreeNodeValue, Color.Red);
+        }
+
+        public void SetSendEndNode(TreeNode fileNode)
+        {
+            // TODO - tree to get a start and end for each directory
+            Node newEndNode = CurrNodeList.Where(x => x.TreeNodeValue == fileNode).FirstOrDefault();
+            if (newEndNode != null)
+            { 
+                newEndNode.TreeNodeTestType = TestNodeType.END;
+            }
+            //SendEndNode = fileNode;
+
+            //UpdateNodeColor?.Invoke(SendEndNode, Color.Red);
+            UpdateNodeColor?.Invoke(newEndNode?.TreeNodeValue, Color.Red);
+        }
+
+        public void ClearDurationNode()
+        {
+            // TODO - tree to get a start and end for each directory
+            Node startNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.START).FirstOrDefault();
+            Node endNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.END).FirstOrDefault();
+
+            UpdateNodeColor?.Invoke(startNode?.TreeNodeValue, Color.Black);
+            UpdateNodeColor?.Invoke(endNode?.TreeNodeValue, Color.Black);
+
+            if (startNode != null)
+            {
+                startNode.TreeNodeTestType = TestNodeType.NORMAL;
+            }
+            if (endNode != null)
+            {
+                endNode.TreeNodeTestType = TestNodeType.NORMAL;
+            }
+
+
+            //UpdateNodeColor?.Invoke(SendStartNode, Color.Black);
+            //UpdateNodeColor?.Invoke(SendEndNode, Color.Black);
+
+            //SendStartNode = null;
+            //SendEndNode = null;
         }
 
     }

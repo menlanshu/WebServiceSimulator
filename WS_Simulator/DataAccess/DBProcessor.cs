@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WS_Simulator.DataAccess
 {
@@ -27,7 +28,7 @@ namespace WS_Simulator.DataAccess
             }
         }
 
-        public static void HandleDBAction(string requestMessage, Action<string> updateReplyMessage)
+        public static string HandleDBAction(string requestMessage, Action<string> updateReplyMessage)
         {
             string replyMessage = "";
 
@@ -52,6 +53,8 @@ namespace WS_Simulator.DataAccess
             {
                 updateReplyMessage?.Invoke(replyMessage);
             }
+
+            return replyMessage;
         }
 
         public static string ConvertBetweenDataTableAndXML_AX(DataTable dtNeedCoveret)

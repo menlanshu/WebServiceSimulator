@@ -47,12 +47,17 @@ namespace WS_Simulator.DataAccess
         public static void SaveFile(string fileName, string contents)
         {
 
-            FileStream stream = System.IO.File.OpenWrite(fileName);
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(contents);
-            writer.Flush();
-            stream.SetLength(stream.Position);
-            stream.Close();
+            try { 
+                FileStream stream = System.IO.File.OpenWrite(fileName);
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write(contents);
+                writer.Flush();
+                stream.SetLength(stream.Position);
+                stream.Close();
+            }catch(Exception err)
+            {
+                // TODO - May be write log or show exception in reply box
+            }
         }
     }
 }

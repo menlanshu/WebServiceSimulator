@@ -11,15 +11,14 @@ namespace WS_Simulator.Models
     public class TestNode : Node
     {
         public string TreeNodeMessage { get; set; }
+        public string TreeNodeReplyMessage { get; set; }
         public TestStatus TreeNodeSendStatus { get; set; }
         public bool NeedSend { get; set; }
-        public TestNode(TreeNodeType treeNodeType, TreeNode treeNodeValue, 
-            TestStatus testStatus, string treeNodeMessage, bool needSend)
-        {
-            base.TreeNodeType = treeNodeType;
-            base.TreeNodeValue = treeNodeValue;
-            base.TreeNodeName = treeNodeValue.Text;
+        public long TestPeriod { get; set; }
 
+        public TestNode(Node baseNode,
+            TestStatus testStatus, string treeNodeMessage, bool needSend) : base(baseNode.Id, baseNode.TreeNodeType, baseNode.TreeNodeValue)
+        {
             this.TreeNodeSendStatus = testStatus;
             this.TreeNodeMessage = treeNodeMessage;
             this.NeedSend = needSend;

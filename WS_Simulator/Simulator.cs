@@ -11,12 +11,13 @@ using WS_Simulator.FormHandler;
 using WS_Simulator.Models;
 using WS_Simulator.DataAccess;
 using WS_Simulator.Interface;
+using System.Collections.Generic;
+using System.Text;
 
 namespace WS_Simulator
 {
     public partial class Simulator : Form, ISearchFormRequester
     {
-        private Action TimerStart;
         private Action UpdateCurrLoopText;
 
         private Action<string> UpdateReplyMessage;
@@ -82,8 +83,8 @@ namespace WS_Simulator
                 }
 
 
-                if(_testClient.InitialGenerateContext(out errDesc) == false)
-                { 
+                if (_testClient.InitialGenerateContext(out errDesc) == false)
+                {
                     ShowErrorMessage(errDesc);
                     return;
                 }
@@ -94,12 +95,15 @@ namespace WS_Simulator
                 _testClient.TimerStart += TimerStartSet;
                 _testClient.UpdateAfterReadFile = UpdateAfterReadFileMethod;
                 _testClient.UpdateReplyMessage = UpdateRTBReplyMsg;
+                _testClient.UpdateNodeColor = UpdateTreeNodeColor;
+                _testClient.UpdateSendNodeListStatus = UpdateRequestBoxWaitNodeStatus;
+                _testClient.SaveReplyMsgToFile = SaveReplyMsgToFileMethod;
 
                 WireUpForms();
 
                 (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
-                
-                if(okay)
+
+                if (okay)
                 {
                     _testClient.RootDirectoryPath = directoryPath;
                     _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
@@ -137,8 +141,8 @@ namespace WS_Simulator
             myTimer.Enabled = false;
 
         }
-        
-        
+
+
         // Initial Control event and delegate
         private void InitializeFormEventAndDelegate()
         {
@@ -150,7 +154,6 @@ namespace WS_Simulator
             this.UpdateAfterReadFile += UpdateAfterReadFileMethod;
             this.UpdateCurrLoopText += UpdateCurrentLoopTextMethod;
             this.SelectNodeAndSend += SelectNodeAndSendMethod;
-            this.TimerStart += TimerStartSet;
         }
         private void UpdateCurrentLoopTextMethod()
         {
@@ -166,7 +169,7 @@ namespace WS_Simulator
                 myTimer.Enabled = true;
                 myTimer.Start();
             }));
-            
+
         }
         private void UpdateRTBReplyMsg(string replyMessage)
         {
@@ -234,6 +237,29 @@ namespace WS_Simulator
             );
 
             return requestMessage;
+        }
+
+
+        private void SaveReplyMsgToFileMethod(TestNode currNode)
+        {
+            if (currNode != null)
+            {
+                string relativeFilePah = currNode.TreeNodeValue.FullPath.Substring(8);
+                string relativeFolderPath = relativeFilePah.Substring(0, relativeFilePah.LastIndexOf("\\") + 1);
+                string directoryPath = $@"{_testClient.RootDirectoryPath}{relativeFolderPath}Result\";
+
+                if(!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                string fileNameFullPath = $@"{directoryPath }{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
+
+                if (!File.Exists(fileNameFullPath))
+                { 
+                    FileProcessor.SaveFile(fileNameFullPath, currNode.TreeNodeReplyMessage); ;
+                }
+            }
         }
         #endregion
 
@@ -318,6 +344,24 @@ namespace WS_Simulator
         private void myTimer_Tick(object sender, EventArgs e)
         {
             this.rtbReply.Text = "Please wait web service reply.........." + (++waitSecond).ToString();
+        }
+
+        private void UpdateRequestBoxWaitNodeStatus(List<TestNode> testNodes)
+        {
+            if (testNodes.Count > 1)
+            {
+                StringBuilder currentStatus = new StringBuilder();
+
+                foreach (var testNode in testNodes)
+                {
+                    currentStatus.AppendLine($"Test Node: {testNode.TreeNodeName}\n" +
+                        $"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms{Environment.NewLine} ");
+                }
+
+                this.rtbRequest.Clear();
+                this.rtbRequest.Text = currentStatus.ToString();
+            }
+
         }
 
         #endregion
@@ -750,19 +794,17 @@ namespace WS_Simulator
 
             if (fileNode.Nodes.Count == 0)
             {
-                if (_testClient.SendStartNode != null)
-                {
-                    _testClient.SendStartNode.ForeColor = Color.Black;
-                }
-                if (_testClient.SendEndNode != null)
-                {
-                    _testClient.SendEndNode.ForeColor = Color.Black;
-                }
-                _testClient.SendStartNode = fileNode;
-                _testClient.SendStartNode.ForeColor = Color.Red;
-                _testClient.SendEndNode = null;
+                _testClient.SetSendStartNode(fileNode);
             }
 
+        }
+
+        private void UpdateTreeNodeColor(TreeNode treeNode, Color toColor)
+        {
+            if (treeNode != null)
+            {
+                treeNode.ForeColor = toColor;
+            }
         }
 
         private void SetEndStripMenuItem_Click(object sender, EventArgs e)
@@ -771,28 +813,18 @@ namespace WS_Simulator
 
             if (fileNode.Nodes.Count == 0)
             {
-                _testClient.SendEndNode = fileNode;
-                _testClient.SendEndNode.ForeColor = Color.Red;
+                _testClient.SetSendEndNode(fileNode);
             }
         }
 
         private void clearStartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_testClient.SendStartNode != null)
-            {
-                _testClient.SendStartNode.ForeColor = Color.Black;
-            }
-            if (_testClient.SendEndNode != null)
-            {
-                _testClient.SendEndNode.ForeColor = Color.Black;
-            }
-            _testClient.SendStartNode = null;
-            _testClient.SendEndNode = null;
+            _testClient.ClearDurationNode();
         }
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _testClient.DurationSendFlag = TestNodeType.END;
+            _testClient.ManualStop = true;
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -803,7 +835,7 @@ namespace WS_Simulator
             waitSecond = 0;
             myTimer.Enabled = false;
 
-            _testClient.DurationSendFlag = TestNodeType.END;
+            //_testClient.DurationSendFlag = TestNodeType.END;
             _testClient.ManualStop = true;
         }
 
@@ -835,6 +867,11 @@ namespace WS_Simulator
         private void cbPerfTest_CheckedChanged(object sender, EventArgs e)
         {
             _testClient.IsPerfTest = cbPerfTest.Checked;
+        }
+
+        private void autoSaveReplyCB_CheckedChanged(object sender, EventArgs e)
+        {
+            _testClient.AutoSaveReply = autoSaveReplyCB.Checked;
         }
     }
 }

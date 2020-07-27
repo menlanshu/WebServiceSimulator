@@ -84,7 +84,7 @@ namespace WS_Simulator.DataAccess
                 }
             }
         }
-        public static void InvokeWebMethod(Action<string> updateReplyMessage)
+        public static string InvokeWebMethod(Action<string> updateReplyMessage)
         {
             string replyHeader = "";
             string replyMessage = "";
@@ -145,6 +145,8 @@ namespace WS_Simulator.DataAccess
             {
                 updateReplyMessage?.Invoke(replyMessage);
             }
+
+            return replyMessage;
         }
 
         private static string GetReplyHeader(string inReply)

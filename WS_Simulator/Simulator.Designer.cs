@@ -68,6 +68,7 @@
             this.tbMsgCount = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
+            this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -281,33 +282,33 @@
             this.toolStripClear,
             this.saveToFileToolStripMenuItem});
             this.rtbContextMenu.Name = "pathContextMenu";
-            this.rtbContextMenu.Size = new System.Drawing.Size(181, 114);
+            this.rtbContextMenu.Size = new System.Drawing.Size(134, 92);
             // 
             // toolStripToXML
             // 
             this.toolStripToXML.Name = "toolStripToXML";
-            this.toolStripToXML.Size = new System.Drawing.Size(180, 22);
+            this.toolStripToXML.Size = new System.Drawing.Size(133, 22);
             this.toolStripToXML.Text = "ToXML";
             this.toolStripToXML.Click += new System.EventHandler(this.toolStripToXML_Click);
             // 
             // toDispatchToolStripMenuItem
             // 
             this.toDispatchToolStripMenuItem.Name = "toDispatchToolStripMenuItem";
-            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.toDispatchToolStripMenuItem.Text = "ToDispatch";
             this.toDispatchToolStripMenuItem.Click += new System.EventHandler(this.toDispatchToolStripMenuItem_Click);
             // 
             // toolStripClear
             // 
             this.toolStripClear.Name = "toolStripClear";
-            this.toolStripClear.Size = new System.Drawing.Size(180, 22);
+            this.toolStripClear.Size = new System.Drawing.Size(133, 22);
             this.toolStripClear.Text = "Clear";
             this.toolStripClear.Click += new System.EventHandler(this.toolStripClear_Click);
             // 
             // saveToFileToolStripMenuItem
             // 
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
-            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.saveToFileToolStripMenuItem.Text = "SaveToFile";
             this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
             // 
@@ -363,7 +364,7 @@
             // lbHowManyNodesSend
             // 
             this.lbHowManyNodesSend.AutoSize = true;
-            this.lbHowManyNodesSend.Location = new System.Drawing.Point(391, 4);
+            this.lbHowManyNodesSend.Location = new System.Drawing.Point(628, 4);
             this.lbHowManyNodesSend.Name = "lbHowManyNodesSend";
             this.lbHowManyNodesSend.Size = new System.Drawing.Size(116, 17);
             this.lbHowManyNodesSend.TabIndex = 4;
@@ -372,7 +373,7 @@
             // lbCurrentCount
             // 
             this.lbCurrentCount.AutoSize = true;
-            this.lbCurrentCount.Location = new System.Drawing.Point(513, 4);
+            this.lbCurrentCount.Location = new System.Drawing.Point(750, 4);
             this.lbCurrentCount.Name = "lbCurrentCount";
             this.lbCurrentCount.Size = new System.Drawing.Size(85, 17);
             this.lbCurrentCount.TabIndex = 5;
@@ -402,7 +403,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(638, -1);
+            this.btnStop.Location = new System.Drawing.Point(875, -1);
             this.btnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(56, 27);
@@ -414,7 +415,7 @@
             // cbAutoChangeContext
             // 
             this.cbAutoChangeContext.AutoSize = true;
-            this.cbAutoChangeContext.Location = new System.Drawing.Point(733, 3);
+            this.cbAutoChangeContext.Location = new System.Drawing.Point(333, 3);
             this.cbAutoChangeContext.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cbAutoChangeContext.Name = "cbAutoChangeContext";
             this.cbAutoChangeContext.Size = new System.Drawing.Size(142, 21);
@@ -461,12 +462,25 @@
             this.lbCurrentLoop.TabIndex = 11;
             this.lbCurrentLoop.Text = "CurrentLoop:";
             // 
+            // autoSaveReplyCB
+            // 
+            this.autoSaveReplyCB.AutoSize = true;
+            this.autoSaveReplyCB.Location = new System.Drawing.Point(478, 3);
+            this.autoSaveReplyCB.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.autoSaveReplyCB.Name = "autoSaveReplyCB";
+            this.autoSaveReplyCB.Size = new System.Drawing.Size(113, 21);
+            this.autoSaveReplyCB.TabIndex = 12;
+            this.autoSaveReplyCB.Text = "AutoSaveReply";
+            this.autoSaveReplyCB.UseVisualStyleBackColor = true;
+            this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
+            // 
             // Simulator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1553, 758);
+            this.Controls.Add(this.autoSaveReplyCB);
             this.Controls.Add(this.lbCurrentLoop);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tbMsgCount);
@@ -547,6 +561,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbCurrentLoop;
         private System.Windows.Forms.ToolStripMenuItem openFileFolderToolStripMenuItem;
+        private System.Windows.Forms.CheckBox autoSaveReplyCB;
     }
 }
 
