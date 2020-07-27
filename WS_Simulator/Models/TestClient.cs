@@ -82,14 +82,18 @@ namespace WS_Simulator.Models
 
                 TimerStart?.Invoke();
 
+                // TODO - this is not a good practice
+                if (WaitSendTreeNode.Count > 1)
+                {
+                    RequestMessage = requestMessage;
+                }
+
                 if (isSqlFile)
                 {
-                    ReplyMessage = await Task.Run(() => DBProcessor.HandleDBAction(requestMessage, UpdateReplyMessage));
+                    ReplyMessage = await Task.Run(() => DBProcessor.HandleDBAction(RequestMessage, UpdateReplyMessage));
                 }
                 else
                 {
-                    // TODO - this is not a good practice
-                    RequestMessage = requestMessage;
                     ReplyMessage = await Task.Run(() => WebServiceProcessor.InvokeWebMethod(UpdateReplyMessage));
                 }
 
