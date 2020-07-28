@@ -23,6 +23,10 @@ namespace WS_Simulator.Models
         public TreeNodeType TreeNodeType { get; set; }
         public TestNodeType TreeNodeTestType { get; set; } = TestNodeType.NORMAL;
 
+
+        public int? RepositoryId { get; set; }
+        public TestRepository Repository { get; set; }
+
         public Node(TreeNodeType treeNodeType, TreeNode treeNodeValue, Node motherNode)
         {
             TreeNodeType = treeNodeType;

@@ -16,7 +16,7 @@ using System.Text;
 
 namespace WS_Simulator
 {
-    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester
+    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester, ILoadFromDBFormRequester
     {
         private Action UpdateCurrLoopText;
 
@@ -231,7 +231,7 @@ namespace WS_Simulator
             {
                 this.pathTree.SelectedNode = node;
 
-                return SimulatorFormHandler.LoadTestFile(node.FullPath, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                return SimulatorFormHandler.LoadTestFile(node, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
 
             }), currNode
             );
@@ -310,8 +310,8 @@ namespace WS_Simulator
             }
 
             _testClient.AddTestNode(this.pathTree.SelectedNode, 
-                (nodePath, rootPath, updateReplyMessage, updateAfterReadFile) => 
-                SimulatorFormHandler.LoadTestFile(nodePath, rootPath,updateReplyMessage, updateAfterReadFile));
+                (node, rootPath, updateReplyMessage, updateAfterReadFile) => 
+                SimulatorFormHandler.LoadTestFile(node, rootPath,updateReplyMessage, updateAfterReadFile));
             _testClient.RequestMessage = this.rtbRequest.Text;
 
             //await _testClient.SendMessageToE3(this.pathTree.SelectedNode, this.rtbRequest.Text, UpdateReplyMessage, TimerStart);
@@ -337,7 +337,7 @@ namespace WS_Simulator
             if (this.pathTree.SelectedNode != null)
             {
                 this.pathTree.SelectedNode.BackColor = Color.LightGreen;
-                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode.FullPath, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
             }
         }
 
@@ -442,11 +442,6 @@ namespace WS_Simulator
             {
                 selectRichTextBox.Clear();
             }
-        }
-
-        private void loadFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
         }
 
         private void saveToFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -851,6 +846,7 @@ namespace WS_Simulator
 
         private void loadFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            _testClient.CurrentRepository = null;
             System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
             dialog.SelectedPath = _testClient.RootDirectoryPath;
             dialog.Description = "Please choose the folder for test xml files. ";
@@ -910,6 +906,17 @@ namespace WS_Simulator
             return (result, errDesc);
         }
 
+        private void loadFromDBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadFromDB frm = new LoadFromDB(this);
+            frm.Show();
+        }
+
+        public void CovertTestRepositoryToTree(TestRepository testRepository)
+        {
+            _testClient.CurrentRepository = testRepository;
+            SimulatorFormHandler.LoadFileTreeFromDB(this.pathTree, folderContextMenu, fileContextMenu, _testClient.CurrentRepository);
+        }
     }
 }
 

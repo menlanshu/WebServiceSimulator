@@ -33,6 +33,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Simulator));
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadFromDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveCurrTreeToDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.pathTree = new System.Windows.Forms.TreeView();
@@ -69,9 +72,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.loadFromDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveCurrTreeToDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -110,9 +110,29 @@
             this.loadFromDBToolStripMenuItem,
             this.saveCurrTreeToDBToolStripMenuItem});
             this.loadFileToolStripMenuItem.Name = "loadFileToolStripMenuItem";
-            this.loadFileToolStripMenuItem.Size = new System.Drawing.Size(78, 22);
-            this.loadFileToolStripMenuItem.Text = "LoadFolder";
-            this.loadFileToolStripMenuItem.Click += new System.EventHandler(this.loadFileToolStripMenuItem_Click);
+            this.loadFileToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
+            this.loadFileToolStripMenuItem.Text = "Load Repository";
+            // 
+            // loadFromFolderToolStripMenuItem
+            // 
+            this.loadFromFolderToolStripMenuItem.Name = "loadFromFolderToolStripMenuItem";
+            this.loadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromFolderToolStripMenuItem.Text = "LoadFromFolder";
+            this.loadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.loadFromFolderToolStripMenuItem_Click);
+            // 
+            // loadFromDBToolStripMenuItem
+            // 
+            this.loadFromDBToolStripMenuItem.Name = "loadFromDBToolStripMenuItem";
+            this.loadFromDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromDBToolStripMenuItem.Text = "LoadFromDB";
+            this.loadFromDBToolStripMenuItem.Click += new System.EventHandler(this.loadFromDBToolStripMenuItem_Click);
+            // 
+            // saveCurrTreeToDBToolStripMenuItem
+            // 
+            this.saveCurrTreeToDBToolStripMenuItem.Name = "saveCurrTreeToDBToolStripMenuItem";
+            this.saveCurrTreeToDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveCurrTreeToDBToolStripMenuItem.Text = "SaveCurrTreeToDB";
+            this.saveCurrTreeToDBToolStripMenuItem.Click += new System.EventHandler(this.saveCurrTreeToDBToolStripMenuItem_Click);
             // 
             // reloadFolderToolStripMenuItem
             // 
@@ -480,26 +500,6 @@
             this.autoSaveReplyCB.Text = "AutoSaveReply";
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
-            // 
-            // loadFromDBToolStripMenuItem
-            // 
-            this.loadFromDBToolStripMenuItem.Name = "loadFromDBToolStripMenuItem";
-            this.loadFromDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadFromDBToolStripMenuItem.Text = "LoadFromDB";
-            // 
-            // saveCurrTreeToDBToolStripMenuItem
-            // 
-            this.saveCurrTreeToDBToolStripMenuItem.Name = "saveCurrTreeToDBToolStripMenuItem";
-            this.saveCurrTreeToDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.saveCurrTreeToDBToolStripMenuItem.Text = "SaveCurrTreeToDB";
-            this.saveCurrTreeToDBToolStripMenuItem.Click += new System.EventHandler(this.saveCurrTreeToDBToolStripMenuItem_Click);
-            // 
-            // loadFromFolderToolStripMenuItem
-            // 
-            this.loadFromFolderToolStripMenuItem.Name = "loadFromFolderToolStripMenuItem";
-            this.loadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadFromFolderToolStripMenuItem.Text = "LoadFromFolder";
-            this.loadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.loadFromFolderToolStripMenuItem_Click);
             // 
             // Simulator
             // 

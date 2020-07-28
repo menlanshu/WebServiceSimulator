@@ -83,7 +83,7 @@ namespace WS_Simulator.FormHandler
                 return (true, directoryPath);
             }
 
-            return (false, "");
+            return (false, "Directory path not exist");
         }
 
         public static void LoadWholeTree(FileSystemInfo tempSystemInfo, TreeNode tempNode, 
@@ -126,7 +126,75 @@ namespace WS_Simulator.FormHandler
 
         }
 
-        public static string LoadTestFile(string nodePath, string rootPath, 
+        public static (bool oKay, string directoryPath) LoadFileTreeFromDB(TreeView pathTree, ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
+            TestRepository testRepository, string directoryPath = ".")
+        {
+            if (testRepository != null)
+            {
+                Node rootNode = testRepository.TestNodeList.Where(x => x.TreeNodeType == TreeNodeType.Root).FirstOrDefault();
+
+                if (rootNode != null)
+                {
+                    pathTree.Nodes[0].Nodes.Clear();
+                    pathTree.Nodes[0].Text = rootNode.TreeNodeName;
+                    pathTree.Nodes[0].ContextMenuStrip = folderMenu;
+                    pathTree.Nodes[0].Tag = rootNode;
+
+                    foreach (var node in testRepository.TestNodeList.Where(x => x.MotherNode == rootNode))
+                    {
+                        LoadWholeTreeFomrDB(pathTree.Nodes[0], folderMenu, fileMenu, testRepository,  node);
+                    }
+
+                    pathTree.Nodes[0].Expand();
+
+                    return (true, directoryPath);
+                }else
+                {
+                    return (false, "Can not find root node");
+                }
+            }
+
+            return (false, "Test Repository is NUll!");
+        }
+
+        public static void LoadWholeTreeFomrDB(TreeNode tempNode, ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
+            TestRepository testRepository, Node currNode)
+        {
+
+            try
+            {
+                if (currNode.TreeNodeType == TreeNodeType.Directory)
+                {
+                    TreeNode tempDireNode = new TreeNode(currNode.TreeNodeName);
+
+                    tempDireNode.ContextMenuStrip = folderMenu;
+                    tempDireNode.Tag = currNode;
+
+                    tempNode.Nodes.Add(tempDireNode);
+
+                    foreach (var node in testRepository.TestNodeList.Where(x => x.MotherNode == currNode))
+                    {
+                        LoadWholeTreeFomrDB(tempDireNode, folderMenu, fileMenu, testRepository, node);
+                    }
+                }
+                else if (currNode.TreeNodeType == TreeNodeType.File)
+                {
+                    TreeNode tempFileNode = new TreeNode(currNode.TreeNodeName);
+
+                    tempFileNode.ContextMenuStrip = fileMenu;
+                    tempFileNode.Tag = currNode;
+
+                    tempNode.Nodes.Add(tempFileNode);
+                }
+            }
+            catch (Exception err)
+            {
+                throw new Exception($"Exception happen in LoadWholeTreeFomrDB : { err.Message }");
+            }
+
+        }
+
+        public static string LoadTestFile(TreeNode node, string rootPath, 
             Action<string> updateReplyMessage, Action<string> updateAfterReadFile)
         {
             string filePath = "";
@@ -135,10 +203,18 @@ namespace WS_Simulator.FormHandler
 
             try
             {
-                // TODO - Optimize the node path!!
-                filePath = rootPath + nodePath.Substring(8);
+                if (node.Tag is Node)
+                {
+                    requestMessage = ((Node)node.Tag).TreeNodeMessage;
+                    updateAfterReadFile?.Invoke(requestMessage);
+                }
+                else
+                {
+                    // TODO - Optimize the node path!!
+                    filePath = rootPath + node.FullPath.Substring(8);
 
-                requestMessage = FileProcessor.ReadFile(filePath, updateAfterReadFile);
+                    requestMessage = FileProcessor.ReadFile(filePath, updateAfterReadFile);
+                }
             }
             catch (Exception err)
             {

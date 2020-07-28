@@ -18,6 +18,8 @@ namespace WS_Simulator
         {
             _requester = requester;
 
+            this.StartPosition = FormStartPosition.CenterScreen;
+
             InitializeComponent();
         }
 
@@ -26,7 +28,7 @@ namespace WS_Simulator
             bool result;
             string errDesc;
 
-            if(this.nameValueText.Text.Length < 0)
+            if(string.IsNullOrWhiteSpace(this.nameValueText.Text))
             {
                 MessageBox.Show("Please key in your test repository name");
             }else

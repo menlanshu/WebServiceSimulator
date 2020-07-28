@@ -45,6 +45,7 @@ namespace WS_Simulator.Models
         public bool ManualStop { get; set; }
 
         public List<Node> CurrNodeList { get; set; } = new List<Node>();
+        public TestRepository CurrentRepository { get; set; }
 
         public string RequestMessage { get; set; }
         public string ReplyMessage { get; set; }
@@ -346,7 +347,7 @@ namespace WS_Simulator.Models
             return result;
         }
 
-        public void AddTestNode(TreeNode sendNode, Func<string, string, Action<string>, Action<string>, string> loadFile)
+        public void AddTestNode(TreeNode sendNode, Func<TreeNode, string, Action<string>, Action<string>, string> loadFile)
         {
             string requestMessage = "";
             WaitSendTreeNode = new List<TestNode>();
@@ -372,7 +373,7 @@ namespace WS_Simulator.Models
 
                         if (saveTestNode == true)
                         {
-                            requestMessage = loadFile(node.TreeNodeValue.FullPath, RootDirectoryPath, UpdateReplyMessage, null);
+                            requestMessage = loadFile(node.TreeNodeValue, RootDirectoryPath, UpdateReplyMessage, null);
                             TestNode newNode = new TestNode(node, TestStatus.WaitForSend, requestMessage, true);
                             WaitSendTreeNode.Add(newNode);
                         }
@@ -386,7 +387,7 @@ namespace WS_Simulator.Models
             }else
             {
                 Node currNode = CurrNodeList.Where(x => x.TreeNodeValue == sendNode).FirstOrDefault();
-                requestMessage = loadFile(sendNode.FullPath, RootDirectoryPath, UpdateReplyMessage, null);
+                requestMessage = loadFile(sendNode, RootDirectoryPath, UpdateReplyMessage, null);
                 TestNode newNode = new TestNode(currNode, TestStatus.WaitForSend, requestMessage, true);
                 WaitSendTreeNode.Add(newNode);
             }
@@ -425,6 +426,7 @@ namespace WS_Simulator.Models
             if(currNode.Tag is DirectoryInfo)
             {
                 Node newNode = new Node( TreeNodeType.Directory, currNode, motherNode);
+                CurrNodeList.Add(newNode);
 
                 foreach(TreeNode node in currNode.Nodes)
                 {

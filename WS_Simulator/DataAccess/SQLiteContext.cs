@@ -5,7 +5,7 @@ namespace WS_Simulator.DataAccess
 {
     public class SQLiteContext : DbContext
     {
-        private const string ConnString = "DataSource=TestCase.db";
+        private const string ConnString = "DataSource=TestRepositories.db";
         public DbSet<TestRepository> TestRespositories { get; set; }
         public DbSet<Node> NodeList { get; set; }
 
@@ -17,7 +17,9 @@ namespace WS_Simulator.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TestRepository>()
-                .HasMany(t => t.TestNodeList);
+                .HasMany(t => t.TestNodeList)
+                .WithOne(n => n.Repository)
+                .HasForeignKey(t => t.RepositoryId).IsRequired(false);
 
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.MotherNode)
