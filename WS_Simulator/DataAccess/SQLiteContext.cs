@@ -19,12 +19,13 @@ namespace WS_Simulator.DataAccess
             modelBuilder.Entity<TestRepository>()
                 .HasMany(t => t.TestNodeList)
                 .WithOne(n => n.Repository)
-                .HasForeignKey(t => t.RepositoryId).IsRequired(false);
+                .HasForeignKey(t => t.RepositoryId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Node>()
                 .HasOne(n => n.MotherNode)
                 .WithMany()
                 .HasForeignKey(n => n.MotherNodeId).IsRequired(false);
+
         }
     }
 }

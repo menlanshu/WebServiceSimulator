@@ -15,11 +15,15 @@ namespace WS_Simulator.Models
         public long TestPeriod { get; set; }
 
         public TestNode(Node baseNode,
-            TestStatus testStatus, string treeNodeMessage, bool needSend) : base(baseNode.TreeNodeType, baseNode.TreeNodeValue, baseNode.MotherNode)
+            TestStatus testStatus, string treeNodeMessage, bool needSend) : 
+            base(baseNode.TreeNodeType, baseNode.TreeNodeValue, baseNode.MotherNode, baseNode.NodeFullPath)
         {
             this.TreeNodeSendStatus = testStatus;
             this.TreeNodeMessage = treeNodeMessage;
             this.NeedSend = needSend;
+
+            this.TreeNodeSourceType = baseNode.TreeNodeSourceType;
+            this.MotherNodeId = baseNode.MotherNodeId;
         }
     }
 }

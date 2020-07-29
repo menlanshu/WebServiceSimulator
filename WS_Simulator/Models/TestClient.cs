@@ -21,9 +21,11 @@ namespace WS_Simulator.Models
         public Action<string> UpdateAfterReadFile;
         public Action<TreeNode, Color> UpdateNodeColor;
         public Action<List<TestNode>> UpdateSendNodeListStatus;
-        public Action<TestNode> SaveReplyMsgToFile;
+        public Func<Node, string, TreeNodeType, Node> SaveNodeToTree;
 
         private char[] ConfigDelimeter = (";").ToCharArray();
+        private const string ResultFolderName = "Result";
+        private const string ResultFilePostFix = "result";
 
         public string RootDirectoryPath { get; set; }
         public int CurrentSendNodeCount { get; set; }
@@ -49,6 +51,7 @@ namespace WS_Simulator.Models
 
         public string RequestMessage { get; set; }
         public string ReplyMessage { get; set; }
+
 
         private async Task SendMessageToE3(TreeNode sendNode, string requestMessage)
         {
@@ -228,7 +231,7 @@ namespace WS_Simulator.Models
                 tempNode.TreeNodeReplyMessage = ReplyMessage;
                 if (AutoSaveReply == true)
                 {  
-                    await Task.Run(() => SaveReplyMsgToFile(tempNode));
+                    await Task.Run(() => SaveReplyMsgToFileMethod(tempNode));
                 }
 
             }
@@ -347,14 +350,18 @@ namespace WS_Simulator.Models
             return result;
         }
 
-        public void AddTestNode(TreeNode sendNode, Func<TreeNode, string, Action<string>, Action<string>, string> loadFile)
+        public void AddTestNode(TreeNode sendNode, Func<Node, string, Action<string>, Action<string>, string> loadFile)
         {
             string requestMessage = "";
             WaitSendTreeNode = new List<TestNode>();
             if(sendNode.Nodes.Count > 0)
             {
                 // Check current directory is for duration test or not
-                List<Node> sendNodeList = CurrNodeList.Where(x => sendNode.Nodes.Contains(x.TreeNodeValue)).ToList();
+                List<Node> sendNodeList = new List<Node>();
+                foreach (TreeNode treeNode in sendNode.Nodes)
+                {
+                    sendNodeList.Add((Node)treeNode.Tag);
+                }
                 bool durationCheckNeed = sendNodeList.Where(x => x.TreeNodeTestType == TestNodeType.START).Count() > 0;
                 bool saveTestNode = false;
 
@@ -373,7 +380,7 @@ namespace WS_Simulator.Models
 
                         if (saveTestNode == true)
                         {
-                            requestMessage = loadFile(node.TreeNodeValue, RootDirectoryPath, UpdateReplyMessage, null);
+                            requestMessage = loadFile(node, RootDirectoryPath, UpdateReplyMessage, null);
                             TestNode newNode = new TestNode(node, TestStatus.WaitForSend, requestMessage, true);
                             WaitSendTreeNode.Add(newNode);
                         }
@@ -386,9 +393,8 @@ namespace WS_Simulator.Models
                 }
             }else
             {
-                Node currNode = CurrNodeList.Where(x => x.TreeNodeValue == sendNode).FirstOrDefault();
-                requestMessage = loadFile(sendNode, RootDirectoryPath, UpdateReplyMessage, null);
-                TestNode newNode = new TestNode(currNode, TestStatus.WaitForSend, requestMessage, true);
+                requestMessage = loadFile((Node)sendNode.Tag, RootDirectoryPath, UpdateReplyMessage, null);
+                TestNode newNode = new TestNode((Node)sendNode.Tag, TestStatus.WaitForSend, requestMessage, true);
                 WaitSendTreeNode.Add(newNode);
             }
         }
@@ -405,6 +411,7 @@ namespace WS_Simulator.Models
             }    
         }
 
+        /*
         // Initial Current Node list according to root node of path tree
         public void InitialCurrNodeList(TreeNode rootNode)
         {
@@ -440,7 +447,7 @@ namespace WS_Simulator.Models
 
                 CurrNodeList.Add(newNode);
             }
-        }
+        }*/
 
 
         public void SetSendStartNode(TreeNode fileNode)
@@ -507,6 +514,115 @@ namespace WS_Simulator.Models
 
             //SendStartNode = null;
             //SendEndNode = null;
+        }
+
+
+        private void SaveReplyMsgToFileMethod(Node currNode)
+        {
+            if (currNode != null)
+            {
+                if (currNode.TreeNodeSourceType == SourceNodeType.DB)
+                {
+                    SaveReplyResultToDB(currNode);
+                }
+                else
+                {
+                    SaveReplyResultToLocal(currNode);
+                }
+            }
+        }
+
+        private void SaveReplyResultToDB(Node currNode)
+        {
+            Node resultDirectory = null;
+            Node fileNode = null;
+            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmss")}.{ResultFilePostFix}";
+
+            var result = CurrNodeList.Where(x => x.MotherNodeId == currNode.MotherNodeId &&
+                x.TreeNodeType == TreeNodeType.Directory && x.TreeNodeName == ResultFolderName);
+            if (result.Count() == 0)
+            {
+                resultDirectory = SaveNodeToTree(currNode.MotherNode, ResultFolderName,
+                    TreeNodeType.Directory);
+
+                resultDirectory.RepositoryId = CurrentRepository.Id;
+                resultDirectory.Repository = CurrentRepository;
+                SQLiteDBProcessor.SaveOneNode(resultDirectory);
+            }else
+            {
+                resultDirectory = result.FirstOrDefault();
+            }
+
+
+            if (CurrNodeList.Where(x => x.MotherNodeId == resultDirectory.Id &&
+                x.TreeNodeType == TreeNodeType.File && x.TreeNodeName == fileName).Count() == 0)
+            {
+                fileNode = SaveNodeToTree(resultDirectory, fileName, TreeNodeType.File);
+
+                fileNode.RepositoryId = CurrentRepository.Id;
+                fileNode.TreeNodeMessage = currNode.TreeNodeReplyMessage;
+                SQLiteDBProcessor.SaveOneNode(fileNode);
+            }
+        }
+
+        public bool SaveNewNodeToDB(Node currNode)
+        {
+            Node fileNode = null;
+
+            if (CurrNodeList.Where(x => x.MotherNodeId == currNode.MotherNode?.Id &&
+                x.TreeNodeType == TreeNodeType.File && x.TreeNodeName == currNode.TreeNodeName).Count() == 0)
+            {
+                fileNode = SaveNodeToTree(currNode.MotherNode, currNode.TreeNodeName, TreeNodeType.File);
+
+                fileNode.RepositoryId = CurrentRepository.Id;
+                fileNode.TreeNodeMessage = currNode.TreeNodeMessage;
+                SQLiteDBProcessor.SaveOneNode(fileNode);
+
+                return true;
+            }else
+            {
+                return false;
+            }
+
+        }
+
+
+
+        private void SaveReplyResultToLocal(Node currNode)
+        {
+            Node resultDirectory = null;
+            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmss")}.{ResultFilePostFix}";
+
+            string relativeFilePah = currNode.TreeNodeValue.FullPath.Substring(8);
+            string relativeFolderPath = relativeFilePah.Substring(0, relativeFilePah.LastIndexOf("\\") + 1);
+            string directoryPath = $@"{RootDirectoryPath}{relativeFolderPath}{ResultFolderName}\";
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+                resultDirectory = SaveNodeToTree(currNode.MotherNode, ResultFolderName,
+                    TreeNodeType.Directory);
+            }else
+            {
+                foreach(TreeNode node in currNode.MotherNode.TreeNodeValue.Nodes)
+                {
+                    if(node.Text == ResultFolderName)
+                    {
+                        resultDirectory = (Node)node.Tag;
+                        break;
+                    }
+                }
+            }
+
+            string fileNameFullPath = $@"{directoryPath }{fileName}";
+
+            if (!File.Exists(fileNameFullPath))
+            {
+                FileProcessor.SaveFile(fileNameFullPath, currNode.TreeNodeReplyMessage);
+                SaveNodeToTree(resultDirectory, 
+                    $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmss")}.{ResultFilePostFix}",
+                    TreeNodeType.File);
+            }
         }
 
     }

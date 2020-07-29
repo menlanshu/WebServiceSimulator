@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using WS_Simulator.Models;
 
 namespace WS_Simulator.DataAccess
@@ -15,18 +16,89 @@ namespace WS_Simulator.DataAccess
 
         public static void SaveDataToDB(TestRepository testRepository)
         {
-            _sQLiteContext.TestRespositories.Add(testRepository);
-            _sQLiteContext.SaveChanges();
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                _sQLiteContext.TestRespositories.Add(testRepository);
+                _sQLiteContext.SaveChanges();
+            }
         }
 
         public static bool CheckRepositoryName(string name)
         {
-            return (_sQLiteContext.TestRespositories.Where(x => x.RepositoryName == name).Count() > 0);
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                return (_sQLiteContext.TestRespositories.Where(x => x.RepositoryName == name).Count() > 0);
+            }
+        }
+
+        public static string GetRequestMessageOfCurrentNode(Node node)
+        {
+            string outputMessage = "";
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                if (node.TreeNodeType == TreeNodeType.File)
+                {
+                    outputMessage = _sQLiteContext.NodeList.Where(x => x.Id == node.Id).FirstOrDefault()?.TreeNodeMessage;
+                }
+            }
+
+            return outputMessage;
+        }
+
+        public static void SaveOneNode(Node node)
+        {
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                node.Repository = null;
+                node.MotherNodeId = node.MotherNode?.Id;
+                node.MotherNode = null;
+                _sQLiteContext.NodeList.Add(node);
+                _sQLiteContext.SaveChanges();
+            }
+        }
+
+        public static void DeleteOneNode(Node node)
+        {
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                Node removeNode = _sQLiteContext.NodeList.Where(x => x.Id == node.Id).FirstOrDefault();
+                _sQLiteContext.NodeList.Remove(removeNode);
+                _sQLiteContext.SaveChanges();
+            }
         }
 
         public static List<TestRepository> GetAllRepository()
         {
-            return _sQLiteContext.TestRespositories.Include(x => x.TestNodeList).ToList();
+            List<TestRepository> outputList = new List<TestRepository>();
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                foreach (TestRepository currRepo in _sQLiteContext.TestRespositories.ToList())
+                {
+                    TestRepository testRepository = new TestRepository();
+                    testRepository.Id = currRepo.Id;
+                    testRepository.RepositoryName = currRepo.RepositoryName;
+                    testRepository.TestNodeList =
+                        _sQLiteContext.NodeList.Where(x => x.RepositoryId == currRepo.Id)
+                        .Select(
+                            x =>
+                            new Node
+                            {
+                                Id = x.Id,
+                                TreeNodeName = x.TreeNodeName,
+                                NodeFullPath = x.NodeFullPath,
+                                MotherNodeId = x.MotherNodeId,
+                                MotherNode = x.MotherNode,
+                                TreeNodeType = x.TreeNodeType,
+                                RepositoryId = x.RepositoryId,
+                                Repository = x.Repository
+                            }
+                        ).ToList();
+
+                    outputList.Add(testRepository);
+                }
+            }
+
+            return outputList;
         }
 
     }

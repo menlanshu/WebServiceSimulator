@@ -16,7 +16,7 @@ using System.Text;
 
 namespace WS_Simulator
 {
-    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester, ILoadFromDBFormRequester
+    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester, ILoadFromDBFormRequester, ISaveSingleFieToDB
     {
         private Action UpdateCurrLoopText;
 
@@ -97,16 +97,21 @@ namespace WS_Simulator
                 _testClient.UpdateReplyMessage = UpdateRTBReplyMsg;
                 _testClient.UpdateNodeColor = UpdateTreeNodeColor;
                 _testClient.UpdateSendNodeListStatus = UpdateRequestBoxWaitNodeStatus;
-                _testClient.SaveReplyMsgToFile = SaveReplyMsgToFileMethod;
+                _testClient.SaveNodeToTree = SaveNodeToTree;
 
                 WireUpForms();
 
-                (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
+                // Initial a list of Node
+                List<Node> initialNodeList = new List<Node>();
+
+                _testClient.CurrentRepository = null;
+                (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList, 
+                    this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
 
                 if (okay)
                 {
                     _testClient.RootDirectoryPath = directoryPath;
-                    _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                    _testClient.CurrNodeList = initialNodeList;
                 }
                 else
                 {
@@ -231,7 +236,7 @@ namespace WS_Simulator
             {
                 this.pathTree.SelectedNode = node;
 
-                return SimulatorFormHandler.LoadTestFile(node, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                return SimulatorFormHandler.LoadTestFile((Node)node.Tag, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
 
             }), currNode
             );
@@ -239,27 +244,67 @@ namespace WS_Simulator
             return requestMessage;
         }
 
-
-        private void SaveReplyMsgToFileMethod(TestNode currNode)
+        private Node SaveNodeToTree(Node motherNode, string nodeName, TreeNodeType treeNodeType)
         {
-            if (currNode != null)
-            {
-                string relativeFilePah = currNode.TreeNodeValue.FullPath.Substring(8);
-                string relativeFolderPath = relativeFilePah.Substring(0, relativeFilePah.LastIndexOf("\\") + 1);
-                string directoryPath = $@"{_testClient.RootDirectoryPath}{relativeFolderPath}Result\";
-
-                if(!Directory.Exists(directoryPath))
+            Node newNode =  (Node)this.Invoke(
+                (Func<Node, string, TreeNodeType, Node>)(
+                (inmotherNode, innodeName, intreeNodeType) =>
                 {
-                    Directory.CreateDirectory(directoryPath);
+                    return SaveNodeToTreeMethod(inmotherNode, innodeName, intreeNodeType);
+                }
+                ), 
+                motherNode, nodeName, treeNodeType);
+
+            return newNode;
+        }
+
+        private Node SaveNodeToTreeMethod(Node motherNode, string nodeName, TreeNodeType treeNodeType)
+        {
+            TreeNode newTreeNode = null;
+            Node newNode = null;
+
+            if (motherNode != null)
+            {
+                if (treeNodeType == TreeNodeType.File)
+                {
+                    // Add node to current path tree
+                    newTreeNode = new TreeNode();
+                    //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
+                    newTreeNode.Text = nodeName;
+                    newTreeNode.ContextMenuStrip = this.fileContextMenu;
+                    // Add new tree node to current tree
+                    motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
+
+                    // Add node to current Node tree
+                    newNode = new Node(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
+                    newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
+
+                    newTreeNode.Tag = newNode;
+
+                    _testClient.CurrNodeList.Add(newNode);
+                }
+                else if (treeNodeType == TreeNodeType.Directory)
+                {
+                    // Add node to current path tree
+                    newTreeNode = new TreeNode();
+                    //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
+                    newTreeNode.Text = nodeName;
+                    newTreeNode.ContextMenuStrip = this.folderContextMenu;
+                    // Add new tree node to current tree
+                    motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
+
+                    // Add node to current Node tree
+                    newNode = new Node(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
+                    newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
+
+                    newTreeNode.Tag = newNode;
+
+                    _testClient.CurrNodeList.Add(newNode);
                 }
 
-                string fileNameFullPath = $@"{directoryPath }{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
-
-                if (!File.Exists(fileNameFullPath))
-                { 
-                    FileProcessor.SaveFile(fileNameFullPath, currNode.TreeNodeReplyMessage); ;
-                }
             }
+
+            return newNode;
         }
         #endregion
 
@@ -337,7 +382,8 @@ namespace WS_Simulator
             if (this.pathTree.SelectedNode != null)
             {
                 this.pathTree.SelectedNode.BackColor = Color.LightGreen;
-                SimulatorFormHandler.LoadTestFile(this.pathTree.SelectedNode, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+                SimulatorFormHandler.LoadTestFile((Node)this.pathTree.SelectedNode.Tag, _testClient.RootDirectoryPath, 
+                    UpdateReplyMessage, UpdateAfterReadFile);
             }
         }
 
@@ -448,23 +494,29 @@ namespace WS_Simulator
         {
             if (selectRichTextBox != null)
             {
-                SaveFileDialog sfd = new SaveFileDialog();
-
-                //set file type
-                sfd.Filter = "Test File（*.xml）|*.xml";
-
-                sfd.FilterIndex = 1;
-                sfd.RestoreDirectory = true;
-
-                sfd.InitialDirectory = _testClient.RootDirectoryPath;
-
-                if (sfd.ShowDialog() == DialogResult.OK)
+                if (_testClient.CurrentRepository == null)
                 {
-                    string localFilePath = sfd.FileName.ToString();
-                    string fileNameExt = localFilePath.Substring(localFilePath.LastIndexOf("\\") + 1);
-                    
-                    FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text); ;
+                    SaveFileDialog sfd = new SaveFileDialog();
 
+                    //set file type
+                    sfd.Filter = "Test File（*.xml）|*.xml";
+
+                    sfd.FilterIndex = 1;
+                    sfd.RestoreDirectory = true;
+
+                    sfd.InitialDirectory = _testClient.RootDirectoryPath;
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        string localFilePath = sfd.FileName.ToString();
+                        //string fileNameExt = localFilePath.Substring(localFilePath.LastIndexOf("\\") + 1);
+
+                        FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text);
+                    }
+                }else
+                {
+                    SaveSingleFileToDB frm = new SaveSingleFileToDB(this, this.pathTree, selectRichTextBox.Text);
+                    frm.Show();
                 }
             }
         }
@@ -489,11 +541,14 @@ namespace WS_Simulator
                 MessageBox.Show("Excepetion happen in " + System.Reflection.MethodBase.GetCurrentMethod().Name + " : " + err.Message);
             }
 
-            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, path);
+            // Initial a list of Node
+            List<Node> initialNodeList = new List<Node>();
+            _testClient.CurrentRepository = null;
+            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList, this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, path);
             if (okay)
             {
                 _testClient.RootDirectoryPath = directoryPath;
-                _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                _testClient.CurrNodeList = initialNodeList;
             }
             else
             {
@@ -533,12 +588,16 @@ namespace WS_Simulator
 
         private void reloadFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (bool okay, string directoryPath)  = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, 
+            // Initial a list of Node
+            List<Node> initialNodeList = new List<Node>();
+
+            _testClient.CurrentRepository = null;
+            (bool okay, string directoryPath)  = SimulatorFormHandler.LoadFileTree(ref initialNodeList, this.pathTree, folderContextMenu, fileContextMenu, 
                 _wsConfig.FileExtensionName, _testClient.RootDirectoryPath);
             if (okay)
             {
                 _testClient.RootDirectoryPath = directoryPath;
-                _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                _testClient.CurrNodeList = initialNodeList;
             }
             else
             {
@@ -811,7 +870,8 @@ namespace WS_Simulator
             {
                 if (directoryNode.FullPath != "")
                 {
-                    Process.Start($@"{((DirectoryInfo)directoryNode.Tag).FullName}");
+                    //Process.Start($@"{((DirectoryInfo)directoryNode.Tag).FullName}");
+                    Process.Start($@"{FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath)}");
                 }
             }
         }
@@ -840,8 +900,14 @@ namespace WS_Simulator
 
         private void saveCurrTreeToDBToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveToDB frm = new SaveToDB(this);
-            frm.Show();
+            if (_testClient.CurrentRepository == null)
+            {
+                SaveToDB frm = new SaveToDB(this);
+                frm.Show();
+            }else
+            {
+                MessageBox.Show("Can't save repository from DB to DB!");
+            }
         }
 
         private void loadFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -867,11 +933,17 @@ namespace WS_Simulator
                     }
                     else
                     {
-                        (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
+                        // Initial a list of Node
+                        List<Node> initialNodeList = new List<Node>();
+                        
+                        _testClient.CurrentRepository = null;
+                        (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(
+                            ref initialNodeList, this.pathTree, 
+                            folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
                         if (okay)
                         {
                             _testClient.RootDirectoryPath = directoryPath;
-                            _testClient.InitialCurrNodeList(this.pathTree.Nodes[0]);
+                            _testClient.CurrNodeList = initialNodeList;
                         }
                         else
                         {
@@ -897,6 +969,8 @@ namespace WS_Simulator
                 testRepository.TestNodeList = _testClient.CurrNodeList;
                 SQLiteDBProcessor.SaveDataToDB(testRepository);
 
+                _testClient.CurrNodeList.ForEach(x => x.TreeNodeMessage = "");
+
                 result = true;
             }else
             {
@@ -916,6 +990,32 @@ namespace WS_Simulator
         {
             _testClient.CurrentRepository = testRepository;
             SimulatorFormHandler.LoadFileTreeFromDB(this.pathTree, folderContextMenu, fileContextMenu, _testClient.CurrentRepository);
+            _testClient.CurrNodeList = testRepository.TestNodeList;
+        }
+
+        public bool RequestSaveFile(Node newNode)
+        {
+            return _testClient.SaveNewNodeToDB(newNode);
+        }
+
+        private void deleteFromDBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.pathTree.SelectedNode != null)
+            {
+                if (_testClient.CurrentRepository == null)
+                {
+                    Node currNode = (Node)this.pathTree.SelectedNode.Tag;
+                    this.pathTree.SelectedNode.Remove();
+                    _testClient.CurrNodeList.Remove(currNode);
+                }
+                else
+                {
+                    Node currNode = (Node)this.pathTree.SelectedNode.Tag;
+                    this.pathTree.SelectedNode.Remove();
+                    _testClient.CurrNodeList.Remove(currNode);
+                    SQLiteDBProcessor.DeleteOneNode(currNode);
+                }
+            }
         }
     }
 }

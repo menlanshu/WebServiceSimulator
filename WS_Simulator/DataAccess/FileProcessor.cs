@@ -12,6 +12,10 @@ namespace WS_Simulator.DataAccess
 {
     public static class FileProcessor
     {
+        public static string GetFullPath(string rootPath, string nodeFullPath)
+        {
+            return rootPath + nodeFullPath.Substring(8);
+        }
         public static void LoadMessageForAllNodes(List<Node> nodeList, string rootPath)
         {
             foreach(Node node in nodeList)

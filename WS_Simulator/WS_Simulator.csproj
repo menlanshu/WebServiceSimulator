@@ -216,6 +216,7 @@
     <Compile Include="Interface\ILoadFromDBFormRequester.cs" />
     <Compile Include="Interface\ISaveToDBFormRequester.cs" />
     <Compile Include="Interface\ISearchFormRequester.cs" />
+    <Compile Include="Interface\ISaveSingleFieToDB.cs" />
     <Compile Include="Models\Enum.cs" />
     <Compile Include="Models\Node.cs" />
     <Compile Include="Models\TestClient.cs" />
@@ -227,6 +228,12 @@
     </Compile>
     <Compile Include="LoadFromDB.Designer.cs">
       <DependentUpon>LoadFromDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SaveSingleFileToDB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveSingleFileToDB.Designer.cs">
+      <DependentUpon>SaveSingleFileToDB.cs</DependentUpon>
     </Compile>
     <Compile Include="SaveToDB.cs">
       <SubType>Form</SubType>
@@ -295,6 +302,9 @@
     <EmbeddedResource Include="LoadFromDB.resx">
       <DependentUpon>LoadFromDB.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SaveSingleFileToDB.resx">
+      <DependentUpon>SaveSingleFileToDB.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SaveToDB.resx">
       <DependentUpon>SaveToDB.cs</DependentUpon>
     </EmbeddedResource>
@@ -305,7 +315,6 @@
       <DependentUpon>Simulator.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="ILMerge.props" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">

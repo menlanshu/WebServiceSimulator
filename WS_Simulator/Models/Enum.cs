@@ -19,6 +19,12 @@ namespace WS_Simulator.Models
         END
     }
 
+    public enum SourceNodeType
+    {
+        DB,
+        LOCAL
+    }
+
     public enum TreeNodeType
     {
         Root,
