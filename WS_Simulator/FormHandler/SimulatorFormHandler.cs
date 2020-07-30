@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,6 +17,9 @@ namespace WS_Simulator.FormHandler
     {
 
         public static char[] ConfigDelimeter = (";").ToCharArray();
+        public static string FileImageKey = "file";
+        public static string FolderImageKey = "folder";
+
 
         public static async Task InitMethodNameOfWebService(WSConfig wSConfig, TreeNodeCollection treeNodes)
         {
@@ -106,6 +110,8 @@ namespace WS_Simulator.FormHandler
                 {
                     TreeNode tempDireNode = new TreeNode(tempSystemInfo.Name);
                     tempDireNode.ContextMenuStrip = folderMenu;
+                    tempDireNode.ImageIndex = 1; // ImageKey = "folder";
+                    tempDireNode.SelectedImageIndex = 1;
                     tempNode.Nodes.Add(tempDireNode);
 
                     Node newNode = new Node(TreeNodeType.Directory, tempDireNode, motherNode, tempDireNode.FullPath);
@@ -126,6 +132,8 @@ namespace WS_Simulator.FormHandler
                     {
                         TreeNode tempFileNode = new TreeNode(tempSystemInfo.Name);
                         tempFileNode.ContextMenuStrip = fileMenu;
+                        tempFileNode.ImageIndex = 0; // ImageKey = "file";
+                        tempFileNode.SelectedImageIndex = 0; ;
                         tempNode.Nodes.Add(tempFileNode);
 
                         // Covert file node to local file system node
@@ -194,6 +202,9 @@ namespace WS_Simulator.FormHandler
 
                     tempDireNode.ContextMenuStrip = folderMenu;
                     tempDireNode.Tag = currNode;
+                    tempDireNode.ImageIndex = 1; // ImageKey = "folder";
+                    tempDireNode.SelectedImageIndex = 1;
+
                     currNode.TreeNodeValue = tempDireNode;
 
                     tempNode.Nodes.Add(tempDireNode);
@@ -211,6 +222,9 @@ namespace WS_Simulator.FormHandler
 
                     tempFileNode.ContextMenuStrip = fileMenu;
                     tempFileNode.Tag = currNode;
+                    tempFileNode.ImageIndex = 0; // ImageKey = "file";
+                    tempFileNode.SelectedImageIndex = 0; ;
+
                     currNode.TreeNodeValue = tempFileNode;
 
                     tempNode.Nodes.Add(tempFileNode);
@@ -246,6 +260,9 @@ namespace WS_Simulator.FormHandler
                 {
                     TreeNode tempDireNode = new TreeNode(tempNode.Text);
                     motherNode.Nodes.Add(tempDireNode);
+                    tempDireNode.ImageIndex = 1; // ImageKey = "folder";
+                    tempDireNode.SelectedImageIndex = 1;
+
                     tempDireNode.Tag = tempNode.Tag;
 
                     foreach (TreeNode node in tempNode.Nodes)

@@ -62,61 +62,15 @@ namespace WS_Simulator
 
         private void Simulator_Load(object sender, EventArgs e)
         {
-            string errDesc = "";
             try
             {
 
-                _wsConfig = new WSConfig();
-                if (_wsConfig.InitializeWSConfig(out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
+                WSConfigInitilization();
 
-                if (_wsConfig.DBHelperNeed)
-                {
-                    if (!DBProcessor.InitDBHelper(out errDesc))
-                    {
-                        ShowErrorMessage(errDesc);
-                        return;
-                    }
-                }
+                TestClientInitialization();
 
+                InitialImageList();
 
-                if (_testClient.InitialGenerateContext(out errDesc) == false)
-                {
-                    ShowErrorMessage(errDesc);
-                    return;
-                }
-
-                _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
-                _testClient.IsDBHelperNeed = _wsConfig.DBHelperNeed;
-
-                _testClient.TimerStart += TimerStartSet;
-                _testClient.UpdateAfterReadFile = UpdateAfterReadFileMethod;
-                _testClient.UpdateReplyMessage = UpdateRTBReplyMsg;
-                _testClient.UpdateNodeColor = UpdateTreeNodeColor;
-                _testClient.UpdateSendNodeListStatus = UpdateRequestBoxWaitNodeStatus;
-                _testClient.SaveNodeToTree = SaveNodeToTree;
-
-                WireUpForms();
-
-                // Initial a list of Node
-                List<Node> initialNodeList = new List<Node>();
-
-                _testClient.CurrentRepository = null;
-                (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList, 
-                    this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
-
-                if (okay)
-                {
-                    _testClient.RootDirectoryPath = directoryPath;
-                    _testClient.CurrNodeList = initialNodeList;
-                }
-                else
-                {
-                    MessageBox.Show(this, "Load Current Directory fail", "Reminder");
-                }
             }
             catch (Exception err)
             {
@@ -124,6 +78,75 @@ namespace WS_Simulator
             }
         }
 
+        private void WSConfigInitilization()
+        {
+            string errDesc = "";
+
+            _wsConfig = new WSConfig();
+            if (_wsConfig.InitializeWSConfig(out errDesc) == false)
+            {
+                ShowErrorMessage(errDesc);
+                return;
+            }
+
+            if (_wsConfig.DBHelperNeed)
+            {
+                if (!DBProcessor.InitDBHelper(out errDesc))
+                {
+                    ShowErrorMessage(errDesc);
+                    return;
+                }
+            }
+        }
+
+        private void TestClientInitialization()
+        {
+            string errDesc = "";
+
+            if (_testClient.InitialGenerateContext(out errDesc) == false)
+            {
+                ShowErrorMessage(errDesc);
+                return;
+            }
+
+            _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
+            _testClient.IsDBHelperNeed = _wsConfig.DBHelperNeed;
+
+            _testClient.TimerStart += TimerStartSet;
+            _testClient.UpdateAfterReadFile = UpdateAfterReadFileMethod;
+            _testClient.UpdateReplyMessage = UpdateRTBReplyMsg;
+            _testClient.UpdateNodeColor = UpdateTreeNodeColor;
+            _testClient.UpdateSendNodeListStatus = UpdateRequestBoxWaitNodeStatus;
+            _testClient.SaveNodeToTree = SaveNodeToTree;
+
+            WireUpForms();
+
+            // Initial a list of Node
+            List<Node> initialNodeList = new List<Node>();
+
+            _testClient.CurrentRepository = null;
+            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList,
+                this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
+
+            if (okay)
+            {
+                _testClient.RootDirectoryPath = directoryPath;
+                _testClient.CurrNodeList = initialNodeList;
+            }
+            else
+            {
+                MessageBox.Show(this, "Load Current Directory fail", "Reminder");
+            }
+        }
+
+        private void InitialImageList()
+        {
+            ImageList myImageList = new ImageList();
+            myImageList.Images.Add(SimulatorFormHandler.FileImageKey, Image.FromFile("file.ico"));
+            myImageList.Images.Add(SimulatorFormHandler.FolderImageKey, Image.FromFile("folder.ico"));
+
+            this.pathTree.ImageList = myImageList;
+        }
 
         // Initial Control size and font size
         private void InitilizeControl()
@@ -394,7 +417,7 @@ namespace WS_Simulator
 
         private void UpdateRequestBoxWaitNodeStatus(List<TestNode> testNodes)
         {
-            if (testNodes.Count > 1)
+            if (testNodes.Count > 0)
             {
                 StringBuilder currentStatus = new StringBuilder();
 
@@ -1015,6 +1038,25 @@ namespace WS_Simulator
                     _testClient.CurrNodeList.Remove(currNode);
                     SQLiteDBProcessor.DeleteOneNode(currNode);
                 }
+            }
+        }
+
+        private void reloadFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Initial a list of Node
+            List<Node> initialNodeList = new List<Node>();
+
+            _testClient.CurrentRepository = null;
+            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList, this.pathTree, folderContextMenu, fileContextMenu,
+                _wsConfig.FileExtensionName, _testClient.RootDirectoryPath);
+            if (okay)
+            {
+                _testClient.RootDirectoryPath = directoryPath;
+                _testClient.CurrNodeList = initialNodeList;
+            }
+            else
+            {
+                MessageBox.Show(this, "Load Current Directory fail", "Reminder");
             }
         }
     }

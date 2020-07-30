@@ -24,6 +24,8 @@ namespace WS_Simulator
             m_ComponentName = componentName;
             this.txbSearch.Text = selectText;
 
+            this.StartPosition = FormStartPosition.CenterScreen;
+
             this.FormBorderStyle = FormBorderStyle.Fixed3D;
 
             if (m_ComponentName.Contains("Request"))

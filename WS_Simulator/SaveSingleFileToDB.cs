@@ -26,6 +26,17 @@ namespace WS_Simulator
 
             this.StartPosition = FormStartPosition.CenterScreen;
             SimulatorFormHandler.LoadDirectoryTree(this.pathTree, currPathTree);
+
+            InitialImageList();
+        }
+
+        private void InitialImageList()
+        {
+            ImageList myImageList = new ImageList();
+            myImageList.Images.Add(SimulatorFormHandler.FileImageKey, Image.FromFile("file.ico"));
+            myImageList.Images.Add(SimulatorFormHandler.FolderImageKey, Image.FromFile("folder.ico"));
+
+            this.pathTree.ImageList = myImageList;
         }
 
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
@@ -69,7 +80,7 @@ namespace WS_Simulator
                 return null;
             }
 
-            if (currentNode.Text.Contains(directoryName))
+            if (currentNode.Text.ToLower().Contains(directoryName.ToLower()))
             {
                 return currentNode;
             }

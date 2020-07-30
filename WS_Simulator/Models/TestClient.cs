@@ -87,7 +87,7 @@ namespace WS_Simulator.Models
                 TimerStart?.Invoke();
 
                 // TODO - this is not a good practice
-                if (WaitSendTreeNode.Count > 1)
+                if (WaitSendTreeNode.Count > 0)
                 {
                     RequestMessage = requestMessage;
                 }
@@ -236,8 +236,6 @@ namespace WS_Simulator.Models
 
             }
 
-            WaitSendTreeNode.Clear();
-
             if (IsPerfTest == true && ManualStop == false)
             {
                 if (CurrentPerfTestCount < PerfMsgCount)
@@ -245,7 +243,13 @@ namespace WS_Simulator.Models
                     CurrentPerfTestCount++;
                     updateCurrentLoopText?.Invoke();
                     await RunAllNodesInDirectory(updateCurrentLoopText, selectAndSendNode);
+                }else
+                {
+                    WaitSendTreeNode.Clear();
                 }
+            }else
+            {
+                WaitSendTreeNode.Clear();
             }
         }
 
@@ -536,7 +540,7 @@ namespace WS_Simulator.Models
         {
             Node resultDirectory = null;
             Node fileNode = null;
-            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmss")}.{ResultFilePostFix}";
+            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmssfff")}.{ResultFilePostFix}";
 
             var result = CurrNodeList.Where(x => x.MotherNodeId == currNode.MotherNodeId &&
                 x.TreeNodeType == TreeNodeType.Directory && x.TreeNodeName == ResultFolderName);
@@ -591,7 +595,7 @@ namespace WS_Simulator.Models
         private void SaveReplyResultToLocal(Node currNode)
         {
             Node resultDirectory = null;
-            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmss")}.{ResultFilePostFix}";
+            string fileName = $"{ currNode.TreeNodeName}.{ DateTime.Now.ToString("yyyyMMddhhmmssfff")}.{ResultFilePostFix}";
 
             string relativeFilePah = currNode.TreeNodeValue.FullPath.Substring(8);
             string relativeFolderPath = relativeFilePah.Substring(0, relativeFilePah.LastIndexOf("\\") + 1);
