@@ -38,4 +38,10 @@ namespace WS_Simulator.Models
         Sending,
         Sended
     }
+
+    public enum SendType
+    {
+        RUNALL,
+        SEND
+    }
 }

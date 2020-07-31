@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,21 +14,31 @@ using WS_Simulator.Models;
 
 namespace WS_Simulator
 {
-    public partial class SaveSingleFileToDB : Form
+    public partial class CopyFolderForm : Form
     {
-        ISaveSingleFieToDB _requester;
-        string _requestMessage;
-        public SaveSingleFileToDB(ISaveSingleFieToDB saveSingleFieToDB, TreeView currPathTree, string requestMessage)
+        ICopyFolderFormRequester _requester;
+        private Node _folderNode;
+
+        public CopyFolderForm(ICopyFolderFormRequester copyFolderFormRequester, TreeView currPathTree, Node folderNode)
         {
             InitializeComponent();
 
-            _requester = saveSingleFieToDB;
-            _requestMessage = requestMessage;
+            _requester = copyFolderFormRequester;
+            _folderNode = folderNode;
 
             this.StartPosition = FormStartPosition.CenterScreen;
             SimulatorFormHandler.LoadDirectoryTree(this.pathTree, currPathTree);
 
+            MakeReplaceFunctionVisible(this.needReplaceCB.Checked);
             InitialImageList();
+        }
+
+        private void MakeReplaceFunctionVisible(bool isVisible)
+        {
+            this.oldTextLabel.Visible = isVisible;
+            this.oldTextValue.Visible = isVisible;
+            this.newNameLabel.Visible = isVisible;
+            this.newTextValue.Visible = isVisible;
         }
 
         private void InitialImageList()
@@ -108,27 +119,52 @@ namespace WS_Simulator
 
         private void okayButton_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrWhiteSpace(this.nameText.Text))
+            bool okay = false;
+            string errDesc = "";
+            
+            if(string.IsNullOrWhiteSpace(this.folderNameText.Text))
             {
-                MessageBox.Show("File Name can not be empty!");
+                MessageBox.Show("Folder Name can not be empty!");
+                return;
             }else
             {
-                if(this.pathTree.SelectedNode != null)
-                {
-                    DBNode newNode = new DBNode();
-                    newNode.MotherNode = (Node)this.pathTree.SelectedNode.Tag;
-                    newNode.TreeNodeMessage = _requestMessage;
-                    newNode.TreeNodeName = this.nameText.Text;
-                    newNode.RepositoryId = newNode.MotherNode.RepositoryId;
-                    newNode.Repository = newNode.MotherNode.Repository;
 
-                    if (newNode.SaveNewNodeToDB())
+                if(SimulatorFormHandler.CheckNodeExist(this.pathTree.SelectedNode, this.folderNameText.Text))
+                {
+                    MessageBox.Show("Folder name already exist in this folder!");
+                    return;
+                }
+
+                if (this.needReplaceCB.Checked)
+                {
+                    if(string.IsNullOrWhiteSpace(this.oldTextValue.Text) ||
+                        string.IsNullOrWhiteSpace(this.newTextValue.Text))
                     {
-                        MessageBox.Show("Add okay");
+                        MessageBox.Show("Old Text and New Text both can't be empty!");
+                        return;
+                    }
+                }
+
+                if (this.pathTree.SelectedNode != null)
+                {
+                    if(!this.needReplaceCB.Checked)
+                    {
+                        (okay, errDesc) = _requester.SaveFolderToTreeNode((Node)this.pathTree.SelectedNode.Tag,
+                            _folderNode, this.folderNameText.Text);
+                    }else
+                    {
+                        (okay, errDesc) = _requester.SaveFolderToTreeNode((Node)this.pathTree.SelectedNode.Tag,
+                            _folderNode, this.folderNameText.Text, this.oldTextValue.Text, this.newTextValue.Text);
+                    }
+
+
+                    if (okay)
+                    {
+                        MessageBox.Show("Copy folder okay");
                         this.Close();
                     }else
                     {
-                        MessageBox.Show("Seems same record already exists in DB!");
+                        MessageBox.Show(errDesc);
                     }
                 }else
                 {
@@ -138,9 +174,16 @@ namespace WS_Simulator
             }
         }
 
+
+
         private void cancelButton_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void needReplaceCB_CheckedChanged(object sender, EventArgs e)
+        {
+            MakeReplaceFunctionVisible(this.needReplaceCB.Checked);
         }
     }
 }

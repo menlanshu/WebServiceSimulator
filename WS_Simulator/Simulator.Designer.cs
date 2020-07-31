@@ -34,6 +34,7 @@
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadFromDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveCurrTreeToDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -72,7 +73,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.reloadFromFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -117,21 +118,28 @@
             // loadFromFolderToolStripMenuItem
             // 
             this.loadFromFolderToolStripMenuItem.Name = "loadFromFolderToolStripMenuItem";
-            this.loadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.loadFromFolderToolStripMenuItem.Text = "LoadFromFolder";
             this.loadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.loadFromFolderToolStripMenuItem_Click);
+            // 
+            // reloadFromFolderToolStripMenuItem
+            // 
+            this.reloadFromFolderToolStripMenuItem.Name = "reloadFromFolderToolStripMenuItem";
+            this.reloadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.reloadFromFolderToolStripMenuItem.Text = "ReloadFromFolder";
+            this.reloadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.reloadFromFolderToolStripMenuItem_Click);
             // 
             // loadFromDBToolStripMenuItem
             // 
             this.loadFromDBToolStripMenuItem.Name = "loadFromDBToolStripMenuItem";
-            this.loadFromDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadFromDBToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.loadFromDBToolStripMenuItem.Text = "LoadFromDB";
             this.loadFromDBToolStripMenuItem.Click += new System.EventHandler(this.loadFromDBToolStripMenuItem_Click);
             // 
             // saveCurrTreeToDBToolStripMenuItem
             // 
             this.saveCurrTreeToDBToolStripMenuItem.Name = "saveCurrTreeToDBToolStripMenuItem";
-            this.saveCurrTreeToDBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveCurrTreeToDBToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.saveCurrTreeToDBToolStripMenuItem.Text = "SaveCurrTreeToDB";
             this.saveCurrTreeToDBToolStripMenuItem.Click += new System.EventHandler(this.saveCurrTreeToDBToolStripMenuItem_Click);
             // 
@@ -350,35 +358,36 @@
             this.runMenuItem,
             this.stopToolStripMenuItem,
             this.clearStartToolStripMenuItem,
-            this.openFileFolderToolStripMenuItem});
+            this.openFileFolderToolStripMenuItem,
+            this.copyFolderToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(161, 92);
+            this.folderContextMenu.Size = new System.Drawing.Size(181, 136);
             // 
             // runMenuItem
             // 
             this.runMenuItem.Name = "runMenuItem";
-            this.runMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.runMenuItem.Size = new System.Drawing.Size(180, 22);
             this.runMenuItem.Text = "Run All";
             this.runMenuItem.Click += new System.EventHandler(this.runMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.stopToolStripMenuItem.Text = "Stop Run";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
             // clearStartToolStripMenuItem
             // 
             this.clearStartToolStripMenuItem.Name = "clearStartToolStripMenuItem";
-            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.clearStartToolStripMenuItem.Text = "Clear Duration";
             this.clearStartToolStripMenuItem.Click += new System.EventHandler(this.clearStartToolStripMenuItem_Click);
             // 
             // openFileFolderToolStripMenuItem
             // 
             this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
-            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
             this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
             // 
@@ -503,12 +512,12 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
-            // reloadFromFolderToolStripMenuItem
+            // copyFolderToolStripMenuItem
             // 
-            this.reloadFromFolderToolStripMenuItem.Name = "reloadFromFolderToolStripMenuItem";
-            this.reloadFromFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reloadFromFolderToolStripMenuItem.Text = "ReloadFromFolder";
-            this.reloadFromFolderToolStripMenuItem.Click += new System.EventHandler(this.reloadFromFolderToolStripMenuItem_Click);
+            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
+            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
+            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -602,6 +611,7 @@
         private System.Windows.Forms.ToolStripMenuItem loadFromFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteFromDBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadFromFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
     }
 }
 

@@ -213,11 +213,14 @@
     <Compile Include="DataAccess\WebServiceProcessor.cs" />
     <Compile Include="DataAccess\XMLProcessor.cs" />
     <Compile Include="FormHandler\SimulatorFormHandler.cs" />
+    <Compile Include="Interface\ICopyFolderFormRequester.cs" />
     <Compile Include="Interface\ILoadFromDBFormRequester.cs" />
     <Compile Include="Interface\ISaveToDBFormRequester.cs" />
     <Compile Include="Interface\ISearchFormRequester.cs" />
     <Compile Include="Interface\ISaveSingleFieToDB.cs" />
+    <Compile Include="Models\DBNode.cs" />
     <Compile Include="Models\Enum.cs" />
+    <Compile Include="Models\FileNode.cs" />
     <Compile Include="Models\Node.cs" />
     <Compile Include="Models\TestClient.cs" />
     <Compile Include="Models\TestNode.cs" />
@@ -228,6 +231,12 @@
     </Compile>
     <Compile Include="LoadFromDB.Designer.cs">
       <DependentUpon>LoadFromDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CopyFolderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CopyFolderForm.Designer.cs">
+      <DependentUpon>CopyFolderForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SaveSingleFileToDB.cs">
       <SubType>Form</SubType>
@@ -301,6 +310,9 @@
     </Compile>
     <EmbeddedResource Include="LoadFromDB.resx">
       <DependentUpon>LoadFromDB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CopyFolderForm.resx">
+      <DependentUpon>CopyFolderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SaveSingleFileToDB.resx">
       <DependentUpon>SaveSingleFileToDB.cs</DependentUpon>

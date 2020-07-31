@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace WS_Simulator.Models
 {
-    public class Node
+    public abstract class Node
     {
         public int Id { get; set; }
         public string TreeNodeName { get; set; }
@@ -47,25 +47,29 @@ namespace WS_Simulator.Models
         { 
         }
 
-        //public string GetFullPathOfFile(string rootPath)
-        //{
-        //    string outputPath = "";
-        //    switch (this.TreeNodeType)
-        //    {
-        //        case TreeNodeType.Root:
-        //            outputPath = $"{rootPath}";
-        //            break;
-        //        case TreeNodeType.Directory:
-        //            outputPath = $@"{rootPath}\{NodeFullPath.Substring(8)}";
-        //            break;
-        //        case TreeNodeType.File:
-        //            outputPath = $@"{rootPath}\{NodeFullPath.Substring(8)}\{TreeNodeName}";
-        //            break;
-        //        default:
-        //            break;
-        //    }
+        public abstract void SaveReplyResult(string currentNodeReplyMessage);
 
-        //    return outputPath;
-        //}
-    }
+        public abstract string GetCurrentMessage(bool updateControl);
+
+            //public string GetFullPathOfFile(string rootPath)
+            //{
+            //    string outputPath = "";
+            //    switch (this.TreeNodeType)
+            //    {
+            //        case TreeNodeType.Root:
+            //            outputPath = $"{rootPath}";
+            //            break;
+            //        case TreeNodeType.Directory:
+            //            outputPath = $@"{rootPath}\{NodeFullPath.Substring(8)}";
+            //            break;
+            //        case TreeNodeType.File:
+            //            outputPath = $@"{rootPath}\{NodeFullPath.Substring(8)}\{TreeNodeName}";
+            //            break;
+            //        default:
+            //            break;
+            //    }
+
+            //    return outputPath;
+            //}
+        }
 }

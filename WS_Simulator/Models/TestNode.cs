@@ -8,22 +8,24 @@ using System.Windows.Forms;
 
 namespace WS_Simulator.Models
 {
-    public class TestNode : Node
+    public class TestNode 
     {
+        public Node NodeInTree { get; set; }
+        public string CurrentNodeSendMessage { get; set; }
+        public string CurrentNodeReplyMessage { get; set; }
         public TestStatus TreeNodeSendStatus { get; set; }
         public bool NeedSend { get; set; }
         public long TestPeriod { get; set; }
 
-        public TestNode(Node baseNode,
-            TestStatus testStatus, string treeNodeMessage, bool needSend) : 
-            base(baseNode.TreeNodeType, baseNode.TreeNodeValue, baseNode.MotherNode, baseNode.NodeFullPath)
+        public TestNode(Node baseNode, TestStatus testStatus, string treeNodeMessage, bool needSend)
         {
+            NodeInTree = baseNode;
+
+            this.CurrentNodeSendMessage = treeNodeMessage;
+
             this.TreeNodeSendStatus = testStatus;
-            this.TreeNodeMessage = treeNodeMessage;
             this.NeedSend = needSend;
 
-            this.TreeNodeSourceType = baseNode.TreeNodeSourceType;
-            this.MotherNodeId = baseNode.MotherNodeId;
         }
     }
 }

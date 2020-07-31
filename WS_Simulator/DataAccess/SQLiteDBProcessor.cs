@@ -45,6 +45,31 @@ namespace WS_Simulator.DataAccess
             return outputMessage;
         }
 
+        public static Node GetResultDirectoryNodeOfCurrentFolder(Node node, string resultFolderName)
+        {
+            Node output = null;
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                output = _sQLiteContext.NodeList.Where(x => x.MotherNodeId == node.MotherNodeId &&
+                x.TreeNodeType == TreeNodeType.Directory && x.TreeNodeName == resultFolderName)
+                    .Include(x => x.MotherNode).Include(x => x.Repository).FirstOrDefault();
+            }
+
+            return output;
+        }
+
+        public static Node GetChildNodeOfCurrentDirectory(Node node, string childNodeName)
+        {
+            Node output = null;
+            using (_sQLiteContext = new SQLiteContext())
+            {
+                output = _sQLiteContext.NodeList.Where(x => x.MotherNodeId == node.Id &&
+                x.TreeNodeType == TreeNodeType.File && x.TreeNodeName == childNodeName).FirstOrDefault();
+            }
+
+            return output;
+        }
+
         public static void SaveOneNode(Node node)
         {
             using (_sQLiteContext = new SQLiteContext())
@@ -77,11 +102,11 @@ namespace WS_Simulator.DataAccess
                     TestRepository testRepository = new TestRepository();
                     testRepository.Id = currRepo.Id;
                     testRepository.RepositoryName = currRepo.RepositoryName;
-                    testRepository.TestNodeList =
+                    testRepository.TestNodeList = new List<Node>(
                         _sQLiteContext.NodeList.Where(x => x.RepositoryId == currRepo.Id)
                         .Select(
                             x =>
-                            new Node
+                            new DBNode
                             {
                                 Id = x.Id,
                                 TreeNodeName = x.TreeNodeName,
@@ -92,7 +117,7 @@ namespace WS_Simulator.DataAccess
                                 RepositoryId = x.RepositoryId,
                                 Repository = x.Repository
                             }
-                        ).ToList();
+                        ).ToList());
 
                     outputList.Add(testRepository);
                 }

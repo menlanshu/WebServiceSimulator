@@ -10,6 +10,5 @@ namespace WS_Simulator.Interface
 {
     public interface ISaveSingleFieToDB
     {
-        bool RequestSaveFile(Node newNode);
     }
 }

@@ -16,11 +16,25 @@ namespace WS_Simulator.DataAccess
         {
             return rootPath + nodeFullPath.Substring(8);
         }
+
+        public static string GetFullDirectoryPath(string rootPath, string dirNodeFullPath)
+        {
+            return $"{rootPath}{GetRelativeFolderPath(dirNodeFullPath)}";
+        }
+
+        public static string GetRelativeFolderPath(string nodeFullPath)
+        {
+            string relativeFilePah = nodeFullPath.Substring(8);
+            string relativeFolderPath = relativeFilePah.Substring(0, relativeFilePah.LastIndexOf("\\") + 1);
+
+            return relativeFolderPath;
+        }
         public static void LoadMessageForAllNodes(List<Node> nodeList, string rootPath)
         {
             foreach(Node node in nodeList)
             {
                 string filePath = rootPath + node.TreeNodeValue.FullPath.Substring(8);
+                node.TreeNodeMessage = node.GetCurrentMessage(false);
                 node.TreeNodeMessage = ReadFile(filePath, null);
             }
         }

@@ -20,6 +20,18 @@ namespace WS_Simulator.FormHandler
         public static string FileImageKey = "file";
         public static string FolderImageKey = "folder";
 
+        public static bool CheckNodeExist(TreeNode motherNode, string name)
+        {
+            foreach (TreeNode node in motherNode.Nodes)
+            {
+                if (node.Text == name)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public static async Task InitMethodNameOfWebService(WSConfig wSConfig, TreeNodeCollection treeNodes)
         {
@@ -66,7 +78,9 @@ namespace WS_Simulator.FormHandler
             return false;
         }
 
-        public static (bool oKay, string directoryPath) LoadFileTree(ref List<Node> nodeList, TreeView pathTree, ContextMenuStrip folderMenu, ContextMenuStrip fileMenu, 
+        public static (bool oKay, string directoryPath) LoadFileTree(
+            ref List<Node> nodeList, TreeView pathTree, 
+            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu, 
             List<string> loadExtensionNameList, string directoryPath = ".")
         {
             if (Directory.Exists(directoryPath))
@@ -81,7 +95,7 @@ namespace WS_Simulator.FormHandler
                 pathTree.Nodes[0].ContextMenuStrip = folderMenu;
 
                 // assign root node
-                Node newNode = new Node(TreeNodeType.Root, pathTree.Nodes[0], null, pathTree.Nodes[0].FullPath);
+                Node newNode = new FileNode(TreeNodeType.Root, pathTree.Nodes[0], null, pathTree.Nodes[0].FullPath);
                 newNode.TreeNodeSourceType = SourceNodeType.LOCAL;
                 nodeList.Add(newNode);
 
@@ -100,8 +114,10 @@ namespace WS_Simulator.FormHandler
             return (false, "Directory path not exist");
         }
 
-        public static void LoadWholeTree(ref List<Node> nodeList, Node motherNode, FileSystemInfo tempSystemInfo, TreeNode tempNode, 
-            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu, List<string> loadExtensionNameList)
+        public static void LoadWholeTree(
+            ref List<Node> nodeList, Node motherNode, FileSystemInfo tempSystemInfo, TreeNode tempNode, 
+            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
+            List<string> loadExtensionNameList)
         {
 
             try
@@ -114,7 +130,7 @@ namespace WS_Simulator.FormHandler
                     tempDireNode.SelectedImageIndex = 1;
                     tempNode.Nodes.Add(tempDireNode);
 
-                    Node newNode = new Node(TreeNodeType.Directory, tempDireNode, motherNode, tempDireNode.FullPath);
+                    Node newNode = new FileNode(TreeNodeType.Directory, tempDireNode, motherNode, tempDireNode.FullPath);
                     newNode.TreeNodeSourceType = SourceNodeType.LOCAL;
                     nodeList.Add(newNode);
 
@@ -137,7 +153,7 @@ namespace WS_Simulator.FormHandler
                         tempNode.Nodes.Add(tempFileNode);
 
                         // Covert file node to local file system node
-                        Node newNode = new Node(TreeNodeType.File, tempFileNode, motherNode, tempFileNode.FullPath);
+                        Node newNode = new FileNode(TreeNodeType.File, tempFileNode, motherNode, tempFileNode.FullPath);
                         newNode.TreeNodeSourceType = SourceNodeType.LOCAL;
                         nodeList.Add(newNode);
 
@@ -153,7 +169,9 @@ namespace WS_Simulator.FormHandler
 
         }
 
-        public static (bool oKay, string directoryPath) LoadFileTreeFromDB(TreeView pathTree, ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
+        public static (bool oKay, string directoryPath) LoadFileTreeFromDB(
+            TreeView pathTree, 
+            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             TestRepository testRepository, string directoryPath = ".")
         {
             if (testRepository != null)
@@ -189,7 +207,9 @@ namespace WS_Simulator.FormHandler
             return (false, "Test Repository is NUll!");
         }
 
-        public static void LoadWholeTreeFomrDB(TreeNode tempNode, ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
+        public static void LoadWholeTreeFomrDB(
+            TreeNode tempNode, 
+            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             TestRepository testRepository, Node currNode)
         {
 
@@ -278,7 +298,8 @@ namespace WS_Simulator.FormHandler
 
         }
 
-        public static string LoadTestFile(Node node, string rootPath, 
+        public static string LoadTestFile(
+            Node node, string rootPath, 
             Action<string> updateReplyMessage, Action<string> updateAfterReadFile)
         {
             string filePath = "";
@@ -312,8 +333,6 @@ namespace WS_Simulator.FormHandler
 
             return requestMessage;
         }
-
-
 
 
     }
