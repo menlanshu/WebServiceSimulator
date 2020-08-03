@@ -18,7 +18,7 @@ using System.Diagnostics.Eventing.Reader;
 namespace WS_Simulator
 {
     public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester, 
-        ILoadFromDBFormRequester, ISaveSingleFieToDB, ICopyFolderFormRequester
+        ILoadFromDBFormRequester, ISaveSingleFieToDB, ICopyFolderFormRequester, IReplaceTextFormRequester
     {
         private Action UpdateCurrLoopText;
 
@@ -1170,6 +1170,50 @@ namespace WS_Simulator
             if(this.pathTree.SelectedNode != null)
             {
                 CopyFolderForm frm = new CopyFolderForm(this, this.pathTree, (Node)this.pathTree.SelectedNode.Tag);
+                frm.Show();
+            }
+        }
+
+        public (bool okay, string errDesc) ReplaceTextFileInfo(Node folderNode, string oldText = "", string newText = "")
+        {
+            bool okay = false;
+            string errDesc = "";
+            string newMessage = "";
+
+            if (_testClient.CurrentRepository != null)
+            {
+                // TODO - Support DB
+                errDesc = "This function only support local file now!";
+                return (okay, errDesc);
+            }
+
+            // Add Each Node of this folder
+            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
+            {
+                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
+                {
+                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
+                    {
+                        // DO nothing
+                    }
+                    else
+                    {
+                        newMessage = ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText);
+                        ((Node)currNode.Tag).UpdateCurrentMessage(newMessage);
+                    }
+                }
+            }
+
+            okay = true;
+
+            return (okay, errDesc);
+        }
+
+        private void replaceTextOfAllFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.pathTree.SelectedNode != null)
+            {
+                ReplaceTextForm frm = new ReplaceTextForm(this, (Node)this.pathTree.SelectedNode.Tag);
                 frm.Show();
             }
         }

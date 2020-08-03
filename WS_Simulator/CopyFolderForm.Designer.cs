@@ -129,9 +129,9 @@
             this.oldTextLabel.AutoSize = true;
             this.oldTextLabel.Location = new System.Drawing.Point(27, 310);
             this.oldTextLabel.Name = "oldTextLabel";
-            this.oldTextLabel.Size = new System.Drawing.Size(89, 30);
+            this.oldTextLabel.Size = new System.Drawing.Size(94, 30);
             this.oldTextLabel.TabIndex = 7;
-            this.oldTextLabel.Text = "Old Text";
+            this.oldTextLabel.Text = "Old Text:";
             // 
             // queryButton
             // 

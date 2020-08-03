@@ -205,6 +205,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\GenerateContext.cs" />
+    <Compile Include="Interface\IReplaceTextFormRequester.cs" />
+    <Compile Include="ReplaceTextForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReplaceTextForm.Designer.cs">
+      <DependentUpon>ReplaceTextForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataAccess\DBOperation.cs" />
     <Compile Include="DataAccess\DBProcessor.cs" />
     <Compile Include="DataAccess\FileProcessor.cs" />
@@ -298,6 +305,9 @@
     <Compile Include="WebService\XmlElementProperty.cs" />
     <Compile Include="WebService\XmlTreeNode.cs" />
     <Compile Include="WebService\XmlTreeWriter.cs" />
+    <EmbeddedResource Include="ReplaceTextForm.resx">
+      <DependentUpon>ReplaceTextForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

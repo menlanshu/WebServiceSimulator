@@ -50,6 +50,7 @@ namespace WS_Simulator.Models
         public abstract void SaveReplyResult(string currentNodeReplyMessage);
 
         public abstract string GetCurrentMessage(bool updateControl);
+        public abstract void UpdateCurrentMessage(string requestMessage);
 
             //public string GetFullPathOfFile(string rootPath)
             //{

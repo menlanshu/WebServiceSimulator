@@ -20,6 +20,19 @@ namespace WS_Simulator.Models
         private const string DateTimeFormatStr = "yyyyMMddhhmmssfff";
         private const string ResultFilePostFix = "result";
 
+        public string FileFullPath { 
+            get
+            {
+                if (string.IsNullOrEmpty(NodeFullPath))
+                {
+                    return ""; 
+                }else
+                {
+                    return FileProcessor.GetFullPath(RootDirectoryPath, NodeFullPath);
+                }
+            }
+        }
+
         public FileNode(TreeNodeType treeNodeType, TreeNode treeNodeValue, Node motherNode, string fullPath) : 
             base(treeNodeType, treeNodeValue, motherNode, fullPath)
         {
@@ -30,12 +43,9 @@ namespace WS_Simulator.Models
 
         public override string GetCurrentMessage(bool updateControl)
         {
-            string filePath = "";
             string requestMessage = "";
 
-            filePath = FileProcessor.GetFullPath(RootDirectoryPath, NodeFullPath);
-
-            requestMessage = FileProcessor.ReadFile(filePath, 
+            requestMessage = FileProcessor.ReadFile(FileFullPath, 
                 updateControl ? UpdateAfterReadFile : null);
 
             return requestMessage;
@@ -102,6 +112,11 @@ namespace WS_Simulator.Models
                 FileProcessor.SaveFile(fileNameFullPath, currentNodeReplyMessage);
                 SaveNodeToTree?.Invoke(resultDirectory, fileName, TreeNodeType.File);
             }
+        }
+
+        public override void UpdateCurrentMessage(string requestMessage)
+        {
+            FileProcessor.SaveFile(FileFullPath, requestMessage);
         }
     }
 }

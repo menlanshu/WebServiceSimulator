@@ -60,6 +60,7 @@
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbHowManyNodesSend = new System.Windows.Forms.Label();
             this.lbCurrentCount = new System.Windows.Forms.Label();
             this.fileContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -73,7 +74,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceTextOfAllFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -359,37 +360,45 @@
             this.stopToolStripMenuItem,
             this.clearStartToolStripMenuItem,
             this.openFileFolderToolStripMenuItem,
-            this.copyFolderToolStripMenuItem});
+            this.copyFolderToolStripMenuItem,
+            this.replaceTextOfAllFilesToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(181, 136);
+            this.folderContextMenu.Size = new System.Drawing.Size(199, 158);
             // 
             // runMenuItem
             // 
             this.runMenuItem.Name = "runMenuItem";
-            this.runMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.runMenuItem.Size = new System.Drawing.Size(198, 22);
             this.runMenuItem.Text = "Run All";
             this.runMenuItem.Click += new System.EventHandler(this.runMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.stopToolStripMenuItem.Text = "Stop Run";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
             // clearStartToolStripMenuItem
             // 
             this.clearStartToolStripMenuItem.Name = "clearStartToolStripMenuItem";
-            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.clearStartToolStripMenuItem.Text = "Clear Duration";
             this.clearStartToolStripMenuItem.Click += new System.EventHandler(this.clearStartToolStripMenuItem_Click);
             // 
             // openFileFolderToolStripMenuItem
             // 
             this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
-            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
             this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
+            // 
+            // copyFolderToolStripMenuItem
+            // 
+            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
+            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
+            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
             // 
             // lbHowManyNodesSend
             // 
@@ -512,12 +521,12 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
-            // copyFolderToolStripMenuItem
+            // replaceTextOfAllFilesToolStripMenuItem
             // 
-            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
-            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
-            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
+            this.replaceTextOfAllFilesToolStripMenuItem.Name = "replaceTextOfAllFilesToolStripMenuItem";
+            this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.replaceTextOfAllFilesToolStripMenuItem.Text = "Replace Text Of All Files";
+            this.replaceTextOfAllFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceTextOfAllFilesToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -612,6 +621,7 @@
         private System.Windows.Forms.ToolStripMenuItem deleteFromDBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadFromFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem replaceTextOfAllFilesToolStripMenuItem;
     }
 }
 

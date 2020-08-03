@@ -96,5 +96,11 @@ namespace WS_Simulator.Models
             }
 
         }
+
+        public override void UpdateCurrentMessage(string requestMessage)
+        {
+            // TODO - Add this logic
+            throw new NotImplementedException();
+        }
     }
 }

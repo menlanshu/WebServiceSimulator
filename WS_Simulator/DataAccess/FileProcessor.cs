@@ -85,6 +85,7 @@ namespace WS_Simulator.DataAccess
             }catch(Exception err)
             {
                 // TODO - May be write log or show exception in reply box
+                throw err;
             }
         }
     }
