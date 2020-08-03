@@ -59,24 +59,7 @@ namespace WS_Simulator.FormHandler
             }
         }
 
-        public static bool NeedWait(string fileName, List<string> needWaitmessageList)
-        {
-            if (fileName == "")
-            {
-                return false;
-            }
-            else
-            {
-                foreach (string tempStr in needWaitmessageList)
-                {
-                    if (fileName.Contains(tempStr))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+
 
         public static (bool oKay, string directoryPath) LoadFileTree(
             ref List<Node> nodeList, TreeView pathTree, 

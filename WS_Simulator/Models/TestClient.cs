@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using WebServiceStudio;
 using WS_Simulator.DataAccess;
 
 namespace WS_Simulator.Models
@@ -43,6 +39,7 @@ namespace WS_Simulator.Models
         public int CurrentActualSendNodeCount { get; set; }
         public List<int> AutoContextCountList { get; set; }
         public List<string> NeedSendExtensionName { get; set; }
+        public List<string> NeedWaitmessageList { get; set; }
         public GenerateContext AutoGenerateContext { get; private set; }
 
         public List<TestNode> WaitSendTreeNode { get; private set; } = new List<TestNode>();
@@ -64,7 +61,7 @@ namespace WS_Simulator.Models
         public string ReplyMessage { get; set; }
 
         public SendType SendType { get; set; }
-
+        public int NeedWaitTime { get; internal set; }
 
         public string GetNodeValue(string nodeName)
         {
@@ -352,6 +349,11 @@ namespace WS_Simulator.Models
                     await Task.Run(() => SaveReplyMsgToFileMethod(tempNode));
                 }
 
+                if(tempNode.NeedWait)
+                { 
+                    await Task.Delay(tempNode.NeedWaitTime);
+                }
+
             }
 
             if (IsPerfTest == true && ManualStop == false)
@@ -403,7 +405,12 @@ namespace WS_Simulator.Models
                         if (saveTestNode == true)
                         {
                             requestMessage = node.GetCurrentMessage(false);
-                            TestNode newNode = new TestNode(node, TestStatus.WaitForSend, requestMessage, true);
+                            TestNode newNode = new TestNode(node, TestStatus.WaitForSend, requestMessage);
+                            if (NeedWait(newNode.NodeInTree.TreeNodeName))
+                            {
+                                newNode.NeedWait = true;
+                                newNode.NeedWaitTime = NeedWaitTime;
+                            }
                             WaitSendTreeNode.Add(newNode);
                         }
 
@@ -416,7 +423,12 @@ namespace WS_Simulator.Models
             }else
             {
                 requestMessage = ((Node)sendNode.Tag).GetCurrentMessage(false);
-                TestNode newNode = new TestNode((Node)sendNode.Tag, TestStatus.WaitForSend, requestMessage, true);
+                TestNode newNode = new TestNode((Node)sendNode.Tag, TestStatus.WaitForSend, requestMessage);
+                if (NeedWait(newNode.NodeInTree.TreeNodeName))
+                {
+                    newNode.NeedWait = true;
+                    newNode.NeedWaitTime = NeedWaitTime;
+                }
                 WaitSendTreeNode.Add(newNode);
             }
         }
@@ -486,5 +498,23 @@ namespace WS_Simulator.Models
             }
         }
 
+        private bool NeedWait(string fileName)
+        {
+            if (fileName == "")
+            {
+                return false;
+            }
+            else
+            {
+                foreach (string tempStr in NeedWaitmessageList)
+                {
+                    if (fileName.Contains(tempStr))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

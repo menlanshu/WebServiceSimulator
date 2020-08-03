@@ -123,6 +123,8 @@ namespace WS_Simulator
 
             _testClient.NeedSendExtensionName = _wsConfig.MultiNodeExtensionName;
             _testClient.IsDBHelperNeed = _wsConfig.DBHelperNeed;
+            _testClient.NeedWaitmessageList = _wsConfig.NeedWaitMessageList;
+            _testClient.NeedWaitTime = _wsConfig.SleepTime;
 
             _testClient.TimerStart += TimerStartSet;
             _testClient.UpdateAfterReadFile = UpdateAfterReadFileMethod;
@@ -231,10 +233,6 @@ namespace WS_Simulator
 
                 this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
                 _testClient.CurrentSendNodeCount++;
-                if (SimulatorFormHandler.NeedWait(this.pathTree.SelectedNode.Text, _wsConfig.NeedWaitMessageList))
-                {
-                    Thread.Sleep(_wsConfig.SleepTime);
-                }
 
             }), replyMessage
             );
@@ -465,8 +463,13 @@ namespace WS_Simulator
 
                 foreach (var testNode in testNodes)
                 {
-                    currentStatus.AppendLine($"Test Node: {testNode.NodeInTree.TreeNodeName}\n" +
-                        $"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms{Environment.NewLine} ");
+                    currentStatus.AppendLine($"Test Node: {testNode.NodeInTree.TreeNodeName}");
+                    currentStatus.AppendLine($"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms");
+                    if(testNode.NeedWait)
+                    {
+                        currentStatus.AppendLine($"Need wait for {testNode.NeedWaitTime}ms after send finish according to configuration.");
+                    }
+                    currentStatus.AppendLine();
                 }
 
                 this.rtbRequest.Clear();
