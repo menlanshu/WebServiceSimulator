@@ -564,15 +564,8 @@ namespace WS_Simulator
             {
                 if (_testClient.CurrentRepository == null)
                 {
-                    SaveFileDialog sfd = new SaveFileDialog();
-
-                    //set file type
-                    sfd.Filter = "Test File（*.xml）|*.xml";
-
-                    sfd.FilterIndex = 1;
-                    sfd.RestoreDirectory = true;
-
-                    sfd.InitialDirectory = _testClient.RootDirectoryPath;
+                    SaveFileDialog sfd = SimulatorFormHandler.
+                        CreateAFileDialog((Node)(this.pathTree.SelectedNode.Tag), _testClient.RootDirectoryPath);
 
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {

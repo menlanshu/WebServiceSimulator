@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace WS_Simulator.Models
 {
-    public abstract class Node
+    public class Node
     {
         public int Id { get; set; }
         public string TreeNodeName { get; set; }
@@ -44,13 +44,12 @@ namespace WS_Simulator.Models
         }
 
         public Node()
-        { 
+        {
         }
 
-        public abstract void SaveReplyResult(string currentNodeReplyMessage);
-
-        public abstract string GetCurrentMessage(bool updateControl);
-        public abstract void UpdateCurrentMessage(string requestMessage);
+        public virtual void SaveReplyResult(string currentNodeReplyMessage) { throw new NotImplementedException(); }
+        public virtual string GetCurrentMessage(bool updateControl) { throw new NotImplementedException(); }
+        public virtual void UpdateCurrentMessage(string requestMessage) { throw new NotImplementedException(); }
 
             //public string GetFullPathOfFile(string rootPath)
             //{

@@ -20,6 +20,16 @@ namespace WS_Simulator.Models
         private const string DateTimeFormatStr = "yyyyMMddhhmmssfff";
         private const string ResultFilePostFix = "result";
 
+        public string DirectoryPath
+        {
+            get
+            {
+                string directoryPath = FileProcessor.GetFullDirectoryPath(RootDirectoryPath,
+                TreeNodeType == TreeNodeType.Directory ? $@"{NodeFullPath}\" : NodeFullPath);
+                return directoryPath;
+            }
+        }
+
         public string FileFullPath { 
             get
             {
@@ -53,24 +63,19 @@ namespace WS_Simulator.Models
 
         public Node SaveCurrentNodeToMotherNode(Node motherNode, string requestMessage)
         {
-            string directoryPath = FileProcessor.GetFullDirectoryPath(RootDirectoryPath, 
-                TreeNodeType == TreeNodeType.Directory ? $@"{NodeFullPath}\" : NodeFullPath);
-
             if (this.TreeNodeType == TreeNodeType.Directory)
             {
-                if (!Directory.Exists(directoryPath))
+                if (!Directory.Exists(DirectoryPath))
                 {
-                    Directory.CreateDirectory(directoryPath);
+                    Directory.CreateDirectory(DirectoryPath);
                     return (Node)SaveNodeToTree?.Invoke(motherNode, TreeNodeName, TreeNodeType.Directory);
                 }
             }
             else if (this.TreeNodeType == TreeNodeType.File)
             {
-                string fileNameFullPath = $@"{directoryPath }{TreeNodeName}";
-
-                if (!File.Exists(fileNameFullPath))
+                if (!File.Exists(FileFullPath))
                 {
-                    FileProcessor.SaveFile(fileNameFullPath, requestMessage);
+                    FileProcessor.SaveFile(FileFullPath, requestMessage);
                     return SaveNodeToTree?.Invoke(motherNode, TreeNodeName,
                         TreeNodeType.File);
                 }

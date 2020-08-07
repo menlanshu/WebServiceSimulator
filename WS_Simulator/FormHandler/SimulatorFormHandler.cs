@@ -318,5 +318,31 @@ namespace WS_Simulator.FormHandler
         }
 
 
+        public static SaveFileDialog CreateAFileDialog(Node node, string defaultPath)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            string openPath = defaultPath;
+
+            //set file type
+            sfd.Filter = "All files (*.*)|*.*";
+            //sfd.FilterIndex = 1;
+            sfd.RestoreDirectory = true;
+
+            // Get the actual path of current node
+            if (node != null)
+            {
+                if (node is FileNode)
+                {
+                    openPath = ((FileNode)node).DirectoryPath;
+                }
+
+                sfd.FileName = node.TreeNodeName;
+            }
+
+            sfd.InitialDirectory = openPath;
+
+            return sfd;
+        }
+
     }
 }
