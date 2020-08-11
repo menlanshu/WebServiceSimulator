@@ -480,40 +480,16 @@ namespace WS_Simulator
 
         #endregion
 
-        private void RichBoxTextToXML(RichTextBox inRichTextBox)
-        {
-            try
-            {
-                string tempStr = inRichTextBox.Text;
-                if (string.IsNullOrEmpty(tempStr))
-                {
-                    MessageBox.Show(inRichTextBox.Name + " is empty!");
-                    return;
-                }
-                inRichTextBox.Text = XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr));
-                inRichTextBox.SelectionStart = 0;
-            }
-            catch (Exception ex)
-            {
-                string msg = "";
-                while (ex != null)
-                {
-                    msg += ex.Message + Environment.NewLine;
-                    ex = ex.InnerException;
-                }
-                inRichTextBox.Text = msg + inRichTextBox.Text;
-                inRichTextBox.SelectionStart = 0;
-            }
-        }
+        
 
         private void tbnRequestToXML_Click(object sender, EventArgs e)
         {
-            RichBoxTextToXML(this.rtbRequest);
+            SimulatorFormHandler.RichBoxTextToXML(this.rtbRequest);
         }
 
         private void btnReplyToXML_Click(object sender, EventArgs e)
         {
-            RichBoxTextToXML(this.rtbReply);
+            SimulatorFormHandler.RichBoxTextToXML(this.rtbReply);
         }
 
         private void rtbRequest_MouseUp(object sender, MouseEventArgs e)
@@ -546,7 +522,7 @@ namespace WS_Simulator
         {
             if (selectRichTextBox != null)
             {
-                RichBoxTextToXML(selectRichTextBox);
+                SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
             }
         }
 
@@ -628,7 +604,7 @@ namespace WS_Simulator
             {
                 if (XMLProcessor.IsE3EventInfo(this.rtbRequest.Text, out configLocation, out errDesc))
                 {
-                    RichBoxTextToXML(selectRichTextBox);
+                    SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
 
                     requestMessage = selectRichTextBox.Text;
 
@@ -1211,6 +1187,14 @@ namespace WS_Simulator
             {
                 ReplaceTextForm frm = new ReplaceTextForm(this, (Node)this.pathTree.SelectedNode.Tag);
                 frm.Show();
+            }
+        }
+
+        private void escapeXmlMessageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (selectRichTextBox != null)
+            {
+                SimulatorFormHandler.RichBoxTextEscapeXML(selectRichTextBox);
             }
         }
     }

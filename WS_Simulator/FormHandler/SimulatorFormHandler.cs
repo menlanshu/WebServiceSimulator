@@ -62,8 +62,8 @@ namespace WS_Simulator.FormHandler
 
 
         public static (bool oKay, string directoryPath) LoadFileTree(
-            ref List<Node> nodeList, TreeView pathTree, 
-            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu, 
+            ref List<Node> nodeList, TreeView pathTree,
+            ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             List<string> loadExtensionNameList, string directoryPath = ".")
         {
             if (Directory.Exists(directoryPath))
@@ -98,7 +98,7 @@ namespace WS_Simulator.FormHandler
         }
 
         public static void LoadWholeTree(
-            ref List<Node> nodeList, Node motherNode, FileSystemInfo tempSystemInfo, TreeNode tempNode, 
+            ref List<Node> nodeList, Node motherNode, FileSystemInfo tempSystemInfo, TreeNode tempNode,
             ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             List<string> loadExtensionNameList)
         {
@@ -153,7 +153,7 @@ namespace WS_Simulator.FormHandler
         }
 
         public static (bool oKay, string directoryPath) LoadFileTreeFromDB(
-            TreeView pathTree, 
+            TreeView pathTree,
             ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             TestRepository testRepository, string directoryPath = ".")
         {
@@ -175,13 +175,14 @@ namespace WS_Simulator.FormHandler
                     foreach (var node in testRepository.TestNodeList.Where(x => x.MotherNodeId == rootNode.Id).OrderBy(x => x.TreeNodeName))
                     {
                         node.MotherNode = rootNode;
-                        LoadWholeTreeFomrDB(pathTree.Nodes[0], folderMenu, fileMenu, testRepository,  node);
+                        LoadWholeTreeFomrDB(pathTree.Nodes[0], folderMenu, fileMenu, testRepository, node);
                     }
 
                     pathTree.Nodes[0].Expand();
 
                     return (true, directoryPath);
-                }else
+                }
+                else
                 {
                     return (false, "Can not find root node");
                 }
@@ -191,7 +192,7 @@ namespace WS_Simulator.FormHandler
         }
 
         public static void LoadWholeTreeFomrDB(
-            TreeNode tempNode, 
+            TreeNode tempNode,
             ContextMenuStrip folderMenu, ContextMenuStrip fileMenu,
             TestRepository testRepository, Node currNode)
         {
@@ -249,7 +250,7 @@ namespace WS_Simulator.FormHandler
 
             foreach (TreeNode node in oldTree.Nodes[0].Nodes)
             {
-               LoadWholeDiretoryTree(node, pathTree.Nodes[0]);
+                LoadWholeDiretoryTree(node, pathTree.Nodes[0]);
             }
             pathTree.Nodes[0].Expand();
         }
@@ -282,7 +283,7 @@ namespace WS_Simulator.FormHandler
         }
 
         public static string LoadTestFile(
-            Node node, string rootPath, 
+            Node node, string rootPath,
             Action<string> updateReplyMessage, Action<string> updateAfterReadFile)
         {
             string filePath = "";
@@ -344,5 +345,57 @@ namespace WS_Simulator.FormHandler
             return sfd;
         }
 
+        public static void RichBoxTextEscapeXML(RichTextBox inRichTextBox)
+        {
+            try
+            {
+                string tempStr = inRichTextBox.Text;
+                if (string.IsNullOrEmpty(tempStr))
+                {
+                    MessageBox.Show(inRichTextBox.Name + " is empty!");
+                    return;
+                }
+                inRichTextBox.Text = XMLProcessor.ToDataFromWebService(tempStr);
+                inRichTextBox.SelectionStart = 0;
+            }
+            catch (Exception ex)
+            {
+                string msg = "";
+                while (ex != null)
+                {
+                    msg += ex.Message + Environment.NewLine;
+                    ex = ex.InnerException;
+                }
+                inRichTextBox.Text = msg + inRichTextBox.Text;
+                inRichTextBox.SelectionStart = 0;
+            }
+
+        }
+
+        public static void RichBoxTextToXML(RichTextBox inRichTextBox)
+        {
+            try
+            {
+                string tempStr = inRichTextBox.Text;
+                if (string.IsNullOrEmpty(tempStr))
+                {
+                    MessageBox.Show(inRichTextBox.Name + " is empty!");
+                    return;
+                }
+                inRichTextBox.Text = XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr));
+                inRichTextBox.SelectionStart = 0;
+            }
+            catch (Exception ex)
+            {
+                string msg = "";
+                while (ex != null)
+                {
+                    msg += ex.Message + Environment.NewLine;
+                    ex = ex.InnerException;
+                }
+                inRichTextBox.Text = msg + inRichTextBox.Text;
+                inRichTextBox.SelectionStart = 0;
+            }
+        }
     }
 }

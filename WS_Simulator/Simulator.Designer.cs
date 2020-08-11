@@ -61,6 +61,7 @@
             this.clearStartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceTextOfAllFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbHowManyNodesSend = new System.Windows.Forms.Label();
             this.lbCurrentCount = new System.Windows.Forms.Label();
             this.fileContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -74,7 +75,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.replaceTextOfAllFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.escapeXmlMessageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -310,35 +311,36 @@
             this.toolStripToXML,
             this.toDispatchToolStripMenuItem,
             this.toolStripClear,
-            this.saveToFileToolStripMenuItem});
+            this.saveToFileToolStripMenuItem,
+            this.escapeXmlMessageToolStripMenuItem});
             this.rtbContextMenu.Name = "pathContextMenu";
-            this.rtbContextMenu.Size = new System.Drawing.Size(134, 92);
+            this.rtbContextMenu.Size = new System.Drawing.Size(181, 136);
             // 
             // toolStripToXML
             // 
             this.toolStripToXML.Name = "toolStripToXML";
-            this.toolStripToXML.Size = new System.Drawing.Size(133, 22);
+            this.toolStripToXML.Size = new System.Drawing.Size(180, 22);
             this.toolStripToXML.Text = "ToXML";
             this.toolStripToXML.Click += new System.EventHandler(this.toolStripToXML_Click);
             // 
             // toDispatchToolStripMenuItem
             // 
             this.toDispatchToolStripMenuItem.Name = "toDispatchToolStripMenuItem";
-            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.toDispatchToolStripMenuItem.Text = "ToDispatch";
             this.toDispatchToolStripMenuItem.Click += new System.EventHandler(this.toDispatchToolStripMenuItem_Click);
             // 
             // toolStripClear
             // 
             this.toolStripClear.Name = "toolStripClear";
-            this.toolStripClear.Size = new System.Drawing.Size(133, 22);
+            this.toolStripClear.Size = new System.Drawing.Size(180, 22);
             this.toolStripClear.Text = "Clear";
             this.toolStripClear.Click += new System.EventHandler(this.toolStripClear_Click);
             // 
             // saveToFileToolStripMenuItem
             // 
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
-            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToFileToolStripMenuItem.Text = "SaveToFile";
             this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
             // 
@@ -363,7 +365,7 @@
             this.copyFolderToolStripMenuItem,
             this.replaceTextOfAllFilesToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(199, 158);
+            this.folderContextMenu.Size = new System.Drawing.Size(199, 136);
             // 
             // runMenuItem
             // 
@@ -399,6 +401,13 @@
             this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.copyFolderToolStripMenuItem.Text = "Copy Folder";
             this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
+            // 
+            // replaceTextOfAllFilesToolStripMenuItem
+            // 
+            this.replaceTextOfAllFilesToolStripMenuItem.Name = "replaceTextOfAllFilesToolStripMenuItem";
+            this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.replaceTextOfAllFilesToolStripMenuItem.Text = "Replace Text Of All Files";
+            this.replaceTextOfAllFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceTextOfAllFilesToolStripMenuItem_Click);
             // 
             // lbHowManyNodesSend
             // 
@@ -521,12 +530,12 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
-            // replaceTextOfAllFilesToolStripMenuItem
+            // escapeXmlMessageToolStripMenuItem
             // 
-            this.replaceTextOfAllFilesToolStripMenuItem.Name = "replaceTextOfAllFilesToolStripMenuItem";
-            this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
-            this.replaceTextOfAllFilesToolStripMenuItem.Text = "Replace Text Of All Files";
-            this.replaceTextOfAllFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceTextOfAllFilesToolStripMenuItem_Click);
+            this.escapeXmlMessageToolStripMenuItem.Name = "escapeXmlMessageToolStripMenuItem";
+            this.escapeXmlMessageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.escapeXmlMessageToolStripMenuItem.Text = "EscapeXmlMessage";
+            this.escapeXmlMessageToolStripMenuItem.Click += new System.EventHandler(this.escapeXmlMessageToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -622,6 +631,7 @@
         private System.Windows.Forms.ToolStripMenuItem reloadFromFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem replaceTextOfAllFilesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem escapeXmlMessageToolStripMenuItem;
     }
 }
 
