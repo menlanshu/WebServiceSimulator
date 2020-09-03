@@ -46,7 +46,6 @@ namespace WS_Simulator.Models
         public Hashtable DispatchConfig { get; set; }
 
         public TreeNode CurrLoopDirectoryNode { get; set; }
-
         public int CurrentPerTestCount { get; set; }
         public int PerfMsgCount { get; set; }
 

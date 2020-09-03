@@ -319,7 +319,7 @@ namespace WS_Simulator.FormHandler
         }
 
 
-        public static SaveFileDialog CreateAFileDialog(Node node, string defaultPath)
+        public static SaveFileDialog CreateAFileDialog(Node node, string defaultPath, string fileName="")
         {
             SaveFileDialog sfd = new SaveFileDialog();
             string openPath = defaultPath;
@@ -337,7 +337,7 @@ namespace WS_Simulator.FormHandler
                     openPath = ((FileNode)node).DirectoryPath;
                 }
 
-                sfd.FileName = node.TreeNodeName;
+                sfd.FileName = fileName;
             }
 
             sfd.InitialDirectory = openPath;

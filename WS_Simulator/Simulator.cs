@@ -540,8 +540,16 @@ namespace WS_Simulator
             {
                 if (_testClient.CurrentRepository == null)
                 {
+                    Node selectNode = (Node)(this.pathTree.SelectedNode.Tag);
+                    string fileName = selectNode.TreeNodeName;
+
+                    if (selectRichTextBox.Name.ToUpper().Contains("REPLY"))
+                    {
+                        fileName = fileName.Substring(0, fileName.LastIndexOf(".")) + "_Result.txt";
+                    }
+
                     SaveFileDialog sfd = SimulatorFormHandler.
-                        CreateAFileDialog((Node)(this.pathTree.SelectedNode.Tag), _testClient.RootDirectoryPath);
+                        CreateAFileDialog(selectNode, _testClient.RootDirectoryPath, fileName);
 
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {
@@ -1056,6 +1064,12 @@ namespace WS_Simulator
 
         private void reloadFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Node selectNode = null;
+            if (this.pathTree.SelectedNode != null)
+            {
+                selectNode = (Node)this.pathTree.SelectedNode.Tag;
+            }
+
             // Initial a list of Node
             List<Node> initialNodeList = new List<Node>();
 
@@ -1066,6 +1080,13 @@ namespace WS_Simulator
             {
                 _testClient.RootDirectoryPath = directoryPath;
                 _testClient.CurrNodeList = initialNodeList;
+
+                if (selectNode != null)
+                {
+                    Node getNode = initialNodeList.Where(x => x.NodeFullPath == selectNode.NodeFullPath).FirstOrDefault();
+
+                    this.pathTree.SelectedNode = getNode?.TreeNodeValue;
+                }
             }
             else
             {
