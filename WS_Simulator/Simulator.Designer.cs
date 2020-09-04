@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Simulator));
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,6 +63,8 @@
             this.openFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.replaceTextOfAllFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateTestCaseFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateCaseConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbHowManyNodesSend = new System.Windows.Forms.Label();
             this.lbCurrentCount = new System.Windows.Forms.Label();
             this.fileContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -76,8 +78,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.generateTestCaseFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.generateCaseConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameFileFollowOrderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -173,14 +174,15 @@
             this.pathTree.Location = new System.Drawing.Point(0, 0);
             this.pathTree.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.pathTree.Name = "pathTree";
-            treeNode3.Name = "RootNode";
-            treeNode3.Text = "";
+            treeNode2.Name = "RootNode";
+            treeNode2.Text = "";
             this.pathTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode3});
+            treeNode2});
             this.pathTree.Size = new System.Drawing.Size(300, 734);
             this.pathTree.TabIndex = 0;
             this.pathTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathTree_DragEnter);
             this.pathTree.DragOver += new System.Windows.Forms.DragEventHandler(this.pathTree_DragOver);
+            this.pathTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.pathTree_KeyDown);
             this.pathTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pathTree_MouseDown);
             // 
             // splitContainer2
@@ -374,9 +376,10 @@
             this.copyFolderToolStripMenuItem,
             this.replaceTextOfAllFilesToolStripMenuItem,
             this.generateTestCaseFileToolStripMenuItem,
-            this.generateCaseConfigFileToolStripMenuItem});
+            this.generateCaseConfigFileToolStripMenuItem,
+            this.renameFileFollowOrderToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(201, 202);
+            this.folderContextMenu.Size = new System.Drawing.Size(201, 224);
             // 
             // runMenuItem
             // 
@@ -419,6 +422,20 @@
             this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.replaceTextOfAllFilesToolStripMenuItem.Text = "Replace Text Of All Files";
             this.replaceTextOfAllFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceTextOfAllFilesToolStripMenuItem_Click);
+            // 
+            // generateTestCaseFileToolStripMenuItem
+            // 
+            this.generateTestCaseFileToolStripMenuItem.Name = "generateTestCaseFileToolStripMenuItem";
+            this.generateTestCaseFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.generateTestCaseFileToolStripMenuItem.Text = "GenerateTestCaseFile";
+            this.generateTestCaseFileToolStripMenuItem.Click += new System.EventHandler(this.generateTestCaseFileToolStripMenuItem_Click);
+            // 
+            // generateCaseConfigFileToolStripMenuItem
+            // 
+            this.generateCaseConfigFileToolStripMenuItem.Name = "generateCaseConfigFileToolStripMenuItem";
+            this.generateCaseConfigFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.generateCaseConfigFileToolStripMenuItem.Text = "GenerateCaseConfigFile";
+            this.generateCaseConfigFileToolStripMenuItem.Click += new System.EventHandler(this.generateCaseConfigFileToolStripMenuItem_Click);
             // 
             // lbHowManyNodesSend
             // 
@@ -541,19 +558,12 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
-            // generateTestCaseFileToolStripMenuItem
+            // renameFileFollowOrderToolStripMenuItem
             // 
-            this.generateTestCaseFileToolStripMenuItem.Name = "generateTestCaseFileToolStripMenuItem";
-            this.generateTestCaseFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.generateTestCaseFileToolStripMenuItem.Text = "GenerateTestCaseFile";
-            this.generateTestCaseFileToolStripMenuItem.Click += new System.EventHandler(this.generateTestCaseFileToolStripMenuItem_Click);
-            // 
-            // generateCaseConfigFileToolStripMenuItem
-            // 
-            this.generateCaseConfigFileToolStripMenuItem.Name = "generateCaseConfigFileToolStripMenuItem";
-            this.generateCaseConfigFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-            this.generateCaseConfigFileToolStripMenuItem.Text = "GenerateCaseConfigFile";
-            this.generateCaseConfigFileToolStripMenuItem.Click += new System.EventHandler(this.generateCaseConfigFileToolStripMenuItem_Click);
+            this.renameFileFollowOrderToolStripMenuItem.Name = "renameFileFollowOrderToolStripMenuItem";
+            this.renameFileFollowOrderToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.renameFileFollowOrderToolStripMenuItem.Text = "RenameFileFollowOrder";
+            this.renameFileFollowOrderToolStripMenuItem.Click += new System.EventHandler(this.renameFileFollowOrderToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -652,6 +662,7 @@
         private System.Windows.Forms.ToolStripMenuItem escapeXmlMessageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateTestCaseFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCaseConfigFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameFileFollowOrderToolStripMenuItem;
     }
 }
 

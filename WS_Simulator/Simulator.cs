@@ -17,7 +17,7 @@ using System.Diagnostics.Eventing.Reader;
 
 namespace WS_Simulator
 {
-    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester, 
+    public partial class Simulator : Form, ISearchFormRequester, ISaveToDBFormRequester,
         ILoadFromDBFormRequester, ISaveSingleFieToDB, ICopyFolderFormRequester, IReplaceTextFormRequester
     {
         private Action UpdateCurrLoopText;
@@ -142,6 +142,13 @@ namespace WS_Simulator
             (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList,
                 this.pathTree, folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName);
 
+            this.pathTree.AllowDrop = true;
+            // Add event handlers for the required drag events.  
+            //this.pathTree.ItemDrag += new ItemDragEventHandler(treeView_ItemDrag);
+            //this.pathTree.DragEnter += new DragEventHandler(treeView_DragEnter);
+            //this.pathTree.DragOver += new DragEventHandler(treeView_DragOver);
+            //this.pathTree.DragDrop += new DragEventHandler(treeView_DragDrop);
+
             if (okay)
             {
                 _testClient.RootDirectoryPath = directoryPath;
@@ -152,7 +159,6 @@ namespace WS_Simulator
                 MessageBox.Show(this, "Load Current Directory fail", "Reminder");
             }
         }
-
         private void InitialImageList()
         {
             ImageList myImageList = new ImageList();
@@ -214,7 +220,8 @@ namespace WS_Simulator
         }
         private void UpdateRTBReplyMsg(string replyMessage)
         {
-            this.BeginInvoke((Action<string>)((replyMsgText) => {
+            this.BeginInvoke((Action<string>)((replyMsgText) =>
+            {
                 if (!this.btnSend.Enabled)
                 {
                     waitSecond = 0;
@@ -280,13 +287,13 @@ namespace WS_Simulator
 
         private Node SaveNodeToTree(Node motherNode, string nodeName, TreeNodeType treeNodeType)
         {
-            Node newNode =  (Node)this.Invoke(
+            Node newNode = (Node)this.Invoke(
                 (Func<Node, string, TreeNodeType, Node>)(
                 (inmotherNode, innodeName, intreeNodeType) =>
                 {
                     return SaveNodeToTreeMethod(inmotherNode, innodeName, intreeNodeType);
                 }
-                ), 
+                ),
                 motherNode, nodeName, treeNodeType);
 
             return newNode;
@@ -319,11 +326,11 @@ namespace WS_Simulator
                         motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
 
                         // Add node to current Node tree
-                        if(motherNode is DBNode)
+                        if (motherNode is DBNode)
                         {
                             newNode = new DBNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
                         }
-                        else if(motherNode is FileNode)
+                        else if (motherNode is FileNode)
                         {
                             newNode = new FileNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
                         }
@@ -351,7 +358,8 @@ namespace WS_Simulator
                         if (motherNode is DBNode)
                         {
                             newNode = new DBNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
-                        }else if (motherNode is FileNode)
+                        }
+                        else if (motherNode is FileNode)
                         {
                             newNode = new FileNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
                         }
@@ -430,7 +438,7 @@ namespace WS_Simulator
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
         {
 
-            if(_testClient.InTesting())
+            if (_testClient.InTesting())
             {
                 return;
             }
@@ -465,7 +473,7 @@ namespace WS_Simulator
                 {
                     currentStatus.AppendLine($"Test Node: {testNode.NodeInTree.TreeNodeName}");
                     currentStatus.AppendLine($"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms");
-                    if(testNode.NeedWait)
+                    if (testNode.NeedWait)
                     {
                         currentStatus.AppendLine($"Need wait for {testNode.NeedWaitTime}ms after send finish according to configuration.");
                     }
@@ -480,7 +488,7 @@ namespace WS_Simulator
 
         #endregion
 
-        
+
 
         private void tbnRequestToXML_Click(object sender, EventArgs e)
         {
@@ -558,7 +566,8 @@ namespace WS_Simulator
 
                         FileProcessor.SaveFile(localFilePath, selectRichTextBox.Text);
                     }
-                }else
+                }
+                else
                 {
                     SaveSingleFileToDB frm = new SaveSingleFileToDB(this, this.pathTree, selectRichTextBox.Text);
                     frm.Show();
@@ -569,7 +578,7 @@ namespace WS_Simulator
         private void pathTree_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                e.Effect = DragDropEffects.All; 
+                e.Effect = DragDropEffects.All;
             else
                 e.Effect = DragDropEffects.None;
         }
@@ -599,7 +608,7 @@ namespace WS_Simulator
             {
                 MessageBox.Show(this, "Load Current Directory fail", "Reminder");
             }
-            
+
         }
 
         private void toDispatchToolStripMenuItem_Click(object sender, EventArgs e)
@@ -619,7 +628,8 @@ namespace WS_Simulator
                     if (XMLProcessor.ChangeToDispatcherMessage(this.pathTree.SelectedNode.Text, ref requestMessage, out errDesc))
                     {
                         selectRichTextBox.Text = requestMessage;
-                    }else
+                    }
+                    else
                     {
                         UpdateReplyMessage?.Invoke(errDesc);
                     }
@@ -637,7 +647,7 @@ namespace WS_Simulator
             List<Node> initialNodeList = new List<Node>();
 
             _testClient.CurrentRepository = null;
-            (bool okay, string directoryPath)  = SimulatorFormHandler.LoadFileTree(ref initialNodeList, this.pathTree, folderContextMenu, fileContextMenu, 
+            (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(ref initialNodeList, this.pathTree, folderContextMenu, fileContextMenu,
                 _wsConfig.FileExtensionName, _testClient.RootDirectoryPath);
             if (okay)
             {
@@ -664,7 +674,7 @@ namespace WS_Simulator
                 this.rtbRequest.Text = tempMessage;
                 MessageBox.Show("Replace Done!");
             }
-            else if(searchComponentName == this.rtbReply.Name)
+            else if (searchComponentName == this.rtbReply.Name)
             {
                 tempMessage = this.rtbReply.Text;
 
@@ -915,7 +925,7 @@ namespace WS_Simulator
         {
             TreeNode directoryNode = this.pathTree.SelectedNode;
 
-            if(directoryNode != null)
+            if (directoryNode != null)
             {
                 if (directoryNode.FullPath != "")
                 {
@@ -953,7 +963,8 @@ namespace WS_Simulator
             {
                 SaveToDB frm = new SaveToDB(this);
                 frm.Show();
-            }else
+            }
+            else
             {
                 MessageBox.Show("Can't save repository from DB to DB!");
             }
@@ -984,10 +995,10 @@ namespace WS_Simulator
                     {
                         // Initial a list of Node
                         List<Node> initialNodeList = new List<Node>();
-                        
+
                         _testClient.CurrentRepository = null;
                         (bool okay, string directoryPath) = SimulatorFormHandler.LoadFileTree(
-                            ref initialNodeList, this.pathTree, 
+                            ref initialNodeList, this.pathTree,
                             folderContextMenu, fileContextMenu, _wsConfig.FileExtensionName, dialog.SelectedPath);
                         if (okay)
                         {
@@ -1021,7 +1032,8 @@ namespace WS_Simulator
                 _testClient.CurrNodeList.ForEach(x => x.TreeNodeMessage = "");
 
                 result = true;
-            }else
+            }
+            else
             {
                 errDesc = "Repository Name Already exist, please change it";
             }
@@ -1095,7 +1107,7 @@ namespace WS_Simulator
             }
         }
 
-        public (bool okay, string errDesc) SaveFolderToTreeNode(Node motherNode, Node folderNode, 
+        public (bool okay, string errDesc) SaveFolderToTreeNode(Node motherNode, Node folderNode,
             string newFolderName, string oldText = "", string newText = "")
         {
             bool okay = false;
@@ -1110,7 +1122,8 @@ namespace WS_Simulator
             }
 
             // Add Folder node
-            FileNode node = new FileNode { 
+            FileNode node = new FileNode
+            {
                 TreeNodeType = TreeNodeType.Directory,
                 TreeNodeName = newFolderName,
                 NodeFullPath = $@"{motherNode.NodeFullPath}\{newFolderName}"
@@ -1135,7 +1148,8 @@ namespace WS_Simulator
                         }
 
                         // Add Filte node
-                        FileNode fileNode = new FileNode {
+                        FileNode fileNode = new FileNode
+                        {
                             TreeNodeType = TreeNodeType.File,
                             TreeNodeName = fileName,
                             NodeFullPath = $@"{dirnode.NodeFullPath}\{fileName}"
@@ -1143,7 +1157,8 @@ namespace WS_Simulator
                         if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
                         {
                             fileNode.SaveCurrentNodeToMotherNode(dirnode, ((Node)currNode.Tag).GetCurrentMessage(false));
-                        }else
+                        }
+                        else
                         {
                             fileNode.SaveCurrentNodeToMotherNode(dirnode, ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText));
                         }
@@ -1151,7 +1166,8 @@ namespace WS_Simulator
                 }
 
                 okay = true;
-            }else
+            }
+            else
             {
                 errDesc = $"Add folder to {motherNode.TreeNodeName} fail!";
             }
@@ -1161,7 +1177,7 @@ namespace WS_Simulator
 
         private void copyFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(this.pathTree.SelectedNode != null)
+            if (this.pathTree.SelectedNode != null)
             {
                 CopyFolderForm frm = new CopyFolderForm(this, this.pathTree, (Node)this.pathTree.SelectedNode.Tag);
                 frm.Show();
@@ -1246,6 +1262,40 @@ namespace WS_Simulator
                 {
                     string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
                     TestCaseDocumentHandler.GenerateCaseConfigFile(directoryPath);
+                }
+            }
+
+            reloadFromFolderToolStripMenuItem_Click(sender, e);
+        }
+
+        private void pathTree_KeyDown(object sender, KeyEventArgs e)
+        {
+            TreeNode currentNode = this.pathTree.SelectedNode;
+            if (e.KeyCode == Keys.Up)
+            {
+                if (currentNode != null)
+                {
+                    currentNode.MoveUp();
+                }
+            }else if (e.KeyCode == Keys.Down)
+            {
+                if (currentNode != null)
+                {
+                    currentNode.MoveDown();
+                }
+            }
+        }
+
+        private void renameFileFollowOrderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode directoryNode = this.pathTree.SelectedNode;
+
+            if (directoryNode != null)
+            {
+                if (directoryNode.FullPath != "")
+                {
+                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
+                    TestCaseDocumentHandler.RenameFileFollowSequence(directoryNode, directoryPath);
                 }
             }
 

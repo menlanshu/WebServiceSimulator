@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Internal;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 using WS_Simulator.Models;
 
@@ -91,6 +94,43 @@ namespace WS_Simulator.FormHandler
                 if (int.TryParse(file.Name.Substring(0, 1), out int tempInt))
                 {
                     File.Move(file.Name, $"0{file.Name}");
+                }
+            }
+
+        }
+        public static void RenameFileFollowSequence(TreeNode directoryNode, string directoryPath)
+        {
+            DirectoryInfo directory = new DirectoryInfo(directoryPath);
+            string pattern = @"^\d+";
+            Regex rgx = new Regex(pattern);
+            
+            int step = 0;
+            string newFileName;
+
+            List<string> alreadyHandled = new List<string>();
+            var nodeList = directoryNode.Nodes.OfType<TreeNode>().ToList();
+
+            foreach (TreeNode node in nodeList)
+            {
+                if (rgx.Match(node.Text).Success)
+                {
+                    if (!alreadyHandled.Contains(node.Text))
+                    {
+                        newFileName = rgx.Replace(node.Text, step.ToString("00"));
+                        File.Move($@"{directoryPath}\{node.Text}", $@"{directoryPath}\{newFileName}");
+                        alreadyHandled.Add(node.Text);
+
+                        string outputfileName = node.Text.Substring(0, node.Text.LastIndexOf(".")) + _resultPostFix;
+                        TreeNode outputNode = nodeList.FirstOrDefault(x => x.Text == outputfileName);
+                        if (outputNode != null)
+                        {
+                            newFileName = rgx.Replace(outputNode.Text, step.ToString("00"));
+                            File.Move($@"{directoryPath}\{outputNode.Text}", $@"{directoryPath}\{newFileName}");
+                            alreadyHandled.Add(outputNode.Text);
+                        }
+
+                        step++;
+                    }
                 }
             }
 
