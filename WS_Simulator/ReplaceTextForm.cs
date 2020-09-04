@@ -42,7 +42,14 @@ namespace WS_Simulator
                 return;
             }
 
-            (okay, errDesc) = _requester.ReplaceTextFileInfo(_folderNode, this.oldTextValue.Text, this.newTextValue.Text);
+            if (cbReplaceFileName.Checked)
+            {
+                (okay, errDesc) = _requester.ReplaceTextFileName(_folderNode, this.oldTextValue.Text, this.newTextValue.Text);
+            }
+            else
+            {
+                (okay, errDesc) = _requester.ReplaceTextFileInfo(_folderNode, this.oldTextValue.Text, this.newTextValue.Text);
+            }
 
             if (okay)
             {

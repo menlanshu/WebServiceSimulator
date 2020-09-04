@@ -10,5 +10,6 @@ namespace WS_Simulator.Interface
     public interface IReplaceTextFormRequester
     {
         (bool okay, string errDesc) ReplaceTextFileInfo(Node folderNode, string oldText = "", string newText = "");
+        (bool okay, string errDesc) ReplaceTextFileName(Node folderNode, string oldText = "", string newText = "");
     }
 }

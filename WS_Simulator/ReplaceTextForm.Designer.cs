@@ -34,18 +34,19 @@
             this.oldTextLabel = new System.Windows.Forms.Label();
             this.cancelButton = new System.Windows.Forms.Button();
             this.okayButton = new System.Windows.Forms.Button();
+            this.cbReplaceFileName = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // newTextValue
             // 
-            this.newTextValue.Location = new System.Drawing.Point(158, 84);
+            this.newTextValue.Location = new System.Drawing.Point(158, 73);
             this.newTextValue.Name = "newTextValue";
             this.newTextValue.Size = new System.Drawing.Size(151, 35);
             this.newTextValue.TabIndex = 16;
             // 
             // oldTextValue
             // 
-            this.oldTextValue.Location = new System.Drawing.Point(158, 37);
+            this.oldTextValue.Location = new System.Drawing.Point(158, 26);
             this.oldTextValue.Name = "oldTextValue";
             this.oldTextValue.Size = new System.Drawing.Size(151, 35);
             this.oldTextValue.TabIndex = 15;
@@ -53,7 +54,7 @@
             // newNameLabel
             // 
             this.newNameLabel.AutoSize = true;
-            this.newNameLabel.Location = new System.Drawing.Point(33, 87);
+            this.newNameLabel.Location = new System.Drawing.Point(33, 76);
             this.newNameLabel.Name = "newNameLabel";
             this.newNameLabel.Size = new System.Drawing.Size(103, 30);
             this.newNameLabel.TabIndex = 14;
@@ -62,7 +63,7 @@
             // oldTextLabel
             // 
             this.oldTextLabel.AutoSize = true;
-            this.oldTextLabel.Location = new System.Drawing.Point(33, 40);
+            this.oldTextLabel.Location = new System.Drawing.Point(33, 29);
             this.oldTextLabel.Name = "oldTextLabel";
             this.oldTextLabel.Size = new System.Drawing.Size(94, 30);
             this.oldTextLabel.TabIndex = 13;
@@ -70,7 +71,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(34, 216);
+            this.cancelButton.Location = new System.Drawing.Point(34, 226);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(275, 41);
             this.cancelButton.TabIndex = 12;
@@ -80,7 +81,7 @@
             // 
             // okayButton
             // 
-            this.okayButton.Location = new System.Drawing.Point(34, 154);
+            this.okayButton.Location = new System.Drawing.Point(34, 164);
             this.okayButton.Name = "okayButton";
             this.okayButton.Size = new System.Drawing.Size(275, 41);
             this.okayButton.TabIndex = 11;
@@ -88,12 +89,23 @@
             this.okayButton.UseVisualStyleBackColor = true;
             this.okayButton.Click += new System.EventHandler(this.okayButton_Click);
             // 
+            // cbReplaceFileName
+            // 
+            this.cbReplaceFileName.AutoSize = true;
+            this.cbReplaceFileName.Location = new System.Drawing.Point(62, 114);
+            this.cbReplaceFileName.Name = "cbReplaceFileName";
+            this.cbReplaceFileName.Size = new System.Drawing.Size(203, 34);
+            this.cbReplaceFileName.TabIndex = 17;
+            this.cbReplaceFileName.Text = "Replace File Name";
+            this.cbReplaceFileName.UseVisualStyleBackColor = true;
+            // 
             // ReplaceTextForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 30F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(342, 297);
+            this.Controls.Add(this.cbReplaceFileName);
             this.Controls.Add(this.newTextValue);
             this.Controls.Add(this.oldTextValue);
             this.Controls.Add(this.newNameLabel);
@@ -104,7 +116,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
             this.Name = "ReplaceTextForm";
-            this.Text = "SaveSingleFileToDB";
+            this.Text = "Change File Info";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -118,5 +130,6 @@
         private System.Windows.Forms.Label oldTextLabel;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button okayButton;
+        private System.Windows.Forms.CheckBox cbReplaceFileName;
     }
 }

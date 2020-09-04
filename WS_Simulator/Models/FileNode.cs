@@ -123,5 +123,22 @@ namespace WS_Simulator.Models
         {
             FileProcessor.SaveFile(FileFullPath, requestMessage);
         }
+
+
+        public override void RenameFile(string newFileName)
+        {
+            string oldFilePath = FileFullPath;
+
+            this.TreeNodeValue.Text = newFileName;
+            this.NodeFullPath = this.TreeNodeValue.FullPath;
+            this.TreeNodeName = newFileName;
+
+            string newFilePath = FileFullPath;
+
+            FileProcessor.MoveFile(oldFilePath, newFilePath);
+
+        }
+
+
     }
 }

@@ -50,6 +50,7 @@ namespace WS_Simulator.Models
         public virtual void SaveReplyResult(string currentNodeReplyMessage) { throw new NotImplementedException(); }
         public virtual string GetCurrentMessage(bool updateControl) { throw new NotImplementedException(); }
         public virtual void UpdateCurrentMessage(string requestMessage) { throw new NotImplementedException(); }
+        public virtual void RenameFile(string newFileName) { throw new NotImplementedException(); }
 
             //public string GetFullPathOfFile(string rootPath)
             //{

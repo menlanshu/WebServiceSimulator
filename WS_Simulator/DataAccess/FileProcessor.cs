@@ -88,5 +88,10 @@ namespace WS_Simulator.DataAccess
                 throw err;
             }
         }
+
+        public static void MoveFile(string oldFileName, string newFileName)
+        {
+            File.Move(oldFileName, newFileName);
+        }
     }
 }

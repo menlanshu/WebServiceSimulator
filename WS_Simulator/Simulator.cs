@@ -1098,7 +1098,7 @@ namespace WS_Simulator
                     Node getNode = initialNodeList.Where(x => x.NodeFullPath == selectNode.NodeFullPath).FirstOrDefault();
 
                     this.pathTree.SelectedNode = getNode?.TreeNodeValue;
-                    this.pathTree.SelectedNode.Expand();
+                    this.pathTree.SelectedNode?.Expand();
                 }
             }
             else
@@ -1210,6 +1210,40 @@ namespace WS_Simulator
                     {
                         newMessage = ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText);
                         ((Node)currNode.Tag).UpdateCurrentMessage(newMessage);
+                    }
+                }
+            }
+
+            okay = true;
+
+            return (okay, errDesc);
+        }
+
+        public (bool okay, string errDesc) ReplaceTextFileName(Node folderNode, string oldText = "", string newText = "")
+        {
+            bool okay = false;
+            string errDesc = "";
+
+            if (_testClient.CurrentRepository != null)
+            {
+                // TODO - Support DB
+                errDesc = "This function only support local file now!";
+                return (okay, errDesc);
+            }
+
+            // Add Each Node of this folder
+            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
+            {
+                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
+                {
+                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
+                    {
+                        // DO nothing
+                    }
+                    else
+                    {
+                        var node = (Node)currNode.Tag;
+                        node.RenameFile(node.TreeNodeName.Replace(oldText, newText));
                     }
                 }
             }
