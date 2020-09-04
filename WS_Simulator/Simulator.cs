@@ -1086,6 +1086,7 @@ namespace WS_Simulator
                     Node getNode = initialNodeList.Where(x => x.NodeFullPath == selectNode.NodeFullPath).FirstOrDefault();
 
                     this.pathTree.SelectedNode = getNode?.TreeNodeValue;
+                    this.pathTree.SelectedNode.Expand();
                 }
             }
             else
@@ -1217,6 +1218,38 @@ namespace WS_Simulator
             {
                 SimulatorFormHandler.RichBoxTextEscapeXML(selectRichTextBox);
             }
+        }
+
+        private void generateTestCaseFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode directoryNode = this.pathTree.SelectedNode;
+
+            if (directoryNode != null)
+            {
+                if (directoryNode.FullPath != "")
+                {
+                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
+                    TestCaseDocumentHandler.GenerateTestCaseFile(directoryPath);
+                }
+            }
+
+            reloadFromFolderToolStripMenuItem_Click(sender, e);
+        }
+
+        private void generateCaseConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode directoryNode = this.pathTree.SelectedNode;
+
+            if (directoryNode != null)
+            {
+                if (directoryNode.FullPath != "")
+                {
+                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
+                    TestCaseDocumentHandler.GenerateCaseConfigFile(directoryPath);
+                }
+            }
+
+            reloadFromFolderToolStripMenuItem_Click(sender, e);
         }
     }
 }

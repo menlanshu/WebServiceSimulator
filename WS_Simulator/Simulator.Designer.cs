@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Simulator));
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,6 +54,7 @@
             this.toDispatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripClear = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.escapeXmlMessageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cbToDispatcher = new System.Windows.Forms.CheckBox();
             this.folderContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.runMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,7 +76,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.escapeXmlMessageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateTestCaseFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateCaseConfigFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -171,10 +173,10 @@
             this.pathTree.Location = new System.Drawing.Point(0, 0);
             this.pathTree.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.pathTree.Name = "pathTree";
-            treeNode1.Name = "RootNode";
-            treeNode1.Text = "";
+            treeNode3.Name = "RootNode";
+            treeNode3.Text = "";
             this.pathTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode3});
             this.pathTree.Size = new System.Drawing.Size(300, 734);
             this.pathTree.TabIndex = 0;
             this.pathTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.pathTree_DragEnter);
@@ -314,35 +316,42 @@
             this.saveToFileToolStripMenuItem,
             this.escapeXmlMessageToolStripMenuItem});
             this.rtbContextMenu.Name = "pathContextMenu";
-            this.rtbContextMenu.Size = new System.Drawing.Size(181, 136);
+            this.rtbContextMenu.Size = new System.Drawing.Size(178, 114);
             // 
             // toolStripToXML
             // 
             this.toolStripToXML.Name = "toolStripToXML";
-            this.toolStripToXML.Size = new System.Drawing.Size(180, 22);
+            this.toolStripToXML.Size = new System.Drawing.Size(177, 22);
             this.toolStripToXML.Text = "ToXML";
             this.toolStripToXML.Click += new System.EventHandler(this.toolStripToXML_Click);
             // 
             // toDispatchToolStripMenuItem
             // 
             this.toDispatchToolStripMenuItem.Name = "toDispatchToolStripMenuItem";
-            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toDispatchToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.toDispatchToolStripMenuItem.Text = "ToDispatch";
             this.toDispatchToolStripMenuItem.Click += new System.EventHandler(this.toDispatchToolStripMenuItem_Click);
             // 
             // toolStripClear
             // 
             this.toolStripClear.Name = "toolStripClear";
-            this.toolStripClear.Size = new System.Drawing.Size(180, 22);
+            this.toolStripClear.Size = new System.Drawing.Size(177, 22);
             this.toolStripClear.Text = "Clear";
             this.toolStripClear.Click += new System.EventHandler(this.toolStripClear_Click);
             // 
             // saveToFileToolStripMenuItem
             // 
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
-            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.saveToFileToolStripMenuItem.Text = "SaveToFile";
             this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
+            // 
+            // escapeXmlMessageToolStripMenuItem
+            // 
+            this.escapeXmlMessageToolStripMenuItem.Name = "escapeXmlMessageToolStripMenuItem";
+            this.escapeXmlMessageToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.escapeXmlMessageToolStripMenuItem.Text = "EscapeXmlMessage";
+            this.escapeXmlMessageToolStripMenuItem.Click += new System.EventHandler(this.escapeXmlMessageToolStripMenuItem_Click);
             // 
             // cbToDispatcher
             // 
@@ -363,49 +372,51 @@
             this.clearStartToolStripMenuItem,
             this.openFileFolderToolStripMenuItem,
             this.copyFolderToolStripMenuItem,
-            this.replaceTextOfAllFilesToolStripMenuItem});
+            this.replaceTextOfAllFilesToolStripMenuItem,
+            this.generateTestCaseFileToolStripMenuItem,
+            this.generateCaseConfigFileToolStripMenuItem});
             this.folderContextMenu.Name = "folderContextMenu";
-            this.folderContextMenu.Size = new System.Drawing.Size(199, 136);
+            this.folderContextMenu.Size = new System.Drawing.Size(201, 202);
             // 
             // runMenuItem
             // 
             this.runMenuItem.Name = "runMenuItem";
-            this.runMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.runMenuItem.Size = new System.Drawing.Size(200, 22);
             this.runMenuItem.Text = "Run All";
             this.runMenuItem.Click += new System.EventHandler(this.runMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.stopToolStripMenuItem.Text = "Stop Run";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
             // clearStartToolStripMenuItem
             // 
             this.clearStartToolStripMenuItem.Name = "clearStartToolStripMenuItem";
-            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.clearStartToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.clearStartToolStripMenuItem.Text = "Clear Duration";
             this.clearStartToolStripMenuItem.Click += new System.EventHandler(this.clearStartToolStripMenuItem_Click);
             // 
             // openFileFolderToolStripMenuItem
             // 
             this.openFileFolderToolStripMenuItem.Name = "openFileFolderToolStripMenuItem";
-            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.openFileFolderToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.openFileFolderToolStripMenuItem.Text = "Open File Folder";
             this.openFileFolderToolStripMenuItem.Click += new System.EventHandler(this.openFileFolderToolStripMenuItem_Click);
             // 
             // copyFolderToolStripMenuItem
             // 
             this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
-            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.copyFolderToolStripMenuItem.Text = "Copy Folder";
             this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
             // 
             // replaceTextOfAllFilesToolStripMenuItem
             // 
             this.replaceTextOfAllFilesToolStripMenuItem.Name = "replaceTextOfAllFilesToolStripMenuItem";
-            this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.replaceTextOfAllFilesToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.replaceTextOfAllFilesToolStripMenuItem.Text = "Replace Text Of All Files";
             this.replaceTextOfAllFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceTextOfAllFilesToolStripMenuItem_Click);
             // 
@@ -530,12 +541,19 @@
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
             // 
-            // escapeXmlMessageToolStripMenuItem
+            // generateTestCaseFileToolStripMenuItem
             // 
-            this.escapeXmlMessageToolStripMenuItem.Name = "escapeXmlMessageToolStripMenuItem";
-            this.escapeXmlMessageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.escapeXmlMessageToolStripMenuItem.Text = "EscapeXmlMessage";
-            this.escapeXmlMessageToolStripMenuItem.Click += new System.EventHandler(this.escapeXmlMessageToolStripMenuItem_Click);
+            this.generateTestCaseFileToolStripMenuItem.Name = "generateTestCaseFileToolStripMenuItem";
+            this.generateTestCaseFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.generateTestCaseFileToolStripMenuItem.Text = "GenerateTestCaseFile";
+            this.generateTestCaseFileToolStripMenuItem.Click += new System.EventHandler(this.generateTestCaseFileToolStripMenuItem_Click);
+            // 
+            // generateCaseConfigFileToolStripMenuItem
+            // 
+            this.generateCaseConfigFileToolStripMenuItem.Name = "generateCaseConfigFileToolStripMenuItem";
+            this.generateCaseConfigFileToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.generateCaseConfigFileToolStripMenuItem.Text = "GenerateCaseConfigFile";
+            this.generateCaseConfigFileToolStripMenuItem.Click += new System.EventHandler(this.generateCaseConfigFileToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -632,6 +650,8 @@
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem replaceTextOfAllFilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem escapeXmlMessageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generateTestCaseFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generateCaseConfigFileToolStripMenuItem;
     }
 }
 

@@ -205,7 +205,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\GenerateContext.cs" />
+    <Compile Include="FormHandler\TestCaseDocumentHandler.cs" />
     <Compile Include="Interface\IReplaceTextFormRequester.cs" />
+    <Compile Include="Models\CaseConfig.cs" />
     <Compile Include="ReplaceTextForm.cs">
       <SubType>Form</SubType>
     </Compile>
