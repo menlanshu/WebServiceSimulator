@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace WS_Simulator.DataAccess
 {
@@ -25,11 +26,12 @@ namespace WS_Simulator.DataAccess
         public static string GetVlaueByPath(string path, string requestMessage, bool isBatch, bool getInnerXml = false)
         {
             XmlDocument testXmlDoc = new XmlDocument();
+
             string pathValue = "";
 
             if (requestMessage == "") return pathValue;
 
-            testXmlDoc.LoadXml(requestMessage);
+            testXmlDoc.LoadXml(RemoveAllNamespaces(requestMessage));
 
             if (testXmlDoc.SelectSingleNode(path) == null)
             {
@@ -72,6 +74,30 @@ namespace WS_Simulator.DataAccess
             }
 
             return pathValue;
+        }
+
+        //Implemented based on interface, not part of algorithm
+        public static string RemoveAllNamespaces(string xmlDocument)
+        {
+            XElement xmlDocumentWithoutNs = RemoveAllNamespaces(XElement.Parse(xmlDocument));
+
+            return xmlDocumentWithoutNs.ToString();
+        }
+
+        //Core recursion function
+        private static XElement RemoveAllNamespaces(XElement xmlDocument)
+        {
+            if (!xmlDocument.HasElements)
+            {
+                XElement xElement = new XElement(xmlDocument.Name.LocalName);
+                xElement.Value = xmlDocument.Value;
+
+                foreach (XAttribute attribute in xmlDocument.Attributes())
+                    xElement.Add(attribute);
+
+                return xElement;
+            }
+            return new XElement(xmlDocument.Name.LocalName, xmlDocument.Elements().Select(el => RemoveAllNamespaces(el)));
         }
 
         public static bool IsE3EventInfo(string requestMessage, out int dispatcherConfig, out string errDesc)

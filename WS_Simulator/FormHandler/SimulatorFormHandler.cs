@@ -398,6 +398,21 @@ namespace WS_Simulator.FormHandler
             }
         }
 
+        public static string FormatReplyMessage(string fileName, string replyContent)
+        {
+            string result = replyContent;
+            string filePostFix = fileName.Substring(fileName.LastIndexOf(".")+1);
+
+            string xmlPath = ConfigurationManager.AppSettings[$"{filePostFix.ToUpper()}Result"];
+
+            if(!string.IsNullOrEmpty(xmlPath))
+            {
+                result = XMLProcessor.GetVlaueByPath(xmlPath, replyContent, true);
+            }
+
+            return result;
+        }
+
         public static void MoveUp(this TreeNode node)
         {
             TreeNode parent = node.Parent;

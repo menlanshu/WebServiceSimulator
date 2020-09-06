@@ -28,6 +28,8 @@ namespace WS_Simulator
         public static char[] ConfigDelimeter = (";").ToCharArray();
         private int waitSecond = 0;
         private RichTextBox selectRichTextBox;
+        private readonly string _toDispatchName = "To Dispatch";
+        private readonly string _toResultName = "To Result";
 
         SearchForm testSearch;
         string requestSourceStr = "";
@@ -506,6 +508,7 @@ namespace WS_Simulator
             {
                 this.toolStripToXML.Visible = true;
                 this.toDispatchToolStripMenuItem.Visible = true;
+                this.toDispatchToolStripMenuItem.Text = _toDispatchName;
                 this.toolStripClear.Visible = true;
                 this.saveToFileToolStripMenuItem.Visible = true;
                 rtbRequest.ContextMenuStrip.Show();
@@ -518,7 +521,8 @@ namespace WS_Simulator
             if (e.Button == MouseButtons.Right)
             {
                 this.toolStripToXML.Visible = true;
-                this.toDispatchToolStripMenuItem.Visible = false;
+                this.toDispatchToolStripMenuItem.Visible = true;
+                this.toDispatchToolStripMenuItem.Text = _toResultName;
                 this.toolStripClear.Visible = true;
                 this.saveToFileToolStripMenuItem.Visible = true;
                 this.rtbReply.ContextMenuStrip.Show();
@@ -615,28 +619,35 @@ namespace WS_Simulator
         {
             int configLocation = 0;
             string errDesc = "";
-            string requestMessage;
+            string message;
+            string name;
 
-            if (selectRichTextBox != null && this.pathTree.SelectedNode != null)
+            if (selectRichTextBox != null && this.pathTree.SelectedNode != null && this.pathTree.SelectedNode.Nodes.Count == 0)
             {
-                if (XMLProcessor.IsE3EventInfo(this.rtbRequest.Text, out configLocation, out errDesc))
+                name = this.pathTree.SelectedNode.Text;
+                message = selectRichTextBox.Text;
+                if (this.toDispatchToolStripMenuItem.Text == _toDispatchName)
                 {
-                    SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
-
-                    requestMessage = selectRichTextBox.Text;
-
-                    if (XMLProcessor.ChangeToDispatcherMessage(this.pathTree.SelectedNode.Text, ref requestMessage, out errDesc))
+                    if (XMLProcessor.IsE3EventInfo(message, out configLocation, out errDesc))
                     {
-                        selectRichTextBox.Text = requestMessage;
+                        SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
+
+                        if (XMLProcessor.ChangeToDispatcherMessage(name, ref message, out errDesc))
+                        {
+                            selectRichTextBox.Text = message;
+                        }
+                        else
+                        {
+                            UpdateReplyMessage?.Invoke(errDesc);
+                        }
                     }
                     else
                     {
                         UpdateReplyMessage?.Invoke(errDesc);
                     }
-                }
-                else
+                }else if(this.toDispatchToolStripMenuItem.Text == _toResultName)
                 {
-                    UpdateReplyMessage?.Invoke(errDesc);
+                    selectRichTextBox.Text = SimulatorFormHandler.FormatReplyMessage(name, message);
                 }
             }
         }
