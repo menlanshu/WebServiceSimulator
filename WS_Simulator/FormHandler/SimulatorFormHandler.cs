@@ -407,7 +407,7 @@ namespace WS_Simulator.FormHandler
 
             if(!string.IsNullOrEmpty(xmlPath))
             {
-                result = XMLProcessor.GetVlaueByPath(xmlPath, replyContent, true);
+                result = XMLProcessor.GetValueByPathList(xmlPath, replyContent);
             }
 
             return result;

@@ -17,6 +17,7 @@ namespace WS_Simulator.DataAccess
         private static string DefaultValue = "NA";
         private static char[] ConfigDelimeter = (";").ToCharArray();
         private const string DispatchFilePath = @".\DispatcherFormat.xml";
+        public static readonly string DefaultXmlStr = $"<defaultValue>{DefaultValue}</defaultValue>";
 
 
         private static Hashtable _normalCollection;
@@ -27,53 +28,70 @@ namespace WS_Simulator.DataAccess
         {
             XmlDocument testXmlDoc = new XmlDocument();
 
-            string pathValue = "";
+            string pathValue = DefaultXmlStr;
 
             if (requestMessage == "") return pathValue;
 
-            testXmlDoc.LoadXml(RemoveAllNamespaces(requestMessage));
+            try
+            {
 
-            if (testXmlDoc.SelectSingleNode(path) == null)
-            {
-                pathValue = DefaultValue;
-            }
-            else
-            {
-                if (testXmlDoc.SelectSingleNode(path) == null)
+                testXmlDoc.LoadXml(RemoveAllNamespaces(requestMessage));
+
+                if (testXmlDoc.SelectSingleNode(path) != null)
                 {
-                    pathValue = $"<defaultValue>{DefaultValue}</defaultValue>";
-                }
-                else
-                {
-                    if (testXmlDoc.SelectSingleNode(path).InnerText != testXmlDoc.SelectSingleNode(path).InnerXml)
+                    if (testXmlDoc.SelectSingleNode(path) != null)
                     {
-                        XmlNodeList tempNodeList = testXmlDoc.SelectNodes(path);
-                        //if (tempNodeList.Count > 1 && !isBatch)
-                        //{
-                        //    pathValue = tempNodeList[sendIndex] == null ?
-                        //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
-                        //}
-                        if (tempNodeList.Count == 1)
+                        if (testXmlDoc.SelectSingleNode(path).InnerText != testXmlDoc.SelectSingleNode(path).InnerXml)
+                        {
+                            XmlNodeList tempNodeList = testXmlDoc.SelectNodes(path);
+                            //if (tempNodeList.Count > 1 && !isBatch)
+                            //{
+                            //    pathValue = tempNodeList[sendIndex] == null ?
+                            //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
+                            //}
+                            if (tempNodeList.Count == 1)
+                            {
+                                pathValue = testXmlDoc.SelectSingleNode(path) == null ?
+                                    DefaultXmlStr :
+                                    (getInnerXml ? testXmlDoc.SelectSingleNode(path).InnerXml : testXmlDoc.SelectSingleNode(path).OuterXml);
+                            }
+                            //else if (sendIndex < totalCount)
+                            //{
+                            //    pathValue = tempNodeList[sendIndex] == null ?
+                            //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
+                            //}
+                        }
+                        else
                         {
                             pathValue = testXmlDoc.SelectSingleNode(path) == null ?
-                                $"<defaultValue>{DefaultValue}</defaultValue>" :
-                                (getInnerXml ? testXmlDoc.SelectSingleNode(path).InnerXml : testXmlDoc.SelectSingleNode(path).OuterXml);
+                                DefaultXmlStr : testXmlDoc.SelectSingleNode(path).InnerText;
                         }
-                        //else if (sendIndex < totalCount)
-                        //{
-                        //    pathValue = tempNodeList[sendIndex] == null ?
-                        //        $"<defaultValue>{DefaultValue}</defaultValue>" : tempNodeList[sendIndex].OuterXml;
-                        //}
-                    }
-                    else
-                    {
-                        pathValue = testXmlDoc.SelectSingleNode(path) == null ?
-                            DefaultValue : testXmlDoc.SelectSingleNode(path).InnerText;
                     }
                 }
+            }
+            catch (Exception err)
+            {
+                pathValue = $"<Exception>{err.Message}</Exception>";
             }
 
             return pathValue;
+        }
+
+        public static string GetValueByPathList(string pathConfig, string requestMessage)
+        {
+            List<string> pathList = pathConfig.Split(ConfigDelimeter).ToList();
+            string result = DefaultXmlStr;
+
+            foreach(var path in pathList)
+            {
+                result = GetVlaueByPath(path, requestMessage, false, true);
+                if (result != DefaultXmlStr)
+                {
+                    return result;
+                }
+            }
+
+            return result;
         }
 
         //Implemented based on interface, not part of algorithm
@@ -90,7 +108,10 @@ namespace WS_Simulator.DataAccess
             if (!xmlDocument.HasElements)
             {
                 XElement xElement = new XElement(xmlDocument.Name.LocalName);
-                xElement.Value = xmlDocument.Value;
+                if (!string.IsNullOrEmpty(xmlDocument.Value))
+                {
+                    xElement.Value = xmlDocument.Value;
+                }
 
                 foreach (XAttribute attribute in xmlDocument.Attributes())
                     xElement.Add(attribute);
