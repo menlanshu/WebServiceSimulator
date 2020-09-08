@@ -1074,13 +1074,24 @@ namespace WS_Simulator
                     Node currNode = (Node)this.pathTree.SelectedNode.Tag;
                     this.pathTree.SelectedNode.Remove();
                     _testClient.CurrNodeList.Remove(currNode);
+
+                    if(MessageBox.Show("Do you want to delete file from local system?", "Delete File Confirm", MessageBoxButtons.OKCancel)
+                        == DialogResult.OK)
+                    {
+                        currNode.DeleteFile();
+                    }
+
                 }
                 else
                 {
                     Node currNode = (Node)this.pathTree.SelectedNode.Tag;
                     this.pathTree.SelectedNode.Remove();
                     _testClient.CurrNodeList.Remove(currNode);
-                    SQLiteDBProcessor.DeleteOneNode(currNode);
+                    if (MessageBox.Show("Do you want to delete file from database?", "Delete File Confirm", MessageBoxButtons.OKCancel)
+                        == DialogResult.OK)
+                    {
+                        currNode.DeleteFile();
+                    }
                 }
             }
         }

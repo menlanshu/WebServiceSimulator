@@ -124,6 +124,11 @@ namespace WS_Simulator.Models
             FileProcessor.SaveFile(FileFullPath, requestMessage);
         }
 
+        public override void DeleteFile()
+        {
+            File.Delete(FileFullPath);
+        }
+
 
         public override void RenameFile(string newFileName)
         {

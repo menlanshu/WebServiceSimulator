@@ -97,6 +97,11 @@ namespace WS_Simulator.Models
 
         }
 
+        public override void DeleteFile()
+        {
+            SQLiteDBProcessor.DeleteOneNode(this);
+        }
+
         public override void UpdateCurrentMessage(string requestMessage)
         {
             // TODO - Add this logic
