@@ -136,6 +136,22 @@ namespace WS_Simulator.FormHandler
 
         }
 
+        public static string AddNumberBeforeFileName(string currentFileName, out bool needRename)
+        {
+            needRename = false;
+            string pattern = @"^\d+";
+            string newFileName = currentFileName;
+            Regex rgx = new Regex(pattern);
+
+            if(!rgx.Match(currentFileName).Success)
+            {
+                needRename = true;
+                newFileName = $"0_{currentFileName}";
+            }
+
+            return newFileName;
+        }
+
         public static void GenerateCaseConfigFile(string directoryPath)
         {
             XTestCase xTestCase = GetCurrentFolderXTestCase(directoryPath);

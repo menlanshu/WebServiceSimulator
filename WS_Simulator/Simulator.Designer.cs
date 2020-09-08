@@ -79,6 +79,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
+            this.addNumberBeforeFileNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -467,28 +468,29 @@
             this.fileContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.SetStartStripMenuItem,
             this.SetEndStripMenuItem,
-            this.deleteFromDBToolStripMenuItem});
+            this.deleteFromDBToolStripMenuItem,
+            this.addNumberBeforeFileNameToolStripMenuItem});
             this.fileContextMenu.Name = "fileContextMenu";
-            this.fileContextMenu.Size = new System.Drawing.Size(118, 70);
+            this.fileContextMenu.Size = new System.Drawing.Size(225, 114);
             // 
             // SetStartStripMenuItem
             // 
             this.SetStartStripMenuItem.Name = "SetStartStripMenuItem";
-            this.SetStartStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.SetStartStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.SetStartStripMenuItem.Text = "Set Start";
             this.SetStartStripMenuItem.Click += new System.EventHandler(this.SetStartStripMenuItem_Click);
             // 
             // SetEndStripMenuItem
             // 
             this.SetEndStripMenuItem.Name = "SetEndStripMenuItem";
-            this.SetEndStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.SetEndStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.SetEndStripMenuItem.Text = "Set End";
             this.SetEndStripMenuItem.Click += new System.EventHandler(this.SetEndStripMenuItem_Click);
             // 
             // deleteFromDBToolStripMenuItem
             // 
             this.deleteFromDBToolStripMenuItem.Name = "deleteFromDBToolStripMenuItem";
-            this.deleteFromDBToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.deleteFromDBToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.deleteFromDBToolStripMenuItem.Text = "Delete";
             this.deleteFromDBToolStripMenuItem.Click += new System.EventHandler(this.deleteFromDBToolStripMenuItem_Click);
             // 
@@ -564,6 +566,13 @@
             this.autoSaveReplyCB.Text = "AutoSaveReply";
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
+            // 
+            // addNumberBeforeFileNameToolStripMenuItem
+            // 
+            this.addNumberBeforeFileNameToolStripMenuItem.Name = "addNumberBeforeFileNameToolStripMenuItem";
+            this.addNumberBeforeFileNameToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.addNumberBeforeFileNameToolStripMenuItem.Text = "AddNumberBeforeFileName";
+            this.addNumberBeforeFileNameToolStripMenuItem.Click += new System.EventHandler(this.addNumberBeforeFileNameToolStripMenuItem_Click);
             // 
             // Simulator
             // 
@@ -663,6 +672,7 @@
         private System.Windows.Forms.ToolStripMenuItem generateTestCaseFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCaseConfigFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renameFileFollowOrderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addNumberBeforeFileNameToolStripMenuItem;
     }
 }
 

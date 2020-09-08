@@ -1357,6 +1357,22 @@ namespace WS_Simulator
 
             reloadFromFolderToolStripMenuItem_Click(sender, e);
         }
+
+        private void addNumberBeforeFileNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.pathTree.SelectedNode != null)
+            {
+                Node currenNode = (Node)this.pathTree.SelectedNode.Tag;
+                bool needRename = false;
+
+                string newFileName = TestCaseDocumentHandler.AddNumberBeforeFileName(currenNode.TreeNodeName,out needRename);
+                if(needRename)
+                {
+                    currenNode.RenameFile(newFileName);
+                }
+
+            }
+        }
     }
 }
 
