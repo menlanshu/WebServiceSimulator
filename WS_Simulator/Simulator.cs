@@ -1333,11 +1333,26 @@ namespace WS_Simulator
                 {
                     currentNode.MoveUp();
                 }
-            }else if (e.KeyCode == Keys.Down)
+            }
+            else if (e.KeyCode == Keys.Down)
             {
                 if (currentNode != null)
                 {
                     currentNode.MoveDown();
+                }
+            }
+            else if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
+            {
+                if (currentNode != null)
+                {
+                    Clipboard.SetText(currentNode.Text);
+                }
+            }
+            else if (e.KeyCode == Keys.S && e.Modifiers == Keys.Control)
+            {
+                if (currentNode != null)
+                {
+                    reloadFromFolderToolStripMenuItem_Click(sender, e);
                 }
             }
         }
