@@ -18,6 +18,7 @@ namespace WS_Simulator
     {
         ICopyFolderFormRequester _requester;
         private Node _folderNode;
+        private bool _folderTreeBusy;
 
         public CopyFolderForm(ICopyFolderFormRequester copyFolderFormRequester, TreeView currPathTree, Node folderNode)
         {
@@ -27,10 +28,28 @@ namespace WS_Simulator
             _folderNode = folderNode;
 
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            _folderTreeBusy = false;
+            SimulatorFormHandler.LoadFileTree(this.folderTree, _folderNode.TreeNodeValue);
+            ShowOrHidePanel2(true);
+
             SimulatorFormHandler.LoadDirectoryTree(this.pathTree, currPathTree);
 
             MakeReplaceFunctionVisible(this.needReplaceCB.Checked);
             InitialImageList();
+        }
+
+        private void ShowOrHidePanel2(bool hide)
+        {
+            if (hide)
+            {
+                this.splitContainer2.Panel2.Enabled = false;
+                this.folderTree.Nodes[0].Checked = true;
+            }
+            else
+            {
+                this.splitContainer2.Panel2.Enabled = true;
+            }
         }
 
         private void MakeReplaceFunctionVisible(bool isVisible)
@@ -68,10 +87,10 @@ namespace WS_Simulator
 
         private void queryButton_Click(object sender, EventArgs e)
         {
-            if(!string.IsNullOrWhiteSpace(this.queryText.Text))
+            if (!string.IsNullOrWhiteSpace(this.queryText.Text))
             {
-                TreeNode currNode = SelectTheTreeNode(this.queryText.Text, this.pathTree.Nodes[0]);
-                if(currNode != null)
+                TreeNode currNode = SimulatorFormHandler.SelectTheTreeNode(this.queryText.Text, this.pathTree.Nodes[0]);
+                if (currNode != null)
                 {
                     if (this.pathTree.SelectedNode != null)
                     {
@@ -84,60 +103,28 @@ namespace WS_Simulator
             }
         }
 
-        private TreeNode SelectTheTreeNode(string directoryName, TreeNode currentNode)
-        {
-            if(currentNode == null)
-            {
-                return null;
-            }
-
-            if (currentNode.Text.ToLower().Contains(directoryName.ToLower()))
-            {
-                return currentNode;
-            }
-            else
-            {
-                if (currentNode.Nodes.Count == 0)
-                {
-                    return null;
-                }
-                else
-                {
-                    foreach (TreeNode node in currentNode.Nodes)
-                    {
-                        TreeNode newNode = SelectTheTreeNode(directoryName, node);
-                        if(newNode != null)
-                        {
-                            return newNode;
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
         private void okayButton_Click(object sender, EventArgs e)
         {
             bool okay = false;
             string errDesc = "";
-            
-            if(string.IsNullOrWhiteSpace(this.folderNameText.Text))
+
+            if (string.IsNullOrWhiteSpace(this.folderNameText.Text))
             {
                 MessageBox.Show("Folder Name can not be empty!");
                 return;
-            }else
+            }
+            else
             {
 
-                if(SimulatorFormHandler.CheckNodeExist(this.pathTree.SelectedNode, this.folderNameText.Text))
-                {
-                    MessageBox.Show("Folder name already exist in this folder!");
-                    return;
-                }
+                //if (SimulatorFormHandler.CheckNodeExist(this.pathTree.SelectedNode, this.folderNameText.Text))
+                //{
+                //    MessageBox.Show("Folder name already exist in this folder!");
+                //    return;
+                //}
 
                 if (this.needReplaceCB.Checked)
                 {
-                    if(string.IsNullOrWhiteSpace(this.oldTextValue.Text) ||
+                    if (string.IsNullOrWhiteSpace(this.oldTextValue.Text) ||
                         string.IsNullOrWhiteSpace(this.newTextValue.Text))
                     {
                         MessageBox.Show("Old Text and New Text both can't be empty!");
@@ -147,11 +134,12 @@ namespace WS_Simulator
 
                 if (this.pathTree.SelectedNode != null)
                 {
-                    if(!this.needReplaceCB.Checked)
+                    if (!this.needReplaceCB.Checked)
                     {
                         (okay, errDesc) = _requester.SaveFolderToTreeNode((Node)this.pathTree.SelectedNode.Tag,
                             _folderNode, this.folderNameText.Text);
-                    }else
+                    }
+                    else
                     {
                         (okay, errDesc) = _requester.SaveFolderToTreeNode((Node)this.pathTree.SelectedNode.Tag,
                             _folderNode, this.folderNameText.Text, this.oldTextValue.Text, this.newTextValue.Text);
@@ -162,11 +150,13 @@ namespace WS_Simulator
                     {
                         MessageBox.Show("Copy folder okay");
                         this.Close();
-                    }else
+                    }
+                    else
                     {
                         MessageBox.Show(errDesc);
                     }
-                }else
+                }
+                else
                 {
                     MessageBox.Show("Select a directory to save file.");
                 }
@@ -184,6 +174,66 @@ namespace WS_Simulator
         private void needReplaceCB_CheckedChanged(object sender, EventArgs e)
         {
             MakeReplaceFunctionVisible(this.needReplaceCB.Checked);
+        }
+
+        private void selectFileCB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.selectFileCB.Checked)
+            {
+                ShowOrHidePanel2(false);
+
+            }
+            else
+            {
+                ShowOrHidePanel2(true);
+            }
+        }
+
+        private void folderTree_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            var selectNode = e.Node;
+            if (selectNode != null)
+            {
+                if (_folderTreeBusy) return;
+
+                _folderTreeBusy = true;
+                try
+                {
+                    ((Node)selectNode.Tag).TreeNodeValue.Checked = selectNode.Checked;
+                    if (selectNode.Nodes.Count > 0)
+                    {
+                        if (selectNode.Checked == true)
+                        {
+                            CheckAllChildNodes(selectNode, true);
+                        }
+                        else
+                        {
+                            CheckAllChildNodes(selectNode, false);
+                        }
+                    }
+                }
+                finally
+                {
+                    _folderTreeBusy = false;
+                }
+            }
+        }
+
+        private void CheckAllChildNodes(TreeNode treeNode, bool nodeChecked)
+        {
+            //here iterate in all child nodes of checked/unchecked parent node
+            foreach (TreeNode node in treeNode.Nodes)
+            {
+                node.Checked = nodeChecked;
+                ((Node)node.Tag).TreeNodeValue.Checked = nodeChecked;
+
+                if (node.Nodes.Count > 0)
+                {
+                    // If the current node has child nodes, call the CheckAllChildsNodes method recursively.
+                    CheckAllChildNodes(node, nodeChecked);
+                }
+            }
+
         }
     }
 }

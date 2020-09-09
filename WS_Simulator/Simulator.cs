@@ -1161,12 +1161,17 @@ namespace WS_Simulator
             };
             Node dirnode = node.SaveCurrentNodeToMotherNode(motherNode, "");
 
+            if(dirnode == null)
+            {
+                dirnode = _testClient.CurrNodeList.FirstOrDefault(x => x.NodeFullPath == node.NodeFullPath);
+            }
+
             if (dirnode != null)
             {
                 // Add Each Node of this folder
                 foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
                 {
-                    if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
+                    if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File && currNode.Checked == true)
                     {
                         // Get Folder node name
                         if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))

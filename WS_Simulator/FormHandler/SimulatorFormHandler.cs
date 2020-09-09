@@ -255,6 +255,41 @@ namespace WS_Simulator.FormHandler
             pathTree.Nodes[0].Expand();
         }
 
+        public static void LoadFileTree(TreeView pathTree, TreeNode rootNode)
+        {
+            pathTree.Nodes[0].Nodes.Clear();
+            pathTree.Nodes[0].Text = rootNode.Text;
+            pathTree.Nodes[0].Tag = rootNode.Tag;
+
+            foreach (TreeNode node in rootNode.Nodes)
+            {
+                LoadWholeFileTree(node, pathTree.Nodes[0]);
+            }
+            pathTree.Nodes[0].Expand();
+        }
+
+        public static void LoadWholeFileTree(TreeNode tempNode, TreeNode motherNode)
+        {
+
+            try
+            {
+                if (((Node)tempNode.Tag).TreeNodeType == TreeNodeType.File)
+                {
+                    TreeNode tempFileNode = new TreeNode(tempNode.Text);
+                    motherNode.Nodes.Add(tempFileNode);
+                    tempFileNode.ImageIndex = 0; // ImageKey = "file";
+                    tempFileNode.SelectedImageIndex = 0;
+
+                    tempFileNode.Tag = tempNode.Tag;
+                }
+            }
+            catch (Exception err)
+            {
+                throw new Exception($"Exception happen in LoadWholeFileTree : { err.Message }");
+            }
+
+        }
+
         public static void LoadWholeDiretoryTree(TreeNode tempNode, TreeNode motherNode)
         {
 
@@ -470,6 +505,39 @@ namespace WS_Simulator.FormHandler
                     view.Nodes.Insert(actualNewIndex, node);
                 }
             }
+        }
+
+        public static TreeNode SelectTheTreeNode(string directoryName, TreeNode currentNode)
+        {
+            if (currentNode == null)
+            {
+                return null;
+            }
+
+            if (currentNode.Text.ToLower().Contains(directoryName.ToLower()))
+            {
+                return currentNode;
+            }
+            else
+            {
+                if (currentNode.Nodes.Count == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    foreach (TreeNode node in currentNode.Nodes)
+                    {
+                        TreeNode newNode = SelectTheTreeNode(directoryName, node);
+                        if (newNode != null)
+                        {
+                            return newNode;
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }
