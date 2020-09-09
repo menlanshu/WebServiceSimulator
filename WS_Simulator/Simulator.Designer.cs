@@ -72,6 +72,7 @@
             this.SetStartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SetEndStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteFromDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addNumberBeforeFileNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnStop = new System.Windows.Forms.Button();
             this.cbAutoChangeContext = new System.Windows.Forms.CheckBox();
             this.cbPerfTest = new System.Windows.Forms.CheckBox();
@@ -79,7 +80,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lbCurrentLoop = new System.Windows.Forms.Label();
             this.autoSaveReplyCB = new System.Windows.Forms.CheckBox();
-            this.addNumberBeforeFileNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -471,7 +471,7 @@
             this.deleteFromDBToolStripMenuItem,
             this.addNumberBeforeFileNameToolStripMenuItem});
             this.fileContextMenu.Name = "fileContextMenu";
-            this.fileContextMenu.Size = new System.Drawing.Size(225, 114);
+            this.fileContextMenu.Size = new System.Drawing.Size(225, 92);
             // 
             // SetStartStripMenuItem
             // 
@@ -493,6 +493,13 @@
             this.deleteFromDBToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.deleteFromDBToolStripMenuItem.Text = "Delete";
             this.deleteFromDBToolStripMenuItem.Click += new System.EventHandler(this.deleteFromDBToolStripMenuItem_Click);
+            // 
+            // addNumberBeforeFileNameToolStripMenuItem
+            // 
+            this.addNumberBeforeFileNameToolStripMenuItem.Name = "addNumberBeforeFileNameToolStripMenuItem";
+            this.addNumberBeforeFileNameToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.addNumberBeforeFileNameToolStripMenuItem.Text = "AddNumberBeforeFileName";
+            this.addNumberBeforeFileNameToolStripMenuItem.Click += new System.EventHandler(this.addNumberBeforeFileNameToolStripMenuItem_Click);
             // 
             // btnStop
             // 
@@ -566,13 +573,6 @@
             this.autoSaveReplyCB.Text = "AutoSaveReply";
             this.autoSaveReplyCB.UseVisualStyleBackColor = true;
             this.autoSaveReplyCB.CheckedChanged += new System.EventHandler(this.autoSaveReplyCB_CheckedChanged);
-            // 
-            // addNumberBeforeFileNameToolStripMenuItem
-            // 
-            this.addNumberBeforeFileNameToolStripMenuItem.Name = "addNumberBeforeFileNameToolStripMenuItem";
-            this.addNumberBeforeFileNameToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.addNumberBeforeFileNameToolStripMenuItem.Text = "AddNumberBeforeFileName";
-            this.addNumberBeforeFileNameToolStripMenuItem.Click += new System.EventHandler(this.addNumberBeforeFileNameToolStripMenuItem_Click);
             // 
             // Simulator
             // 

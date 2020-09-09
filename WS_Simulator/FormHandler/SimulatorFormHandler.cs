@@ -413,18 +413,22 @@ namespace WS_Simulator.FormHandler
             return result;
         }
 
-        public static void MoveUp(this TreeNode node)
+        public static void MoveUp(this TreeNode node, int moveIndex = 1)
         {
             TreeNode parent = node.Parent;
             TreeView view = node.TreeView;
+
+            int actualNewIndex;
+
             if (parent != null)
             {
                 int index = parent.Nodes.IndexOf(node);
                 if (index > 0)
                 {
+                    actualNewIndex = (index - moveIndex) >= 0 ? (index - moveIndex) : 0;
                     parent.Nodes.RemoveAt(index);
-                    parent.Nodes.Insert(index - 1, node);
-                    view.SelectedNode = parent.Nodes[index];
+                    parent.Nodes.Insert(actualNewIndex, node);
+                    view.SelectedNode = parent.Nodes[actualNewIndex + 1];
                 }
             }
             else if (node.TreeView.Nodes.Contains(node)) //root node
@@ -432,23 +436,28 @@ namespace WS_Simulator.FormHandler
                 int index = view.Nodes.IndexOf(node);
                 if (index > 0)
                 {
+                    actualNewIndex = (index - moveIndex) >= 0 ? (index - moveIndex) : 0;
                     view.Nodes.RemoveAt(index);
-                    view.Nodes.Insert(index - 1, node);
+                    view.Nodes.Insert(actualNewIndex, node);
                 }
             }
         }
 
-        public static void MoveDown(this TreeNode node)
+        public static void MoveDown(this TreeNode node, int moveIndex = 1)
         {
             TreeNode parent = node.Parent;
             TreeView view = node.TreeView;
+
+            int actualNewIndex;
+
             if (parent != null)
             {
                 int index = parent.Nodes.IndexOf(node);
                 if (index < parent.Nodes.Count - 1)
                 {
+                    actualNewIndex = (index + moveIndex) <= parent.Nodes.Count - 1 ? (index + moveIndex) : parent.Nodes.Count - 1;
                     parent.Nodes.RemoveAt(index);
-                    parent.Nodes.Insert(index + 1, node);
+                    parent.Nodes.Insert(actualNewIndex, node);
                 }
             }
             else if (view != null && view.Nodes.Contains(node)) //root node
@@ -456,8 +465,9 @@ namespace WS_Simulator.FormHandler
                 int index = view.Nodes.IndexOf(node);
                 if (index < view.Nodes.Count - 1)
                 {
+                    actualNewIndex = (index + moveIndex) <= view.Nodes.Count - 1 ? (index + moveIndex) : view.Nodes.Count - 1;
                     view.Nodes.RemoveAt(index);
-                    view.Nodes.Insert(index + 1, node);
+                    view.Nodes.Insert(actualNewIndex, node);
                 }
             }
         }

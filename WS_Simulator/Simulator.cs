@@ -14,6 +14,7 @@ using WS_Simulator.Interface;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics.Eventing.Reader;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace WS_Simulator
 {
@@ -36,6 +37,7 @@ namespace WS_Simulator
         bool requestIsCaseSensitive = false;
         string replySourceStr = "";
         bool replyIsCaseSensitive = false;
+        private string _currMoveNumber;
 
         private WSConfig _wsConfig = new WSConfig();
         private TestClient _testClient = new TestClient();
@@ -628,22 +630,29 @@ namespace WS_Simulator
                 message = selectRichTextBox.Text;
                 if (this.toDispatchToolStripMenuItem.Text == _toDispatchName)
                 {
-                    if (XMLProcessor.IsE3EventInfo(message, out configLocation, out errDesc))
+                    if (name.Substring(name.LastIndexOf(".")+1).ToUpper() == "SQL")
                     {
-                        SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
-
-                        if (XMLProcessor.ChangeToDispatcherMessage(name, ref message, out errDesc))
+                        selectRichTextBox.Text = DBProcessor.FormatSqlToProcedure(message);
+                    }
+                    else
+                    {
+                        if (XMLProcessor.IsE3EventInfo(message, out configLocation, out errDesc))
                         {
-                            selectRichTextBox.Text = message;
+                            SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
+
+                            if (XMLProcessor.ChangeToDispatcherMessage(name, ref message, out errDesc))
+                            {
+                                selectRichTextBox.Text = message;
+                            }
+                            else
+                            {
+                                UpdateReplyMessage?.Invoke(errDesc);
+                            }
                         }
                         else
                         {
                             UpdateReplyMessage?.Invoke(errDesc);
                         }
-                    }
-                    else
-                    {
-                        UpdateReplyMessage?.Invoke(errDesc);
                     }
                 }else if(this.toDispatchToolStripMenuItem.Text == _toResultName)
                 {
@@ -1327,33 +1336,56 @@ namespace WS_Simulator
         private void pathTree_KeyDown(object sender, KeyEventArgs e)
         {
             TreeNode currentNode = this.pathTree.SelectedNode;
-            if (e.KeyCode == Keys.Up)
+            if (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
             {
-                if (currentNode != null)
-                {
-                    currentNode.MoveUp();
-                }
+                _currMoveNumber = $"{_currMoveNumber}{e.KeyCode - Keys.D0}";
             }
-            else if (e.KeyCode == Keys.Down)
+            else
             {
-                if (currentNode != null)
+                if (e.KeyCode == Keys.Up)
                 {
-                    currentNode.MoveDown();
+                    if (currentNode != null)
+                    {
+                        //if (!string.IsNullOrEmpty(_currMoveNumber) && int.TryParse(_currMoveNumber, out int moveIndex))
+                        //{
+                        //    currentNode.MoveUp(moveIndex);
+                        //}
+                        //else
+                        //{
+                            currentNode.MoveUp();
+                        //}
+                    }
                 }
-            }
-            else if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
-            {
-                if (currentNode != null)
+                else if (e.KeyCode == Keys.Down)
                 {
-                    Clipboard.SetText(currentNode.Text);
+                    if (currentNode != null)
+                    {
+                        //if (!string.IsNullOrEmpty(_currMoveNumber) && int.TryParse(_currMoveNumber, out int moveIndex))
+                        //{
+                        //    currentNode.MoveDown(moveIndex);
+                        //}
+                        //else
+                        //{
+                            currentNode.MoveDown();
+                        //}
+                    }
                 }
-            }
-            else if (e.KeyCode == Keys.S && e.Modifiers == Keys.Control)
-            {
-                if (currentNode != null)
+                else if (e.KeyCode == Keys.C && e.Modifiers == Keys.Control)
                 {
-                    reloadFromFolderToolStripMenuItem_Click(sender, e);
+                    if (currentNode != null)
+                    {
+                        Clipboard.SetText(currentNode.Text);
+                    }
                 }
+                else if (e.KeyCode == Keys.S && e.Modifiers == Keys.Control)
+                {
+                    if (currentNode != null)
+                    {
+                        reloadFromFolderToolStripMenuItem_Click(sender, e);
+                    }
+                }
+
+                _currMoveNumber = "";
             }
         }
 

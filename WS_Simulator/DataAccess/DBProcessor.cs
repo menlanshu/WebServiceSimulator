@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -11,6 +12,9 @@ namespace WS_Simulator.DataAccess
     public static class DBProcessor
     {
         private static DBHelper _myDBHelper;
+        private static readonly string _declareStr = "DECLARE";
+        private static readonly string _beginStr = "BEGIN";
+        private static readonly string _endStr = "END";
 
         public static bool InitDBHelper(out string errDesc)
         {
@@ -34,7 +38,7 @@ namespace WS_Simulator.DataAccess
 
             try
             {
-                DataTable tempDataTable = _myDBHelper.GetTable(requestMessage);
+                DataTable tempDataTable = _myDBHelper.GetTable(requestMessage.RemoveSemicolonFromMessage());
                 if (tempDataTable == null)
                 {
                     replyMessage = "DB Action Error";
@@ -55,6 +59,41 @@ namespace WS_Simulator.DataAccess
             }
 
             return replyMessage;
+        }
+
+        public static string FormatSqlToProcedure(string sqlMessage)
+        {
+            string result = sqlMessage;
+
+            if (sqlMessage.ToUpper().Contains(_beginStr) && sqlMessage.ToUpper().Contains(_endStr))
+            {
+                return result;
+            }
+            else
+            {
+                result = $"{_declareStr}\n{_beginStr}\n{sqlMessage}\n{_endStr};";
+            }
+
+            return result;
+        }
+
+        private static string RemoveSemicolonFromMessage(this string sqlMessage)
+        {
+            string result = sqlMessage;
+            string pattern = @";\s+$";
+            Regex rgx = new Regex(pattern);
+
+            if (sqlMessage.ToUpper().Contains(_beginStr) && sqlMessage.ToUpper().Contains(_endStr))
+            {
+                return result;
+            }
+
+            if(rgx.Match(sqlMessage).Success)
+            {
+                result = rgx.Replace(sqlMessage, "");
+            }
+
+            return result;
         }
 
         public static string ConvertBetweenDataTableAndXML_AX(DataTable dtNeedCoveret)
