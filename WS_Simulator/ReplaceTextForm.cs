@@ -46,7 +46,8 @@ namespace WS_Simulator
             {
                 (okay, errDesc) = _requester.ReplaceTextFileName(_folderNode, this.oldTextValue.Text, this.newTextValue.Text);
             }
-            else
+
+            if(cbReplaceFileContent.Checked)
             {
                 (okay, errDesc) = _requester.ReplaceTextFileInfo(_folderNode, this.oldTextValue.Text, this.newTextValue.Text);
             }

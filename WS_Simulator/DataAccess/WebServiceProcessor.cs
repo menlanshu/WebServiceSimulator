@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -17,11 +18,24 @@ namespace WS_Simulator.DataAccess
         public static TreeView TreeInput { get; private set; } = new TreeView();
 
         private static Wsdl _wsdl = new Wsdl();
+        private static int _timeout;
+        private static string _timeOutConfigName = "WebServiceTimeout";
 
         static WebServiceProcessor()
         {
             WSSWebRequestCreate.RegisterPrefixes();
             SetupAssemblyResolver();
+            InitTimeOutSetting();
+        }
+
+        private static void InitTimeOutSetting()
+        {
+            _timeout = 100000;
+
+            if (int.TryParse(ConfigurationManager.AppSettings[_timeOutConfigName], out int timeOutSetting))
+            {
+                _timeout = timeOutSetting;
+            }
         }
 
         public async static Task Reset(string wSAddress)
@@ -62,6 +76,7 @@ namespace WS_Simulator.DataAccess
                         TreeNode node = TreeMethods.Nodes.Add(type.Name);
 
                         HttpWebClientProtocol proxy = (HttpWebClientProtocol)Activator.CreateInstance(type);
+                        proxy.Timeout = _timeout;
                         ProxyProperty property = new ProxyProperty(proxy);
                         property.RecreateSubtree(null);
 

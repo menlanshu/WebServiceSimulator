@@ -35,6 +35,7 @@
             this.cancelButton = new System.Windows.Forms.Button();
             this.okayButton = new System.Windows.Forms.Button();
             this.cbReplaceFileName = new System.Windows.Forms.CheckBox();
+            this.cbReplaceFileContent = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // newTextValue
@@ -92,12 +93,22 @@
             // cbReplaceFileName
             // 
             this.cbReplaceFileName.AutoSize = true;
-            this.cbReplaceFileName.Location = new System.Drawing.Point(62, 114);
+            this.cbReplaceFileName.Location = new System.Drawing.Point(67, 114);
             this.cbReplaceFileName.Name = "cbReplaceFileName";
-            this.cbReplaceFileName.Size = new System.Drawing.Size(203, 34);
+            this.cbReplaceFileName.Size = new System.Drawing.Size(88, 34);
             this.cbReplaceFileName.TabIndex = 17;
-            this.cbReplaceFileName.Text = "Replace File Name";
+            this.cbReplaceFileName.Text = "Name";
             this.cbReplaceFileName.UseVisualStyleBackColor = true;
+            // 
+            // cbReplaceFileContent
+            // 
+            this.cbReplaceFileContent.AutoSize = true;
+            this.cbReplaceFileContent.Location = new System.Drawing.Point(186, 114);
+            this.cbReplaceFileContent.Name = "cbReplaceFileContent";
+            this.cbReplaceFileContent.Size = new System.Drawing.Size(106, 34);
+            this.cbReplaceFileContent.TabIndex = 18;
+            this.cbReplaceFileContent.Text = "Content";
+            this.cbReplaceFileContent.UseVisualStyleBackColor = true;
             // 
             // ReplaceTextForm
             // 
@@ -105,6 +116,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(342, 297);
+            this.Controls.Add(this.cbReplaceFileContent);
             this.Controls.Add(this.cbReplaceFileName);
             this.Controls.Add(this.newTextValue);
             this.Controls.Add(this.oldTextValue);
@@ -131,5 +143,6 @@
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button okayButton;
         private System.Windows.Forms.CheckBox cbReplaceFileName;
+        private System.Windows.Forms.CheckBox cbReplaceFileContent;
     }
 }
