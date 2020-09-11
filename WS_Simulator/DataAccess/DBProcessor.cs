@@ -80,7 +80,7 @@ namespace WS_Simulator.DataAccess
         private static string RemoveSemicolonFromMessage(this string sqlMessage)
         {
             string result = sqlMessage;
-            string pattern = @";\s+$";
+            string pattern = @";\s*$";
             Regex rgx = new Regex(pattern);
 
             if (sqlMessage.ToUpper().Contains(_beginStr) && sqlMessage.ToUpper().Contains(_endStr))
