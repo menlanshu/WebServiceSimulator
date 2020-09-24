@@ -39,6 +39,14 @@ namespace WS_Simulator.Models
         Sended
     }
 
+    public enum FileType
+    {
+        SQL,
+        XML,
+        TEXT,
+        OTHER
+    }
+
     public enum SendType
     {
         RUNALL,

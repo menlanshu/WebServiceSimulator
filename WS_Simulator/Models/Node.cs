@@ -27,10 +27,25 @@ namespace WS_Simulator.Models
         public TestNodeType TreeNodeTestType { get; set; } = TestNodeType.NORMAL;
         [NotMapped]
         public SourceNodeType TreeNodeSourceType { get; set; }
-
-
         public int? RepositoryId { get; set; }
         public TestRepository Repository { get; set; }
+
+        public FileType FileType {
+            get {
+                string PostFix = TreeNodeName.Substring(TreeNodeName.LastIndexOf('.')+1).ToUpper();
+                switch(PostFix)
+                {
+                    case "SQL":
+                        return FileType.SQL;
+                    case "XML":
+                        return FileType.XML;
+                    case "TXT":
+                        return FileType.TEXT;
+                    default:
+                        return FileType.OTHER;
+                }
+            }
+        }
 
         public Node(TreeNodeType treeNodeType, TreeNode treeNodeValue, Node motherNode, string fullPath)
         {

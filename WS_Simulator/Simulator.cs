@@ -14,7 +14,6 @@ using WS_Simulator.Interface;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics.Eventing.Reader;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace WS_Simulator
 {
@@ -192,6 +191,8 @@ namespace WS_Simulator
             myTimer.Interval = 1000;
             myTimer.Enabled = false;
 
+            this.loadFromDBToolStripMenuItem.Visible = false;
+            this.saveCurrTreeToDBToolStripMenuItem.Visible = false;
         }
 
 
@@ -536,7 +537,15 @@ namespace WS_Simulator
         {
             if (selectRichTextBox != null)
             {
-                SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox);
+                Node node = (Node)this.pathTree.SelectedNode.Tag;
+                FileType fileType = FileType.XML;
+                if (node != null)
+                {
+                    fileType = node.FileType;
+                }
+                
+                SimulatorFormHandler.RichBoxTextToXML(selectRichTextBox, fileType);
+
             }
         }
 

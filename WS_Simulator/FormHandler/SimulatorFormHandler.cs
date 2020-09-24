@@ -1,13 +1,17 @@
-﻿using System;
+﻿using ColorCode;
+using SautinSoft;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WebServiceStudio;
 using WS_Simulator.DataAccess;
 using WS_Simulator.Models;
 
@@ -19,6 +23,8 @@ namespace WS_Simulator.FormHandler
         public static char[] ConfigDelimeter = (";").ToCharArray();
         public static string FileImageKey = "file";
         public static string FolderImageKey = "folder";
+        private static readonly string _SQLName = "SQL";
+        private static readonly string _XMLName = "XML";
 
         public static bool CheckNodeExist(TreeNode motherNode, string name)
         {
@@ -407,7 +413,7 @@ namespace WS_Simulator.FormHandler
 
         }
 
-        public static void RichBoxTextToXML(RichTextBox inRichTextBox)
+        public static void RichBoxTextToXML(RichTextBox inRichTextBox, FileType fileType = FileType.XML)
         {
             try
             {
@@ -417,7 +423,23 @@ namespace WS_Simulator.FormHandler
                     MessageBox.Show(inRichTextBox.Name + " is empty!");
                     return;
                 }
-                inRichTextBox.Text = XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr));
+
+                switch (fileType)
+                {
+                    case FileType.SQL:
+                        inRichTextBox.Rtf = GetRTFFormatFile(tempStr, _SQLName);
+                        break;
+                    case FileType.XML:
+                        inRichTextBox.Rtf = GetRTFFormatFile(XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr)), _XMLName);
+                        break;
+                    case FileType.TEXT:
+                        break;
+                    case FileType.OTHER:
+                        break;
+                    default:
+                        break;
+                }
+
                 inRichTextBox.SelectionStart = 0;
             }
             catch (Exception ex)
@@ -430,6 +452,26 @@ namespace WS_Simulator.FormHandler
                 }
                 inRichTextBox.Text = msg + inRichTextBox.Text;
                 inRichTextBox.SelectionStart = 0;
+            }
+        }
+        
+        public static string GetRTFFormatFile(string tempStr, string fileType)
+        {
+            if (fileType == _XMLName)
+            {
+                string coloredXML = new CodeColorizer().Colorize(XMLProcessor.FormatXml(XMLProcessor.RestoreXml(tempStr)), Languages.Xml);
+                HtmlToRtf h = new HtmlToRtf();
+                h.OpenHtml(coloredXML);
+                return h.ToRtf();
+            }else if (fileType == _SQLName)
+            {
+                string coloredXML = new CodeColorizer().Colorize(tempStr, Languages.Sql);
+                HtmlToRtf h = new HtmlToRtf();
+                h.OpenHtml(coloredXML);
+                return h.ToRtf();
+            }else
+            {
+                return tempStr;
             }
         }
 
