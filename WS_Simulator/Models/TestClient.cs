@@ -476,8 +476,8 @@ namespace WS_Simulator.Models
             Node startNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.START).FirstOrDefault();
             Node endNode = CurrNodeList.Where(x => x.TreeNodeTestType == TestNodeType.END).FirstOrDefault();
 
-            startNode.SetTreeNodeColor();
-            endNode.SetTreeNodeColor();
+            startNode?.SetTreeNodeColor();
+            endNode?.SetTreeNodeColor();
             //UpdateNodeColor?.Invoke(startNode?.TreeNodeValue, Color.Black);
             //UpdateNodeColor?.Invoke(endNode?.TreeNodeValue, Color.Black);
 
