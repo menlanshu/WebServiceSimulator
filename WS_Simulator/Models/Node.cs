@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -27,10 +28,25 @@ namespace WS_Simulator.Models
         public TestNodeType TreeNodeTestType { get; set; } = TestNodeType.NORMAL;
         [NotMapped]
         public SourceNodeType TreeNodeSourceType { get; set; }
-
-
         public int? RepositoryId { get; set; }
         public TestRepository Repository { get; set; }
+
+        public FileType FileType {
+            get {
+                string PostFix = TreeNodeName.Substring(TreeNodeName.LastIndexOf('.')+1).ToUpper();
+                switch(PostFix)
+                {
+                    case "SQL":
+                        return FileType.SQL;
+                    case "XML":
+                        return FileType.XML;
+                    case "TXT":
+                        return FileType.TEXT;
+                    default:
+                        return FileType.OTHER;
+                }
+            }
+        }
 
         public Node(TreeNodeType treeNodeType, TreeNode treeNodeValue, Node motherNode, string fullPath)
         {
@@ -41,6 +57,9 @@ namespace WS_Simulator.Models
             MotherNode = motherNode;
 
             NodeFullPath = fullPath;
+
+            // Set the color of current tree node
+            SetTreeNodeColor();
         }
 
         public Node()
@@ -52,6 +71,27 @@ namespace WS_Simulator.Models
         public virtual void UpdateCurrentMessage(string requestMessage) { throw new NotImplementedException(); }
         public virtual void RenameFile(string newFileName) { throw new NotImplementedException(); }
         public virtual void DeleteFile() { throw new NotImplementedException(); }
+
+        public void SetTreeNodeColor()
+        {
+            switch (FileType)
+            {
+                case FileType.SQL:
+                    this.TreeNodeValue.ForeColor = Color.Blue;
+                    break;
+                case FileType.XML:
+                    this.TreeNodeValue.ForeColor = Color.Green;
+                    break;
+                case FileType.TEXT:
+                    this.TreeNodeValue.ForeColor = Color.Black;
+                    break;
+                case FileType.OTHER:
+                    this.TreeNodeValue.ForeColor = Color.Black;
+                    break;
+                default:
+                    break;
+            }
+        }
 
             //public string GetFullPathOfFile(string rootPath)
             //{
