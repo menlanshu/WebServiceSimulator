@@ -12,6 +12,11 @@ using WS_Simulator.Models;
 
 namespace WS_Simulator.FormHandler
 {
+    public enum FileCase
+    {
+        CASECONFIG,
+        TESTCASE
+    }
     public class TestCaseDocumentHandler
     {
         private static readonly string _resultPostFix = "_Result.txt";
@@ -20,13 +25,10 @@ namespace WS_Simulator.FormHandler
         private static readonly string _executeName = "Execute";
         private static readonly string _sqlName = "SQL";
 
-        public enum FileType
+        public static void GenerateTestCaseFile(Node directoryNode)
         {
-            CASECONFIG,
-            TESTCASE
-        }
-        public static void GenerateTestCaseFile(string directoryPath)
-        {
+            string directoryPath = ((FileNode)directoryNode).DirectoryPath;
+
             StringBuilder fileContent = new StringBuilder();
             StringBuilder expectResult = new StringBuilder();
 
@@ -76,8 +78,12 @@ namespace WS_Simulator.FormHandler
 
             fileContent.AppendLine();
 
-            WriteToFile(GetFileName(FileType.TESTCASE, directoryPath), fileContent.ToString() + expectResult.ToString());
+            string fullFileContext = fileContent.ToString() + expectResult.ToString();
 
+            //WriteToFile(GetFileNamePath(FileCase.TESTCASE, directoryPath), fullFileContext);
+
+            SimulatorFormHandler.AddCurrentNodeToDir(
+                GetFileName(FileCase.TESTCASE), directoryNode, fullFileContext);
         }
 
         private static void WriteToFile(string filePath, string fileContent)
@@ -103,7 +109,7 @@ namespace WS_Simulator.FormHandler
             DirectoryInfo directory = new DirectoryInfo(directoryPath);
             string pattern = @"^\d+";
             Regex rgx = new Regex(pattern);
-            
+
             int step = 0;
             string newFileName;
 
@@ -143,7 +149,7 @@ namespace WS_Simulator.FormHandler
             string newFileName = currentFileName;
             Regex rgx = new Regex(pattern);
 
-            if(!rgx.Match(currentFileName).Success)
+            if (!rgx.Match(currentFileName).Success)
             {
                 needRename = true;
                 newFileName = $"0_{currentFileName}";
@@ -152,14 +158,19 @@ namespace WS_Simulator.FormHandler
             return newFileName;
         }
 
-        public static void GenerateCaseConfigFile(string directoryPath)
+        public static void GenerateCaseConfigFile(Node directoryNode)
         {
-            XTestCase xTestCase = GetCurrentFolderXTestCase(directoryPath);
-            SaveInstanceToFIle(xTestCase, GetFileName(FileType.CASECONFIG, directoryPath));
+            XTestCase xTestCase = GetCurrentFolderXTestCase(directoryNode);
+            string fileContent = ConvertInstanceToString<XTestCase>(xTestCase);
+
+            SimulatorFormHandler.AddCurrentNodeToDir(
+                GetFileName(FileCase.CASECONFIG), directoryNode, fileContent);
         }
 
-        private static XTestCase GetCurrentFolderXTestCase(string directoryPath)
+        private static XTestCase GetCurrentFolderXTestCase(Node directoryNode)
         {
+            string directoryPath = ((FileNode)directoryNode).DirectoryPath;
+
             XTestCase result = new XTestCase();
 
             DirectoryInfo directory = new DirectoryInfo(directoryPath);
@@ -233,30 +244,44 @@ namespace WS_Simulator.FormHandler
             return result;
         }
 
-        private static string GetFileName(FileType nameCase, string directoryPath)
+        private static string GetFileNamePath(FileCase nameCase, string directoryPath)
         {
             switch (nameCase)
             {
-                case FileType.CASECONFIG:
+                case FileCase.CASECONFIG:
                     return $@"{directoryPath}\CaseConfig.xml";
-                case FileType.TESTCASE:
+                case FileCase.TESTCASE:
                     return $@"{directoryPath}\TestCase.txt";
                 default:
                     throw new Exception("Do not support other condition!");
             }
         }
 
+        public static string GetFileName(FileCase nameCase)
+        {
+            switch (nameCase)
+            {
+                case FileCase.CASECONFIG:
+                    return $@"CaseConfig.xml";
+                case FileCase.TESTCASE:
+                    return $@"TestCase.txt";
+                default:
+                    throw new Exception("Do not support other condition!");
+            }
+        }
 
-        public static void SaveInstanceToFIle(XTestCase instance, string fileName)
+
+        public static string ConvertInstanceToString<T>(T instance)
         {
             // Create an instance of the XmlSerializer class;
             // specify the type of object to serialize.
             XmlSerializer serializer =
-            new XmlSerializer(typeof(XTestCase));
+            new XmlSerializer(instance.GetType());
 
-            using (TextWriter textWriter = new StreamWriter(fileName))
+            using (StringWriter stringWriter = new StringWriter())
             {
-                serializer.Serialize(textWriter, instance);
+                serializer.Serialize(stringWriter, instance);
+                return stringWriter.ToString();
             }
         }
 

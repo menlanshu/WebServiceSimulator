@@ -539,5 +539,23 @@ namespace WS_Simulator.FormHandler
 
             return null;
         }
+
+        public static void AddCurrentNodeToDir(string fileName, Node dirnode, string message, string oldText="", string newText="")
+        {
+            FileNode fileNode = new FileNode
+            {
+                TreeNodeType = TreeNodeType.File,
+                TreeNodeName = fileName,
+                NodeFullPath = $@"{dirnode.NodeFullPath}\{fileName}"
+            };
+            if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
+            {
+                fileNode.SaveCurrentNodeToMotherNode(dirnode, message);
+            }
+            else
+            {
+                fileNode.SaveCurrentNodeToMotherNode(dirnode, message.Replace(oldText, newText));
+            }
+        }
     }
 }

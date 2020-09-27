@@ -18,10 +18,9 @@ namespace WS_Simulator.Models
         public Action<TreeNode, Color> UpdateNodeColor;
         public Action<List<TestNode>> UpdateSendNodeListStatus;
         public Func<Node, string, TreeNodeType, Node> SaveNodeToTree;
-
         private char[] ConfigDelimeter = (";").ToCharArray();
-
         private string _rootDirectoryPath;
+
 
         public string RootDirectoryPath {
             get 
@@ -34,32 +33,25 @@ namespace WS_Simulator.Models
                 FileNode.RootDirectoryPath = value;
             }
         }
-
         public int CurrentSendNodeCount { get; set; }
         public int CurrentActualSendNodeCount { get; set; }
         public List<int> AutoContextCountList { get; set; }
         public List<string> NeedSendExtensionName { get; set; }
         public List<string> NeedWaitmessageList { get; set; }
         public GenerateContext AutoGenerateContext { get; private set; }
-
         public List<TestNode> WaitSendTreeNode { get; private set; } = new List<TestNode>();
-
         public bool AutoSaveReply { get; set; }
         public bool IsBatch { get; set; }
         public bool IsDBHelperNeed { get; set; }
-
         public int CurrentPerfTestCount { get; set; }
         public int PerfMsgCount { get; set; }
         public string MethodName { get; set; }
         public bool IsPerfTest { get; set; }
         public bool ManualStop { get; set; }
-
         public List<Node> CurrNodeList { get; set; } = new List<Node>();
         public TestRepository CurrentRepository { get; set; }
-
         public string RequestMessage { get; set; }
         public string ReplyMessage { get; set; }
-
         public SendType SendType { get; set; }
         public int NeedWaitTime { get; internal set; }
 
@@ -97,8 +89,6 @@ namespace WS_Simulator.Models
 
             return nodeValue;
         }
-
-
         public bool InitialGenerateContext(out string errDesc)
         {
             errDesc = "";
@@ -160,8 +150,6 @@ namespace WS_Simulator.Models
             result = string.Format(type, count);
             return result;
         }
-
-
         public bool InTesting()
         {
             if(WaitSendTreeNode.Count > 0)
@@ -209,8 +197,6 @@ namespace WS_Simulator.Models
             }
             return assigned ? result : 0;
         }
-
-
         private async Task SendMessageToE3(TreeNode sendNode, string requestMessage)
         {
             string nodeName = sendNode.Text;
@@ -490,8 +476,6 @@ namespace WS_Simulator.Models
                 endNode.TreeNodeTestType = TestNodeType.NORMAL;
             }
         }
-
-
         private void SaveReplyMsgToFileMethod(TestNode currNode)
         {
             if (currNode != null)
@@ -499,7 +483,6 @@ namespace WS_Simulator.Models
                 currNode.NodeInTree.SaveReplyResult(currNode.CurrentNodeReplyMessage);
             }
         }
-
         private bool NeedWait(string fileName)
         {
             if (fileName == "")

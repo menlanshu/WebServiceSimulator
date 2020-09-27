@@ -194,7 +194,6 @@ namespace WS_Simulator
 
         }
 
-
         // Initial Control event and delegate
         private void InitializeFormEventAndDelegate()
         {
@@ -205,178 +204,6 @@ namespace WS_Simulator
             this.UpdateReplyMessage += UpdateRTBReplyMsg;
             this.UpdateCurrLoopText += UpdateCurrentLoopTextMethod;
             this.SelectNodeAndSend += SelectNodeAndSendMethod;
-        }
-        private void UpdateCurrentLoopTextMethod()
-        {
-            this.BeginInvoke((Action)(() => this.lbCurrentLoop.Text = "CurrentLoop: " + _testClient.CurrentPerfTestCount.ToString()));
-        }
-        private void TimerStartSet()
-        {
-            this.Invoke((Action)(() =>
-            {
-                this.btnSend.Enabled = false;
-                waitSecond = 0;
-
-                myTimer.Enabled = true;
-                myTimer.Start();
-            }));
-
-        }
-        private void UpdateRTBReplyMsg(string replyMessage)
-        {
-            this.BeginInvoke((Action<string>)((replyMsgText) =>
-            {
-                if (!this.btnSend.Enabled)
-                {
-                    waitSecond = 0;
-                    myTimer.Enabled = false;
-
-                    this.rtbReply.Clear();
-                    this.rtbReply.Text = replyMsgText;
-
-                    this.btnSend.Enabled = true;
-                }
-                else
-                {
-                    this.rtbReply.Clear();
-                    this.rtbReply.Text = replyMsgText;
-                }
-
-                this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
-                _testClient.CurrentSendNodeCount++;
-
-            }), replyMessage
-            );
-        }
-        private void UpdateAfterReadFileMethod(string requestMessage)
-        {
-            this.BeginInvoke((Action<string>)(
-                (fileInfo) =>
-                {
-                    this.rtbRequest.Clear();
-                    this.rtbRequest.Text = fileInfo;
-
-                    if (cbToDispatcher.Checked == true)
-                    {
-                        selectRichTextBox = this.rtbRequest;
-                        toDispatchToolStripMenuItem_Click(this, null);
-                    }
-
-                    if (cbAutoChangeContext.Checked == true)
-                    {
-                        this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text);
-                    }
-                }), requestMessage);
-        }
-        private void ShowErrorMessage(string errDesc)
-        {
-            MessageBox.Show(errDesc);
-            this.Dispose();
-        }
-        private string SelectNodeAndSendMethod(TreeNode currNode)
-        {
-            string requestMessage = (string)this.Invoke((Func<TreeNode, string>)((node) =>
-            {
-                this.pathTree.SelectedNode = node;
-
-                return ((Node)node.Tag).GetCurrentMessage(true);
-
-                //return SimulatorFormHandler.LoadTestFile((Node)node.Tag, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
-
-            }), currNode
-            );
-
-            return requestMessage;
-        }
-
-        private Node SaveNodeToTree(Node motherNode, string nodeName, TreeNodeType treeNodeType)
-        {
-            Node newNode = (Node)this.Invoke(
-                (Func<Node, string, TreeNodeType, Node>)(
-                (inmotherNode, innodeName, intreeNodeType) =>
-                {
-                    return SaveNodeToTreeMethod(inmotherNode, innodeName, intreeNodeType);
-                }
-                ),
-                motherNode, nodeName, treeNodeType);
-
-            return newNode;
-        }
-
-        private Node SaveNodeToTreeMethod(Node inMotherNode, string inNodeName, TreeNodeType inTreeNodeType)
-        {
-            return (Node)this.Invoke((Func<Node, string, TreeNodeType, Node>)((motherNode, nodeName, treeNodeType) =>
-            {
-                TreeNode newTreeNode = null;
-                Node newNode = null;
-                if (motherNode != null)
-                {
-                    if (motherNode is DBNode)
-                    {
-                        Node findMotherNode = _testClient.CurrNodeList.Where(x => x.Id == motherNode.Id).FirstOrDefault();
-                        motherNode = findMotherNode == null ? motherNode : findMotherNode;
-                    }
-
-                    if (treeNodeType == TreeNodeType.File)
-                    {
-                        // Add node to current path tree
-                        newTreeNode = new TreeNode();
-                        //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
-                        newTreeNode.Text = nodeName;
-                        newTreeNode.ContextMenuStrip = this.fileContextMenu;
-                        newTreeNode.ImageIndex = 0; // ImageKey = "file";
-                        newTreeNode.SelectedImageIndex = 0;
-                        // Add new tree node to current tree
-                        motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
-
-                        // Add node to current Node tree
-                        if (motherNode is DBNode)
-                        {
-                            newNode = new DBNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
-                        }
-                        else if (motherNode is FileNode)
-                        {
-                            newNode = new FileNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
-                        }
-
-                        newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
-
-                        newTreeNode.Tag = newNode;
-
-                        _testClient.CurrNodeList.Add(newNode);
-                    }
-                    else if (treeNodeType == TreeNodeType.Directory)
-                    {
-                        // Add node to current path tree
-                        newTreeNode = new TreeNode();
-                        //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
-                        newTreeNode.Text = nodeName;
-                        newTreeNode.ContextMenuStrip = this.folderContextMenu;
-                        newTreeNode.ImageIndex = 1; // ImageKey = "folder";
-                        newTreeNode.SelectedImageIndex = 1;
-
-                        // Add new tree node to current tree
-                        motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
-
-                        // Add node to current Node tree
-                        if (motherNode is DBNode)
-                        {
-                            newNode = new DBNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
-                        }
-                        else if (motherNode is FileNode)
-                        {
-                            newNode = new FileNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
-                        }
-                        newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
-
-                        newTreeNode.Tag = newNode;
-
-                        _testClient.CurrNodeList.Add(newNode);
-                    }
-
-                }
-                return newNode;
-            }), inMotherNode, inNodeName, inTreeNodeType);
         }
         #endregion
 
@@ -390,15 +217,6 @@ namespace WS_Simulator
         private void splitContainer3_Panel1_SizeChanged(object sender, EventArgs e)
         {
             AutoChangeFunctionListButton();
-        }
-
-        private void AutoChangeFunctionListButton()
-        {
-            this.cmbAddress.Width = (int)((this.splitContainer3.Panel1.Width - this.lbAddress.Width - this.lbMethod.Width - this.btnSend.Width) * 0.6);
-            this.cmbMethodName.Width = (int)((this.splitContainer3.Panel1.Width - this.lbAddress.Width - this.lbMethod.Width - this.btnSend.Width) * 0.3);
-            this.lbMethod.Location = new System.Drawing.Point(this.cmbAddress.Location.X + this.cmbAddress.Width + 10, this.lbMethod.Location.Y);
-            this.cmbMethodName.Location = new System.Drawing.Point(this.lbMethod.Location.X + this.lbMethod.Width + 10, this.cmbMethodName.Location.Y);
-            this.btnSend.Location = new System.Drawing.Point(this.cmbMethodName.Location.X + this.cmbMethodName.Width + 10, this.btnSend.Location.Y);
         }
 
         private async void cmbAddress_TextChanged(object sender, EventArgs e)
@@ -438,7 +256,6 @@ namespace WS_Simulator
                 await _testClient.RunAllNodesInDirectory(UpdateCurrLoopText, SelectNodeAndSend);
             }
         }
-
         private void pathTree_MouseDown(object sender, MouseEventArgs e)
         {
 
@@ -461,49 +278,18 @@ namespace WS_Simulator
                 ((Node)this.pathTree.SelectedNode.Tag).GetCurrentMessage(true);
             }
         }
-
         private void myTimer_Tick(object sender, EventArgs e)
         {
             this.rtbReply.Text = "Please wait web service reply.........." + (++waitSecond).ToString();
         }
-
-        private void UpdateRequestBoxWaitNodeStatus(List<TestNode> testNodes)
-        {
-            if (_testClient.SendType == SendType.RUNALL)
-            {
-                StringBuilder currentStatus = new StringBuilder();
-
-                foreach (var testNode in testNodes)
-                {
-                    currentStatus.AppendLine($"Test Node: {testNode.NodeInTree.TreeNodeName}");
-                    currentStatus.AppendLine($"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms");
-                    if (testNode.NeedWait)
-                    {
-                        currentStatus.AppendLine($"Need wait for {testNode.NeedWaitTime}ms after send finish according to configuration.");
-                    }
-                    currentStatus.AppendLine();
-                }
-
-                this.rtbRequest.Clear();
-                this.rtbRequest.Text = currentStatus.ToString();
-            }
-
-        }
-
-        #endregion
-
-
-
         private void tbnRequestToXML_Click(object sender, EventArgs e)
         {
             SimulatorFormHandler.RichBoxTextToXML(this.rtbRequest);
         }
-
         private void btnReplyToXML_Click(object sender, EventArgs e)
         {
             SimulatorFormHandler.RichBoxTextToXML(this.rtbReply);
         }
-
         private void rtbRequest_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -517,7 +303,6 @@ namespace WS_Simulator
                 selectRichTextBox = rtbRequest;
             }
         }
-
         private void rtbReply_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -531,7 +316,6 @@ namespace WS_Simulator
                 selectRichTextBox = rtbReply;
             }
         }
-
         private void toolStripToXML_Click(object sender, EventArgs e)
         {
             if (selectRichTextBox != null)
@@ -680,101 +464,6 @@ namespace WS_Simulator
             }
         }
 
-        #region utility function
-
-        public void ReplaceFormRequest(string searchComponentName, string sourceStr, string destStr)
-        {
-            string tempMessage = "";
-
-            if (searchComponentName == this.rtbRequest.Name)
-            {
-                tempMessage = this.rtbRequest.Text;
-
-                tempMessage = tempMessage.Replace(sourceStr, destStr);
-                this.rtbRequest.Text = tempMessage;
-                MessageBox.Show("Replace Done!");
-            }
-            else if (searchComponentName == this.rtbReply.Name)
-            {
-                tempMessage = this.rtbReply.Text;
-
-                tempMessage = tempMessage.Replace(sourceStr, destStr);
-                this.rtbReply.Text = tempMessage;
-                MessageBox.Show("Replace Done!");
-            }
-        }
-
-        public void SearchFormRequest(string searchComponentName, string inSrouceStr, bool isDownSearch = true, bool isCaseSensitive = true)
-        {
-            string tempMessage = "";
-            string sourceStr = "";
-            RichTextBox tempRTBBox;
-
-            if (searchComponentName == this.rtbRequest.Name)
-            {
-                tempRTBBox = this.rtbRequest;
-
-                requestSourceStr = inSrouceStr;
-                requestIsCaseSensitive = isCaseSensitive;
-            }
-            else
-            {
-                tempRTBBox = this.rtbReply;
-
-                replySourceStr = inSrouceStr;
-                replyIsCaseSensitive = isCaseSensitive;
-            }
-
-
-            int strLocation;
-
-            if (isCaseSensitive)
-            {
-                tempMessage = tempRTBBox.Text;
-                sourceStr = inSrouceStr;
-            }
-            else
-            {
-                tempMessage = tempRTBBox.Text.ToUpper();
-                sourceStr = inSrouceStr.ToUpper();
-            }
-
-            if (isDownSearch)
-            {
-                strLocation = tempMessage.IndexOf(sourceStr,
-                    tempRTBBox.SelectionStart == 0 ?
-                    tempRTBBox.SelectionStart : tempRTBBox.SelectionStart + 1);
-
-                if (strLocation < 0)
-                {
-                    MessageBox.Show("Can't find " + inSrouceStr + " from current position.");
-                    return;
-                }
-
-                tempRTBBox.Select(strLocation, sourceStr.Length);
-                tempRTBBox.Focus();
-            }
-            else
-            {
-                tempMessage = new string(tempMessage.Reverse().ToArray());
-                sourceStr = new string(sourceStr.Reverse().ToArray());
-                strLocation = tempMessage.IndexOf(sourceStr, tempMessage.Length -
-                    (tempRTBBox.SelectionStart == 0 ?
-                    tempRTBBox.SelectionStart : tempRTBBox.SelectionStart - 1));
-
-                if (strLocation < 0)
-                {
-                    MessageBox.Show("Can't find " + inSrouceStr + " from current position.");
-                    return;
-                }
-
-                tempRTBBox.Select(tempMessage.Length - strLocation - sourceStr.Length, sourceStr.Length);
-                tempRTBBox.Focus();
-            }
-        }
-
-        #endregion
-
         private void rtbRequest_KeyDown(object sender, KeyEventArgs e)
         {
             rtb_KeyDown(this.rtbRequest, e);
@@ -899,14 +588,6 @@ namespace WS_Simulator
                 _testClient.SetSendStartNode(fileNode);
             }
 
-        }
-
-        private void UpdateTreeNodeColor(TreeNode treeNode, Color toColor)
-        {
-            if (treeNode != null)
-            {
-                treeNode.ForeColor = toColor;
-            }
         }
 
         private void SetEndStripMenuItem_Click(object sender, EventArgs e)
@@ -1034,33 +715,6 @@ namespace WS_Simulator
             }
         }
 
-        public (bool, string) SaveRepositoryToDB(string name)
-        {
-            bool result = false;
-            string errDesc = "";
-
-            if (!SQLiteDBProcessor.CheckRepositoryName(name))
-            {
-                TestRepository testRepository = new TestRepository();
-                testRepository.RepositoryName = name;
-
-
-                FileProcessor.LoadMessageForAllNodes(_testClient.CurrNodeList, _testClient.RootDirectoryPath);
-                testRepository.TestNodeList = _testClient.CurrNodeList;
-                SQLiteDBProcessor.SaveDataToDB(testRepository);
-
-                _testClient.CurrNodeList.ForEach(x => x.TreeNodeMessage = "");
-
-                result = true;
-            }
-            else
-            {
-                errDesc = "Repository Name Already exist, please change it";
-            }
-
-            return (result, errDesc);
-        }
-
         private void loadFromDBToolStripMenuItem_Click(object sender, EventArgs e)
         {
             LoadFromDB frm = new LoadFromDB(this);
@@ -1183,21 +837,9 @@ namespace WS_Simulator
                             fileName = ((Node)currNode.Tag).TreeNodeName.Replace(oldText, newText);
                         }
 
-                        // Add Filte node
-                        FileNode fileNode = new FileNode
-                        {
-                            TreeNodeType = TreeNodeType.File,
-                            TreeNodeName = fileName,
-                            NodeFullPath = $@"{dirnode.NodeFullPath}\{fileName}"
-                        };
-                        if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
-                        {
-                            fileNode.SaveCurrentNodeToMotherNode(dirnode, ((Node)currNode.Tag).GetCurrentMessage(false));
-                        }
-                        else
-                        {
-                            fileNode.SaveCurrentNodeToMotherNode(dirnode, ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText));
-                        }
+                        // Add Filter node
+                        SimulatorFormHandler.AddCurrentNodeToDir(fileName, dirnode,
+                            oldText, newText, ((Node)currNode.Tag).GetCurrentMessage(false));
                     }
                 }
 
@@ -1220,74 +862,6 @@ namespace WS_Simulator
             }
         }
 
-        public (bool okay, string errDesc) ReplaceTextFileInfo(Node folderNode, string oldText = "", string newText = "")
-        {
-            bool okay = false;
-            string errDesc = "";
-            string newMessage = "";
-
-            if (_testClient.CurrentRepository != null)
-            {
-                // TODO - Support DB
-                errDesc = "This function only support local file now!";
-                return (okay, errDesc);
-            }
-
-            // Add Each Node of this folder
-            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
-            {
-                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
-                {
-                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
-                    {
-                        // DO nothing
-                    }
-                    else
-                    {
-                        newMessage = ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText);
-                        ((Node)currNode.Tag).UpdateCurrentMessage(newMessage);
-                    }
-                }
-            }
-
-            okay = true;
-
-            return (okay, errDesc);
-        }
-
-        public (bool okay, string errDesc) ReplaceTextFileName(Node folderNode, string oldText = "", string newText = "")
-        {
-            bool okay = false;
-            string errDesc = "";
-
-            if (_testClient.CurrentRepository != null)
-            {
-                // TODO - Support DB
-                errDesc = "This function only support local file now!";
-                return (okay, errDesc);
-            }
-
-            // Add Each Node of this folder
-            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
-            {
-                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
-                {
-                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
-                    {
-                        // DO nothing
-                    }
-                    else
-                    {
-                        var node = (Node)currNode.Tag;
-                        node.RenameFile(node.TreeNodeName.Replace(oldText, newText));
-                    }
-                }
-            }
-
-            okay = true;
-
-            return (okay, errDesc);
-        }
 
         private void replaceTextOfAllFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1314,12 +888,10 @@ namespace WS_Simulator
             {
                 if (directoryNode.FullPath != "")
                 {
-                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
-                    TestCaseDocumentHandler.GenerateTestCaseFile(directoryPath);
+                    TestCaseDocumentHandler.GenerateTestCaseFile((Node)directoryNode.Tag);
+
                 }
             }
-
-            reloadFromFolderToolStripMenuItem_Click(sender, e);
         }
 
         private void generateCaseConfigFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1330,12 +902,9 @@ namespace WS_Simulator
             {
                 if (directoryNode.FullPath != "")
                 {
-                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
-                    TestCaseDocumentHandler.GenerateCaseConfigFile(directoryPath);
+                    TestCaseDocumentHandler.GenerateCaseConfigFile((Node)directoryNode.Tag);
                 }
             }
-
-            reloadFromFolderToolStripMenuItem_Click(sender, e);
         }
 
         private void pathTree_KeyDown(object sender, KeyEventArgs e)
@@ -1425,6 +994,404 @@ namespace WS_Simulator
 
             }
         }
+
+        #endregion
+
+        #region utility function
+
+        public void ReplaceFormRequest(string searchComponentName, string sourceStr, string destStr)
+        {
+            string tempMessage = "";
+
+            if (searchComponentName == this.rtbRequest.Name)
+            {
+                tempMessage = this.rtbRequest.Text;
+
+                tempMessage = tempMessage.Replace(sourceStr, destStr);
+                this.rtbRequest.Text = tempMessage;
+                MessageBox.Show("Replace Done!");
+            }
+            else if (searchComponentName == this.rtbReply.Name)
+            {
+                tempMessage = this.rtbReply.Text;
+
+                tempMessage = tempMessage.Replace(sourceStr, destStr);
+                this.rtbReply.Text = tempMessage;
+                MessageBox.Show("Replace Done!");
+            }
+        }
+
+        public void SearchFormRequest(string searchComponentName, string inSrouceStr, bool isDownSearch = true, bool isCaseSensitive = true)
+        {
+            string tempMessage = "";
+            string sourceStr = "";
+            RichTextBox tempRTBBox;
+
+            if (searchComponentName == this.rtbRequest.Name)
+            {
+                tempRTBBox = this.rtbRequest;
+
+                requestSourceStr = inSrouceStr;
+                requestIsCaseSensitive = isCaseSensitive;
+            }
+            else
+            {
+                tempRTBBox = this.rtbReply;
+
+                replySourceStr = inSrouceStr;
+                replyIsCaseSensitive = isCaseSensitive;
+            }
+
+
+            int strLocation;
+
+            if (isCaseSensitive)
+            {
+                tempMessage = tempRTBBox.Text;
+                sourceStr = inSrouceStr;
+            }
+            else
+            {
+                tempMessage = tempRTBBox.Text.ToUpper();
+                sourceStr = inSrouceStr.ToUpper();
+            }
+
+            if (isDownSearch)
+            {
+                strLocation = tempMessage.IndexOf(sourceStr,
+                    tempRTBBox.SelectionStart == 0 ?
+                    tempRTBBox.SelectionStart : tempRTBBox.SelectionStart + 1);
+
+                if (strLocation < 0)
+                {
+                    MessageBox.Show("Can't find " + inSrouceStr + " from current position.");
+                    return;
+                }
+
+                tempRTBBox.Select(strLocation, sourceStr.Length);
+                tempRTBBox.Focus();
+            }
+            else
+            {
+                tempMessage = new string(tempMessage.Reverse().ToArray());
+                sourceStr = new string(sourceStr.Reverse().ToArray());
+                strLocation = tempMessage.IndexOf(sourceStr, tempMessage.Length -
+                    (tempRTBBox.SelectionStart == 0 ?
+                    tempRTBBox.SelectionStart : tempRTBBox.SelectionStart - 1));
+
+                if (strLocation < 0)
+                {
+                    MessageBox.Show("Can't find " + inSrouceStr + " from current position.");
+                    return;
+                }
+
+                tempRTBBox.Select(tempMessage.Length - strLocation - sourceStr.Length, sourceStr.Length);
+                tempRTBBox.Focus();
+            }
+        }
+
+        public (bool okay, string errDesc) ReplaceTextFileInfo(Node folderNode, string oldText = "", string newText = "")
+        {
+            bool okay = false;
+            string errDesc = "";
+            string newMessage = "";
+
+            if (_testClient.CurrentRepository != null)
+            {
+                // TODO - Support DB
+                errDesc = "This function only support local file now!";
+                return (okay, errDesc);
+            }
+
+            // Add Each Node of this folder
+            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
+            {
+                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
+                {
+                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
+                    {
+                        // DO nothing
+                    }
+                    else
+                    {
+                        newMessage = ((Node)currNode.Tag).GetCurrentMessage(false).Replace(oldText, newText);
+                        ((Node)currNode.Tag).UpdateCurrentMessage(newMessage);
+                    }
+                }
+            }
+
+            okay = true;
+
+            return (okay, errDesc);
+        }
+
+        public (bool okay, string errDesc) ReplaceTextFileName(Node folderNode, string oldText = "", string newText = "")
+        {
+            bool okay = false;
+            string errDesc = "";
+
+            if (_testClient.CurrentRepository != null)
+            {
+                // TODO - Support DB
+                errDesc = "This function only support local file now!";
+                return (okay, errDesc);
+            }
+
+            // Add Each Node of this folder
+            foreach (TreeNode currNode in folderNode.TreeNodeValue.Nodes)
+            {
+                if (((Node)currNode.Tag).TreeNodeType == TreeNodeType.File)
+                {
+                    if (string.IsNullOrWhiteSpace(oldText) || string.IsNullOrWhiteSpace(newText))
+                    {
+                        // DO nothing
+                    }
+                    else
+                    {
+                        var node = (Node)currNode.Tag;
+                        node.RenameFile(node.TreeNodeName.Replace(oldText, newText));
+                    }
+                }
+            }
+
+            okay = true;
+
+            return (okay, errDesc);
+        }
+        public (bool, string) SaveRepositoryToDB(string name)
+        {
+            bool result = false;
+            string errDesc = "";
+
+            if (!SQLiteDBProcessor.CheckRepositoryName(name))
+            {
+                TestRepository testRepository = new TestRepository();
+                testRepository.RepositoryName = name;
+
+
+                FileProcessor.LoadMessageForAllNodes(_testClient.CurrNodeList, _testClient.RootDirectoryPath);
+                testRepository.TestNodeList = _testClient.CurrNodeList;
+                SQLiteDBProcessor.SaveDataToDB(testRepository);
+
+                _testClient.CurrNodeList.ForEach(x => x.TreeNodeMessage = "");
+
+                result = true;
+            }
+            else
+            {
+                errDesc = "Repository Name Already exist, please change it";
+            }
+
+            return (result, errDesc);
+        }
+        private void UpdateTreeNodeColor(TreeNode treeNode, Color toColor)
+        {
+            if (treeNode != null)
+            {
+                treeNode.ForeColor = toColor;
+            }
+        }
+        private void UpdateRequestBoxWaitNodeStatus(List<TestNode> testNodes)
+        {
+            if (_testClient.SendType == SendType.RUNALL)
+            {
+                StringBuilder currentStatus = new StringBuilder();
+
+                foreach (var testNode in testNodes)
+                {
+                    currentStatus.AppendLine($"Test Node: {testNode.NodeInTree.TreeNodeName}");
+                    currentStatus.AppendLine($"Status: {testNode.TreeNodeSendStatus}  TotalCostTime: {testNode.TestPeriod}ms");
+                    if (testNode.NeedWait)
+                    {
+                        currentStatus.AppendLine($"Need wait for {testNode.NeedWaitTime}ms after send finish according to configuration.");
+                    }
+                    currentStatus.AppendLine();
+                }
+
+                this.rtbRequest.Clear();
+                this.rtbRequest.Text = currentStatus.ToString();
+            }
+
+        }
+        private void AutoChangeFunctionListButton()
+        {
+            this.cmbAddress.Width = (int)((this.splitContainer3.Panel1.Width - this.lbAddress.Width - this.lbMethod.Width - this.btnSend.Width) * 0.6);
+            this.cmbMethodName.Width = (int)((this.splitContainer3.Panel1.Width - this.lbAddress.Width - this.lbMethod.Width - this.btnSend.Width) * 0.3);
+            this.lbMethod.Location = new System.Drawing.Point(this.cmbAddress.Location.X + this.cmbAddress.Width + 10, this.lbMethod.Location.Y);
+            this.cmbMethodName.Location = new System.Drawing.Point(this.lbMethod.Location.X + this.lbMethod.Width + 10, this.cmbMethodName.Location.Y);
+            this.btnSend.Location = new System.Drawing.Point(this.cmbMethodName.Location.X + this.cmbMethodName.Width + 10, this.btnSend.Location.Y);
+        }
+        private void UpdateCurrentLoopTextMethod()
+        {
+            this.BeginInvoke((Action)(() => this.lbCurrentLoop.Text = "CurrentLoop: " + _testClient.CurrentPerfTestCount.ToString()));
+        }
+        private void TimerStartSet()
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.btnSend.Enabled = false;
+                waitSecond = 0;
+
+                myTimer.Enabled = true;
+                myTimer.Start();
+            }));
+
+        }
+        private void UpdateRTBReplyMsg(string replyMessage)
+        {
+            this.BeginInvoke((Action<string>)((replyMsgText) =>
+            {
+                if (!this.btnSend.Enabled)
+                {
+                    waitSecond = 0;
+                    myTimer.Enabled = false;
+
+                    this.rtbReply.Clear();
+                    this.rtbReply.Text = replyMsgText;
+
+                    this.btnSend.Enabled = true;
+                }
+                else
+                {
+                    this.rtbReply.Clear();
+                    this.rtbReply.Text = replyMsgText;
+                }
+
+                this.lbCurrentCount.Text = _testClient.CurrentActualSendNodeCount + "/" + _testClient.CurrentSendNodeCount + "/" + _testClient.WaitSendTreeNode.Count;
+                _testClient.CurrentSendNodeCount++;
+
+            }), replyMessage
+            );
+        }
+        private void UpdateAfterReadFileMethod(string requestMessage)
+        {
+            this.BeginInvoke((Action<string>)(
+                (fileInfo) =>
+                {
+                    this.rtbRequest.Clear();
+                    this.rtbRequest.Text = fileInfo;
+
+                    if (cbToDispatcher.Checked == true)
+                    {
+                        selectRichTextBox = this.rtbRequest;
+                        toDispatchToolStripMenuItem_Click(this, null);
+                    }
+
+                    if (cbAutoChangeContext.Checked == true)
+                    {
+                        this.rtbRequest.Text = _testClient.AutoChangeContextInfo(this.rtbRequest.Text);
+                    }
+                }), requestMessage);
+        }
+        private void ShowErrorMessage(string errDesc)
+        {
+            MessageBox.Show(errDesc);
+            this.Dispose();
+        }
+        private string SelectNodeAndSendMethod(TreeNode currNode)
+        {
+            string requestMessage = (string)this.Invoke((Func<TreeNode, string>)((node) =>
+            {
+                this.pathTree.SelectedNode = node;
+
+                return ((Node)node.Tag).GetCurrentMessage(true);
+
+                //return SimulatorFormHandler.LoadTestFile((Node)node.Tag, _testClient.RootDirectoryPath, UpdateReplyMessage, UpdateAfterReadFile);
+
+            }), currNode
+            );
+
+            return requestMessage;
+        }
+        private Node SaveNodeToTree(Node motherNode, string nodeName, TreeNodeType treeNodeType)
+        {
+            Node newNode = (Node)this.Invoke(
+                (Func<Node, string, TreeNodeType, Node>)(
+                (inmotherNode, innodeName, intreeNodeType) =>
+                {
+                    return SaveNodeToTreeMethod(inmotherNode, innodeName, intreeNodeType);
+                }
+                ),
+                motherNode, nodeName, treeNodeType);
+
+            return newNode;
+        }
+        private Node SaveNodeToTreeMethod(Node inMotherNode, string inNodeName, TreeNodeType inTreeNodeType)
+        {
+            return (Node)this.Invoke((Func<Node, string, TreeNodeType, Node>)((motherNode, nodeName, treeNodeType) =>
+            {
+                TreeNode newTreeNode = null;
+                Node newNode = null;
+                if (motherNode != null)
+                {
+                    if (motherNode is DBNode)
+                    {
+                        Node findMotherNode = _testClient.CurrNodeList.Where(x => x.Id == motherNode.Id).FirstOrDefault();
+                        motherNode = findMotherNode == null ? motherNode : findMotherNode;
+                    }
+
+                    if (treeNodeType == TreeNodeType.File)
+                    {
+                        // Add node to current path tree
+                        newTreeNode = new TreeNode();
+                        //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
+                        newTreeNode.Text = nodeName;
+                        newTreeNode.ContextMenuStrip = this.fileContextMenu;
+                        newTreeNode.ImageIndex = 0; // ImageKey = "file";
+                        newTreeNode.SelectedImageIndex = 0;
+                        // Add new tree node to current tree
+                        motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
+
+                        // Add node to current Node tree
+                        if (motherNode is DBNode)
+                        {
+                            newNode = new DBNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
+                        }
+                        else if (motherNode is FileNode)
+                        {
+                            newNode = new FileNode(TreeNodeType.File, newTreeNode, motherNode, newTreeNode.FullPath);
+                        }
+
+                        newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
+
+                        newTreeNode.Tag = newNode;
+
+                        _testClient.CurrNodeList.Add(newNode);
+                    }
+                    else if (treeNodeType == TreeNodeType.Directory)
+                    {
+                        // Add node to current path tree
+                        newTreeNode = new TreeNode();
+                        //newTreeNode.Text = $@"{ currNode.TreeNodeName}.{DateTime.Now.ToString("yyyyMMddhhmmss")}.result";
+                        newTreeNode.Text = nodeName;
+                        newTreeNode.ContextMenuStrip = this.folderContextMenu;
+                        newTreeNode.ImageIndex = 1; // ImageKey = "folder";
+                        newTreeNode.SelectedImageIndex = 1;
+
+                        // Add new tree node to current tree
+                        motherNode.TreeNodeValue.Nodes.Add(newTreeNode);
+
+                        // Add node to current Node tree
+                        if (motherNode is DBNode)
+                        {
+                            newNode = new DBNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
+                        }
+                        else if (motherNode is FileNode)
+                        {
+                            newNode = new FileNode(TreeNodeType.Directory, newTreeNode, motherNode, newTreeNode.FullPath);
+                        }
+                        newNode.TreeNodeSourceType = motherNode.TreeNodeSourceType;
+
+                        newTreeNode.Tag = newNode;
+
+                        _testClient.CurrNodeList.Add(newNode);
+                    }
+
+                }
+                return newNode;
+            }), inMotherNode, inNodeName, inTreeNodeType);
+        }
+        #endregion
     }
 }
 
