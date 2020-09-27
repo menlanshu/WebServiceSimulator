@@ -343,7 +343,10 @@ namespace WS_Simulator
 
                     if (selectRichTextBox.Name.ToUpper().Contains("REPLY"))
                     {
-                        fileName = fileName.Substring(0, fileName.LastIndexOf(".")) + "_Result.txt";
+                        if (!fileName.EndsWith("_Result.txt"))
+                        {
+                            fileName = fileName.Substring(0, fileName.LastIndexOf(".")) + "_Result.txt";
+                        }
                     }
 
                     SaveFileDialog sfd = SimulatorFormHandler.
