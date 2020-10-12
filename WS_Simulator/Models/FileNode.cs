@@ -73,11 +73,15 @@ namespace WS_Simulator.Models
             }
             else if (this.TreeNodeType == TreeNodeType.File)
             {
+                FileProcessor.SaveFile(FileFullPath, requestMessage);
+
                 if (!File.Exists(FileFullPath))
                 {
-                    FileProcessor.SaveFile(FileFullPath, requestMessage);
                     return SaveNodeToTree?.Invoke(motherNode, TreeNodeName,
                         TreeNodeType.File);
+                }else
+                {
+                    return this;
                 }
             }
 
