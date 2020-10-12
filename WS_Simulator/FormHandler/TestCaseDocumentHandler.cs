@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace WS_Simulator.FormHandler
         CASECONFIG,
         TESTCASE
     }
-    public class TestCaseDocumentHandler
+    public static class TestCaseDocumentHandler
     {
         private static readonly string _resultPostFix = "_Result.txt";
 
@@ -160,7 +161,17 @@ namespace WS_Simulator.FormHandler
 
         public static void GenerateCaseConfigFile(Node directoryNode)
         {
+            string errDesc = "";
+
             XTestCase xTestCase = GetCurrentFolderXTestCase(directoryNode);
+
+            // if sql file without result file show error
+            if(!xTestCase.CheckTestCaseAvailable(out errDesc))
+            {
+                MessageBox.Show(errDesc, "Generate Case Config Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             string fileContent = ConvertInstanceToString<XTestCase>(xTestCase);
 
             SimulatorFormHandler.AddCurrentNodeToDir(
@@ -240,6 +251,20 @@ namespace WS_Simulator.FormHandler
 
             result.StepDetails = stepDetail.ToArray();
 
+
+            return result;
+        }
+
+        private static bool CheckTestCaseAvailable(this XTestCase xTestCase, out string errDesc)
+        {
+            bool result = true;
+            errDesc = "";
+
+            if (xTestCase.StepDetails.ToList().Any(x => x.SQLFile != "" && x.ResultFile == ""))
+            {
+                result = false;
+                errDesc = "SQL file has no result file!";
+            }
 
             return result;
         }
