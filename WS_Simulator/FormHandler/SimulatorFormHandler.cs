@@ -336,8 +336,7 @@ namespace WS_Simulator.FormHandler
                     }
                     else if (node.TreeNodeSourceType == SourceNodeType.LOCAL)
                     {
-                        // TODO - Optimize the node path!!
-                        filePath = FileProcessor.GetFullPath(rootPath, node.NodeFullPath);
+                        filePath = ((FileNode)node).FileFullPath;
 
                         requestMessage = FileProcessor.ReadFile(filePath, updateAfterReadFile);
                     }

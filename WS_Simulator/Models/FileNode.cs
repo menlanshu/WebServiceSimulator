@@ -24,9 +24,7 @@ namespace WS_Simulator.Models
         {
             get
             {
-                string directoryPath = FileProcessor.GetFullDirectoryPath(RootDirectoryPath,
-                TreeNodeType == TreeNodeType.Directory ? $@"{NodeFullPath}\" : NodeFullPath);
-                return directoryPath;
+                return $"{RootDirectoryPath}{NodeRelativeFolderPath}";
             }
         }
 
@@ -38,7 +36,7 @@ namespace WS_Simulator.Models
                     return ""; 
                 }else
                 {
-                    return FileProcessor.GetFullPath(RootDirectoryPath, NodeFullPath);
+                    return $"{RootDirectoryPath}{NodeRelativePath}";
                 }
             }
         }
@@ -93,8 +91,7 @@ namespace WS_Simulator.Models
             Node resultDirectory = null;
             string fileName = $"{ TreeNodeName}.{ DateTime.Now.ToString(DateTimeFormatStr)}.{ResultFilePostFix}";
 
-            string directoryPath = $@"{FileProcessor.GetFullDirectoryPath(RootDirectoryPath, 
-                TreeNodeType == TreeNodeType.Directory ? $@"{NodeFullPath}\" : NodeFullPath)}{ResultFolderName}\";
+            string directoryPath = $@"{DirectoryPath}{ResultFolderName}\";
 
             if (!Directory.Exists(directoryPath))
             {

@@ -633,8 +633,7 @@ namespace WS_Simulator
             {
                 if (directoryNode.FullPath != "")
                 {
-                    //Process.Start($@"{((DirectoryInfo)directoryNode.Tag).FullName}");
-                    Process.Start($@"{FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath)}");
+                    Process.Start($@"{((FileNode)directoryNode.Tag).FileFullPath}");
                 }
             }
         }
@@ -974,7 +973,8 @@ namespace WS_Simulator
             {
                 if (directoryNode.FullPath != "")
                 {
-                    string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
+                    //string directoryPath = FileProcessor.GetFullPath(_testClient.RootDirectoryPath, directoryNode.FullPath);
+                    string directoryPath = ((FileNode)directoryNode.Tag).FileFullPath;
                     TestCaseDocumentHandler.RenameFileFollowSequence(directoryNode, directoryPath);
                 }
             }

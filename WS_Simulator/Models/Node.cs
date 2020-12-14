@@ -18,6 +18,24 @@ namespace WS_Simulator.Models
         [NotMapped]
         public TreeNode TreeNodeValue { get; set; }
         public string NodeFullPath { get; set; }
+        public string NodeRelativePath
+        {
+            get
+            {
+                string currentRelativePath = NodeFullPath.Substring(8) + 
+                    (TreeNodeType == TreeNodeType.Directory ? "\\" : "");
+                return currentRelativePath;
+            }
+        }
+        public string NodeRelativeFolderPath
+        {
+            get
+            {
+                string currentFolderPath = NodeRelativePath
+                .Substring(0, NodeRelativePath.LastIndexOf("\\") + 1);
+                return currentFolderPath;
+            }
+        }
         public string TreeNodeMessage { get; set; }
         public string TreeNodeReplyMessage { get; set; }
 
